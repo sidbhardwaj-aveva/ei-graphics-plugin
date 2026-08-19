@@ -94,3 +94,6 @@ pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1
 This plugin also ships inside the `AVEVA-Copilot-Access/aveva-agent-plugins` monorepo. That repo is
 the upstream source of truth; this repository exists to distribute the plugin to the EI Graphics
 team independently.
+
+Raise changes upstream in `aveva-agent-plugins`, not here — this repository is a distribution mirror
+and direct edits will be overwritten on the next sync.
