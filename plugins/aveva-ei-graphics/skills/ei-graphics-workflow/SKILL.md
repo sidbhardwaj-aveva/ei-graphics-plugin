@@ -249,9 +249,8 @@ against the version it just sealed, and `reject` blocks it. Every transition sti
 hand-edited.
 
 > Because the stage is started through the normal ordering rules, `request` returns
-> `EIWF-APPROVAL-NOT-REQUESTED` while any earlier lifecycle stage is still pending. In the full
-> IMPLEMENT lifecycle that includes the unimplemented Phase C stages, which is why the scope layer is
-> exercised directly today rather than through a wired run.
+> `EIWF-APPROVAL-NOT-REQUESTED` while any earlier lifecycle stage is still pending, so `ado-intake`,
+> `domain-context`, `proposed-scope` and `scope-analysis` must all have completed first.
 
 #### The five states
 
@@ -498,7 +497,7 @@ autonomous repair.
 |---|---|---|
 | A | Thin agent, this skill, result contract, story state directory, state schemas, stage transitions | Implemented |
 | B | `ei-scope-resolver`, `ei-scope-validator`, ProposedScope, ApprovedScope, approval checkpoint, hashing, scope-change request | Implemented |
-| C | The two context stages ahead of the scope layer: `ado-intake` and `domain-context`, with the `ado` and `domain-context` artifacts and the `domain-pack-selection` gate | Not implemented |
+| C | The two context stages ahead of the scope layer: `ado-intake` and `domain-context`, with the `ado` and `domain-context` artifacts and the `domain-pack-selection` gate | Implemented |
 | D | The IMPLEMENT writing and evidence stages — `specification`, `plan`, `tasks`, `implementation`, `targeted-tests`, `regression-tests`, `invariant-validation`, `code-review`, `audit`, `commit`, `pr` — with validation after every writing stage | Not implemented |
 | E | The ITERATE stages — `iteration-recovery`, `diagnosis`, `correction`, tests, review, audit, and `commit` / `pr-update` on the same branch and PR | Not implemented |
 
@@ -506,8 +505,7 @@ autonomous repair.
 is the source of truth for this table; the rows above only summarise it. Stages whose phase has not
 landed are BLOCK states, not skips. Report the blocked stage and stop.
 
-Phase B is complete: scope resolution, `scope-analysis`, approval orchestration and the
-`awaiting-approval` pause, sealing and hashing, post-write drift validation, and scope-change
-requests. Because `ado-intake` and `domain-context` are Phase C, a wired IMPLEMENT run still blocks
-before it reaches the scope stages; the scope scripts take explicit inputs so the stages can be
-exercised on their own.
+Phases A to C are complete. A wired IMPLEMENT run executes
+`preflight -> state-init -> ado-intake -> domain-context -> proposed-scope -> scope-analysis ->
+scope-approval` on the real `lifecycle-implement.json` and reaches a sealed `approved-scope.v1.json`.
+It stops at the first Phase D stage, which is a BLOCK and never a skip.

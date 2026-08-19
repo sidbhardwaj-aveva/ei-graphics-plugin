@@ -201,8 +201,8 @@ the parameter is a deliberate choice, and it costs you `EISR-CONTEXT-MISSING`.
 | ApprovedScope sealing and the `scope-hash` gate | Implemented (Phase B) — owned by `ei-graphics-workflow`, not this skill |
 | Human approval orchestration and the `awaiting-approval` status | Implemented (Phase B) — owned by `ei-graphics-workflow`, not this skill |
 | Scope-change requests and drift validation | Implemented (Phase B) — owned by `ei-scope-validator`, not this skill |
-| Automatic candidate generation from ADO and vocabulary artifacts | Not implemented — depends on Phase C |
+| Automatic candidate generation from ADO and vocabulary artifacts | Not implemented |
 
-Until Phase C lands, the `ado-intake` and `domain-context` stages that precede this one are
-unimplemented, so the wired workflow still blocks before reaching the resolver. The scripts accept
-explicit inputs so the stage can be exercised on its own.
+The `ado-intake` and `domain-context` stages that precede this one are implemented (Phase C), so a
+wired run reaches the resolver. The resolver does not yet derive its own candidates from those
+artifacts: the scripts take explicit inputs, so the caller still supplies the candidate set.

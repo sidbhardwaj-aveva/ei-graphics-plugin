@@ -44,8 +44,8 @@ no schema yet and cannot be written — writing them would create unvalidated st
 |---|---|---|---|
 | `workflow-state` | `workflow-state.json` | `ei-workflow-state` | active |
 | `workflow-result` | `workflow-result.json` | `ei-graphics-workflow` | active |
-| `ado` | `ado.json` | `ei-azure-devops-cli-intake` | reserved (Phase C) |
-| `domain-context` | `domain-context.json` | `ei-vocabulary-navigator` | reserved (Phase C) |
+| `ado` | `ado.json` | `ei-azure-devops-cli-intake` | active |
+| `domain-context` | `domain-context.json` | `ei-vocabulary-navigator` | active |
 | `proposed-scope` | `proposed-scope.json` | `ei-scope-resolver` | active |
 | `approved-scope` | `approved-scope.v{version}.json` | `ei-graphics-workflow` | active |
 | `scope-change-request` | `scope-change-request.v{version}.json` | `ei-scope-validator` | active |
