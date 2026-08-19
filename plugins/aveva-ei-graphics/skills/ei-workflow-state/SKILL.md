@@ -77,11 +77,13 @@ irrelevant.
 
 ```powershell
 & "<skills>/ei-workflow-state/scripts/Initialize-EiWorkflowState.ps1" `
-    -StoryId '123456' -WorkflowPath IMPLEMENT -StoryRef '<ado-url>' -Json
+    -StoryId '123456' -WorkflowPath IMPLEMENT -StoryRef '<ado-url>' -WorkspaceRoot '<repo>' -Json
 ```
 
-`Details.Resumed` is `true` when a valid run already exists. Existing state is never overwritten
-without `-Force`, and `-Force` archives the previous file as `workflow-state.<timestamp>.bak.json`.
+`-WorkspaceRoot` (alias `-RepositoryRoot`) is the root the state directory is created under; it
+defaults to the current directory. `Details.Resumed` is `true` when a valid run already exists.
+Existing state is never overwritten without `-Force`, and `-Force` archives the previous file as
+`workflow-state.<timestamp>.bak.json`.
 
 ### Validate
 

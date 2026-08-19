@@ -115,12 +115,13 @@ never restarts intake and never re-derives scope.
 ## Step 3 — Initialise or resume state
 
 ```powershell
-& "$stateSkill/Initialize-EiWorkflowState.ps1" -StoryId '<story-id>' -WorkflowPath IMPLEMENT -StoryRef '<url>' -Json
+& "$stateSkill/Initialize-EiWorkflowState.ps1" -StoryId '<story-id>' -WorkflowPath IMPLEMENT -StoryRef '<url>' -WorkspaceRoot '<repo>' -Json
 ```
 
-State lives in `.copilottracking/ei-graphics/<story-id>/` and is owned by `ei-workflow-state`.
-`Details.Resumed = true` means an interrupted run continues from `Details.Stage`; re-running a
-completed stage is not allowed. Requesting the other path against an active run returns
+State lives in `<repo>/.copilottracking/ei-graphics/<story-id>/` and is owned by `ei-workflow-state`.
+The root parameter here is `-WorkspaceRoot` (alias `-RepositoryRoot`) and defaults to the current
+directory. `Details.Resumed = true` means an interrupted run continues from `Details.Stage`;
+re-running a completed stage is not allowed. Requesting the other path against an active run returns
 `EIWF-PATH-MISMATCH`.
 
 ## Step 4 — Run stages in the recorded order

@@ -17,7 +17,8 @@ param(
     [Parameter(Mandatory)][AllowEmptyString()][string]$StoryId,
     [ValidateSet('IMPLEMENT', 'ITERATE')][string]$WorkflowPath = 'IMPLEMENT',
     [AllowEmptyString()][string]$StoryRef = '',
-    [string]$WorkspaceRoot = (Get-Location).Path,
+    # Aliased because every other script in the plugin names this root -RepositoryRoot.
+    [Alias('RepositoryRoot')][string]$WorkspaceRoot = (Get-Location).Path,
     [string]$TrackingDir = '.copilottracking',
     [string]$LifecycleDefinitionPath = '',
     [AllowEmptyString()][string]$CreatedBy = '',
