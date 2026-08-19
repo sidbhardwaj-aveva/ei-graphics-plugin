@@ -21,13 +21,26 @@ Allow developers to provide a work item URL and automatically resolve organizati
 
 ## Inputs
 
-- `workItemUrl` (optional): Azure DevOps work item URL.
-- `workItemId` (optional): numeric work item ID.
+- `workItemUrl` (optional): Azure DevOps work item URL, or a pasted reference (see below).
+- `workItemId` (optional): numeric work item ID, or a reference title such as `Bug 4965976 SR205 - ...`.
 - `organization` (optional): Azure DevOps organization.
 - `project` (optional): Azure DevOps project.
 - `cliWorkItemJson` (optional): deterministic mock payload for tests.
 
 At least one of `workItemUrl` or `workItemId` is required.
+
+### Accepted reference forms
+
+| Form | Behaviour |
+|---|---|
+| `https://dev.azure.com/<org>/<project>/_workitems/edit/<id>` | Org, project and id come from the URL |
+| `[Bug 4965976 SR205 - ...](https://dev.azure.com/.../edit/4965976)` | The href is used; the label is ignored |
+| `[Bug 4965976 SR205 - ...](vscode-file://.../workbench.html)` | The href is not an ADO address, so the id comes from the label; org and project must come from parameters or `AZDO_ORG` / `AZDO_PROJECT` |
+| `Bug 4965976 SR205 - ...` | Same as above, without a link |
+
+The id is taken from a work item type prefix (`Bug`, `User Story`, `Task`, `Feature`, ...), a `#`
+prefix, or a standalone 3+ digit token. Identifiers glued to letters such as `SR205` are never read
+as a work item id. A reference that carries no id fails with `missing-work-item-id-in-reference`.
 
 ## Output contract
 

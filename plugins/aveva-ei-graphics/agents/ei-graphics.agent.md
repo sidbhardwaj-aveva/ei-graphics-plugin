@@ -27,8 +27,11 @@ one, and never describe a gate as passing because it looks fine to you.
    EI graphics team.
 2. **Collect the input.**
    - An Azure DevOps story URL or work item id, or
+   - A pasted work item reference such as `[Bug 4965976 SR205 - <title>](<link>)`, or the same
+     title as plain text — the intake resolves the id from the label when the link is not an ADO
+     address, or
    - An existing branch or pull request that has review feedback or CI failures.
-   Ask once, clearly, if neither is supplied.
+   Ask once, clearly, if none is supplied.
 3. **Determine the path.**
    - `IMPLEMENT` — a story that has not been implemented yet.
    - `ITERATE` — an existing PR or branch that needs correction.

@@ -46,6 +46,79 @@ function Get-FieldValue {
     return [string]$property.Value
 }
 
+function Test-AdoHostUrl {
+    param([string]$Url)
+
+    if ([string]::IsNullOrWhiteSpace($Url)) {
+        return $false
+    }
+
+    try {
+        $uri = [System.Uri]$Url
+    }
+    catch {
+        return $false
+    }
+
+    if (-not $uri.IsAbsoluteUri -or [string]::IsNullOrWhiteSpace($uri.Host)) {
+        return $false
+    }
+
+    return ($uri.Host.Equals('dev.azure.com', [System.StringComparison]::OrdinalIgnoreCase) -or
+        $uri.Host.EndsWith('.visualstudio.com', [System.StringComparison]::OrdinalIgnoreCase))
+}
+
+function Split-WorkItemReference {
+    param([string]$Text)
+
+    $reference = [ordered]@{ url = ''; label = '' }
+
+    if ([string]::IsNullOrWhiteSpace($Text)) {
+        return [PSCustomObject]$reference
+    }
+
+    $trimmed = $Text.Trim()
+    $link = [regex]::Match($trimmed, '^\[(?<label>[^\]]+)\]\(\s*(?<url>[^)\s]+)\s*\)$')
+    if ($link.Success) {
+        $reference.label = $link.Groups['label'].Value.Trim()
+        $reference.url = $link.Groups['url'].Value.Trim()
+    }
+    elseif ($trimmed -match '^[A-Za-z][A-Za-z0-9+.-]*://') {
+        $reference.url = $trimmed
+    }
+    else {
+        $reference.label = $trimmed
+    }
+
+    return [PSCustomObject]$reference
+}
+
+function Get-WorkItemIdFromLabel {
+    param([string]$Label)
+
+    if ([string]::IsNullOrWhiteSpace($Label)) {
+        return ''
+    }
+
+    $typed = [regex]::Match($Label, '(?i)\b(?:bug|defect|issue|user\s+story|story|task|feature|epic|pbi|work\s*item)\s*#?\s*(?<id>[1-9][0-9]*)\b')
+    if ($typed.Success) {
+        return $typed.Groups['id'].Value
+    }
+
+    $hashed = [regex]::Match($Label, '#\s*(?<id>[1-9][0-9]*)\b')
+    if ($hashed.Success) {
+        return $hashed.Groups['id'].Value
+    }
+
+    # Identifiers such as "SR205" stay glued to their letters, so they never match this token.
+    $bare = [regex]::Match($Label, '(?<![0-9A-Za-z])(?<id>[1-9][0-9]{2,})(?![0-9A-Za-z])')
+    if ($bare.Success) {
+        return $bare.Groups['id'].Value
+    }
+
+    return ''
+}
+
 function Resolve-FromWorkItemUrl {
     param([string]$Url)
 
@@ -134,6 +207,57 @@ function Get-AdoCliFailureReason {
     }
 
     return 'az-cli-request-failed'
+}
+
+# A reference is often pasted as a markdown link whose href is a local editor address rather than the
+# work item, for example `[Bug 4965976 SR205 - ...](vscode-file://.../workbench.html)`. In that case
+# the identity lives in the label, so the href is discarded instead of failing as an unsupported host.
+$referenceLabel = ''
+
+if (-not [string]::IsNullOrWhiteSpace($WorkItemUrl)) {
+    $reference = Split-WorkItemReference -Text $WorkItemUrl
+    if ([string]::IsNullOrWhiteSpace($reference.url) -or
+        (-not (Test-AdoHostUrl -Url $reference.url) -and -not [string]::IsNullOrWhiteSpace($reference.label))) {
+        $referenceLabel = $reference.label
+        $WorkItemUrl = ''
+    }
+    else {
+        $WorkItemUrl = $reference.url
+    }
+}
+
+if (-not [string]::IsNullOrWhiteSpace($WorkItemId) -and $WorkItemId -notmatch '^[1-9][0-9]*$') {
+    $reference = Split-WorkItemReference -Text $WorkItemId
+    if (Test-AdoHostUrl -Url $reference.url) {
+        if ([string]::IsNullOrWhiteSpace($WorkItemUrl)) { $WorkItemUrl = $reference.url }
+        $WorkItemId = ''
+    }
+    else {
+        $WorkItemId = Get-WorkItemIdFromLabel -Label $reference.label
+        if ([string]::IsNullOrWhiteSpace($referenceLabel)) { $referenceLabel = $reference.label }
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($WorkItemUrl) -and [string]::IsNullOrWhiteSpace($WorkItemId) -and
+    -not [string]::IsNullOrWhiteSpace($referenceLabel)) {
+    $WorkItemId = Get-WorkItemIdFromLabel -Label $referenceLabel
+    if ([string]::IsNullOrWhiteSpace($WorkItemId)) {
+        $failed = [PSCustomObject]@{
+            status = 'failed'
+            reason = 'missing-work-item-id-in-reference'
+            workItemContext = [PSCustomObject]@{
+                workItemUrl = ''
+                workItemId = ''
+                organization = $Organization
+                project = $Project
+                authSource = ''
+            }
+            descriptionText = ''
+        }
+
+        if ($Json) { $failed | ConvertTo-Json -Depth 6 } else { $failed }
+        exit 1
+    }
 }
 
 if ([string]::IsNullOrWhiteSpace($WorkItemUrl) -and [string]::IsNullOrWhiteSpace($WorkItemId)) {

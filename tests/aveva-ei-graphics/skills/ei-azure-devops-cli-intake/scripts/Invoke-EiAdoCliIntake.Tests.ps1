@@ -42,4 +42,52 @@ Describe 'Invoke-EiAdoCliIntake' -Tag 'Unit' {
         $result.status | Should -Be 'failed'
         $result.reason | Should -Be 'missing-work-item-id-in-url'
     }
+
+    It 'resolves the work item id from a pasted markdown link whose href is not an ADO url' {
+        $mock = @'
+{
+    "fields": {
+        "System.Title": "Insertion of tstrip header symbol below previous symbol is not observing the symbol extents boundary"
+    }
+}
+'@
+
+        $pasted = '[Bug 4965976 SR205 - Insertion of tstrip header symbol below previous symbol is not observing the symbol extents boundary](vscode-file://vscode-app/c:/Program%20Files/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)'
+        $output = & $script:ScriptPath -WorkItemUrl $pasted -Organization 'ei-org' -Project 'ei-project' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.status | Should -Be 'retrieved'
+        $result.workItemContext.workItemId | Should -Be '4965976'
+        $result.workItemContext.workItemUrl | Should -BeNullOrEmpty
+    }
+
+    It 'resolves the work item id from a plain reference title' {
+        $mock = '{ "fields": { "System.Title": "Symbol extents boundary" } }'
+
+        $output = & $script:ScriptPath -WorkItemId 'Bug 4965976 SR205 - symbol extents boundary' -Organization 'ei-org' -Project 'ei-project' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.status | Should -Be 'retrieved'
+        $result.workItemContext.workItemId | Should -Be '4965976'
+    }
+
+    It 'uses the ADO url when a markdown link points at the work item' {
+        $mock = '{ "fields": { "System.Title": "Symbol extents boundary" } }'
+
+        $pasted = '[Bug 4965976](https://dev.azure.com/ei-org/ei-project/_workitems/edit/4965976)'
+        $output = & $script:ScriptPath -WorkItemUrl $pasted -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.workItemContext.workItemId | Should -Be '4965976'
+        $result.workItemContext.organization | Should -Be 'ei-org'
+        $result.workItemContext.project | Should -Be 'ei-project'
+    }
+
+    It 'returns failed when a pasted reference carries no work item id' {
+        $output = & $script:ScriptPath -WorkItemUrl '[Insertion of tstrip header symbol SR205](vscode-file://vscode-app/workbench.html)' -Json
+        $LASTEXITCODE | Should -Be 1
+        $result = $output | ConvertFrom-Json
+        $result.status | Should -Be 'failed'
+        $result.reason | Should -Be 'missing-work-item-id-in-reference'
+    }
 }
