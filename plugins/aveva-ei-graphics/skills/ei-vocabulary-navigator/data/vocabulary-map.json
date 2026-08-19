@@ -1,0 +1,78 @@
+{
+  "terms": [
+    {
+      "term": "cable",
+      "aliases": ["cables", "cable gland", "cable glands", "lug", "lugs"],
+      "matchedUris": ["Cable", "CableAttributeUris"],
+      "domainModels": ["Cable", "Core", "FromCoreEnd", "ToCoreEnd"],
+      "repositoryInterfaces": ["ICableRepository"],
+      "services": ["CableService"],
+      "commands": ["CableCommand"],
+      "relatedTests": ["CableService.Tests", "CoreService.Tests"],
+      "runtimeRequired": true,
+      "confidence": 0.9
+    },
+    {
+      "term": "wiring rule",
+      "aliases": ["wiring rules", "rule", "rules"],
+      "matchedUris": ["WiringRule"],
+      "domainModels": ["WiringRule"],
+      "repositoryInterfaces": ["IWiringRuleRepository"],
+      "services": ["WiringRuleService"],
+      "commands": ["WiringRuleCommand"],
+      "relatedTests": ["WiringRuleService.Tests"],
+      "runtimeRequired": false,
+      "confidence": 0.92
+    },
+    {
+      "term": "distribution board",
+      "aliases": ["distribution boards", "board", "boards", "fixed circuit numbers"],
+      "matchedUris": ["DistributionBoard"],
+      "domainModels": ["DistributionBoard"],
+      "repositoryInterfaces": ["IDistributionBoardRepository"],
+      "services": ["DistributionBoardService"],
+      "commands": ["DistributionBoardCommand"],
+      "relatedTests": ["DistributionBoardService.Tests"],
+      "runtimeRequired": true,
+      "confidence": 0.95
+    },
+    {
+      "term": "terminal arrangement",
+      "aliases": ["terminal", "terminals", "terminal arrangements"],
+      "matchedUris": ["TerminalArrangement"],
+      "domainModels": ["TerminalArrangement"],
+      "repositoryInterfaces": ["ITerminalArrangementRepository"],
+      "services": ["TerminalArrangementService"],
+      "commands": ["TerminalArrangementCommand"],
+      "relatedTests": ["TerminalArrangementService.Tests"],
+      "runtimeRequired": false,
+      "confidence": 0.88
+    },
+    {
+      "term": "canvas drawing",
+      "aliases": ["canvas", "drawing", "termination drawing", "sld", "single line diagram"],
+      "matchedUris": ["CanvasDrawing"],
+      "domainModels": ["CanvasDrawing"],
+      "repositoryInterfaces": ["ICanvasDrawingRepository"],
+      "services": ["CanvasDrawingsService"],
+      "commands": ["DrawingCommand"],
+      "relatedTests": ["CanvasDrawingsService.Tests"],
+      "runtimeRequired": true,
+      "confidence": 0.84
+    }
+  ],
+  "ambiguousTerms": [
+    {
+      "term": "signal",
+      "alternatives": ["Signal", "SignalPropagator"]
+    },
+    {
+      "term": "hookup",
+      "alternatives": ["Hookup", "HookupTag", "HookupParts"]
+    },
+    {
+      "term": "phase naming",
+      "alternatives": ["PhaseNaming service", "PhaseNaming UI concern"]
+    }
+  ]
+}

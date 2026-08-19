@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics scope change request",
+  "description": "An immutable request to widen a sealed scope. It is a request, never an authorisation: it records what was needed, who needed it and which sealed scope it was raised against. The sealed ApprovedScope it references is never edited. A request is answered by re-resolving, re-analysing and sealing a new ApprovedScope version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "requestedBy",
+    "requestedAt",
+    "storyId",
+    "storyRef",
+    "version",
+    "supersedes",
+    "basedOnApprovedScopeVersion",
+    "basedOnContentHash",
+    "detectedBy",
+    "reason",
+    "requestedPaths"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "requestedBy": { "type": "string", "minLength": 1 },
+    "requestedAt": { "type": "string", "minLength": 1 },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "storyRef": { "type": ["string", "null"] },
+    "version": { "type": "integer", "minimum": 1 },
+    "supersedes": { "type": ["integer", "null"], "minimum": 1 },
+    "basedOnApprovedScopeVersion": { "type": "integer", "minimum": 1 },
+    "basedOnContentHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "The seal this request was raised against, so a request cannot be silently re-pointed at a different sealed scope."
+    },
+    "detectedBy": { "type": "string", "enum": ["scope-validation", "human"] },
+    "reason": { "type": "string", "minLength": 1 },
+    "requestedPaths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "changeIntent", "reason"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "changeIntent": { "type": "string", "enum": ["modify", "add", "delete"] },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

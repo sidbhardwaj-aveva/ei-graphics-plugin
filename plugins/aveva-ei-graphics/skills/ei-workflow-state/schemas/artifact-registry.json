@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "1.0.0",
+  "stateRoot": ".copilottracking/ei-graphics/{storyId}",
+  "artifacts": [
+    {
+      "name": "workflow-state",
+      "file": "workflow-state.json",
+      "owner": "ei-workflow-state",
+      "writtenByStage": "state-init",
+      "schema": "workflow-state.schema.json",
+      "implementedInPhase": "A",
+      "status": "active",
+      "versioned": false
+    },
+    {
+      "name": "workflow-result",
+      "file": "workflow-result.json",
+      "owner": "ei-graphics-workflow",
+      "writtenByStage": "result",
+      "schema": "workflow-result.schema.json",
+      "implementedInPhase": "A",
+      "status": "active",
+      "versioned": false
+    },
+    {
+      "name": "ado",
+      "file": "ado.json",
+      "owner": "ei-azure-devops-cli-intake",
+      "writtenByStage": "ado-intake",
+      "schema": "ado.schema.json",
+      "implementedInPhase": "C",
+      "status": "active",
+      "versioned": false
+    },
+    {
+      "name": "domain-context",
+      "file": "domain-context.json",
+      "owner": "ei-vocabulary-navigator",
+      "writtenByStage": "domain-context",
+      "schema": "domain-context.schema.json",
+      "implementedInPhase": "C",
+      "status": "active",
+      "versioned": false
+    },
+    {
+      "name": "proposed-scope",
+      "file": "proposed-scope.json",
+      "owner": "ei-scope-resolver",
+      "writtenByStage": "proposed-scope",
+      "schema": "proposed-scope.schema.json",
+      "implementedInPhase": "B",
+      "status": "active",
+      "versioned": false
+    },
+    {
+      "name": "approved-scope",
+      "file": "approved-scope.v{version}.json",
+      "owner": "ei-graphics-workflow",
+      "writtenByStage": "scope-approval",
+      "schema": "approved-scope.schema.json",
+      "implementedInPhase": "B",
+      "status": "active",
+      "versioned": true
+    },
+    {
+      "name": "scope-change-request",
+      "file": "scope-change-request.v{version}.json",
+      "owner": "ei-scope-validator",
+      "writtenByStage": "scope-change",
+      "schema": "scope-change-request.schema.json",
+      "implementedInPhase": "B",
+      "status": "active",
+      "versioned": true
+    },
+    {
+      "name": "specification",
+      "file": "specification.json",
+      "owner": "aveva-rnd:speckit.specify",
+      "writtenByStage": "specification",
+      "schema": null,
+      "implementedInPhase": "D",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "plan",
+      "file": "plan.json",
+      "owner": "aveva-rnd:speckit.plan",
+      "writtenByStage": "plan",
+      "schema": null,
+      "implementedInPhase": "D",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "tasks",
+      "file": "tasks.json",
+      "owner": "aveva-rnd:speckit.tasks",
+      "writtenByStage": "tasks",
+      "schema": null,
+      "implementedInPhase": "D",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "implementation",
+      "file": "implementation.json",
+      "owner": "aveva-rnd:speckit.implement",
+      "writtenByStage": "implementation",
+      "schema": null,
+      "implementedInPhase": "D",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "validation",
+      "file": "validation.json",
+      "owner": "ei-scope-validator",
+      "writtenByStage": "scope-validation",
+      "schema": "validation.schema.json",
+      "implementedInPhase": "B",
+      "status": "active",
+      "versioned": false
+    },
+    {
+      "name": "code-review",
+      "file": "code-review.json",
+      "owner": "aveva-rnd:code-review",
+      "writtenByStage": "code-review",
+      "schema": null,
+      "implementedInPhase": "D",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "audit",
+      "file": "audit.json",
+      "owner": "aveva-core:create-audit",
+      "writtenByStage": "audit",
+      "schema": null,
+      "implementedInPhase": "D",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "pr",
+      "file": "pr.json",
+      "owner": "aveva-rnd:create-pr",
+      "writtenByStage": "pr",
+      "schema": null,
+      "implementedInPhase": "D",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "iteration",
+      "file": "iteration.json",
+      "owner": "ei-graphics-workflow",
+      "writtenByStage": "iteration-recovery",
+      "schema": null,
+      "implementedInPhase": "E",
+      "status": "reserved",
+      "versioned": false
+    },
+    {
+      "name": "diagnosis",
+      "file": "diagnosis.json",
+      "owner": "aveva-rnd:bug-diagnosis",
+      "writtenByStage": "diagnosis",
+      "schema": null,
+      "implementedInPhase": "E",
+      "status": "reserved",
+      "versioned": false
+    }
+  ],
+  "directories": [
+    {
+      "name": "validation",
+      "path": "validation",
+      "owner": "ei-scope-validator",
+      "purpose": "Per-stage validator evidence written after every writing stage."
+    }
+  ]
+}

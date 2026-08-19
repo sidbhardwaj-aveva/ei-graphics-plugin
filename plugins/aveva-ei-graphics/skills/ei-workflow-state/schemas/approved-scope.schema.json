@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics approved scope",
+  "description": "A sealed, hash-addressed authorisation surface. It carries the approved ProposedScope verbatim plus the approver identity, the seal version, and the content hash that makes later tampering detectable. Sealing never reconstructs or broadens a scope.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sealedBy",
+    "storyId",
+    "storyRef",
+    "version",
+    "supersedes",
+    "approvedBy",
+    "approvedAt",
+    "approvalNote",
+    "sourceArtifact",
+    "hashAlgorithm",
+    "canonicalization",
+    "contentHash",
+    "scope"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "sealedBy": { "type": "string", "enum": ["ei-graphics-workflow"] },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "storyRef": { "type": ["string", "null"] },
+    "version": { "type": "integer", "minimum": 1 },
+    "supersedes": { "type": ["integer", "null"], "minimum": 1 },
+    "approvedBy": { "type": "string", "minLength": 1 },
+    "approvedAt": { "type": "string", "minLength": 1 },
+    "approvalNote": { "type": ["string", "null"] },
+    "sourceArtifact": { "type": "string", "enum": ["proposed-scope"] },
+    "hashAlgorithm": { "type": "string", "enum": ["sha256"] },
+    "canonicalization": { "type": "string", "enum": ["ei-scope-canonical-v1"] },
+    "contentHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "scope": {
+      "description": "The ProposedScope payload, verbatim. Its full contract is proposed-scope.schema.json, which Read-EiWorkflowArtifact.ps1 enforces before sealing; only the invariants that sealing itself depends on are restated here.",
+      "type": "object",
+      "required": ["schemaVersion", "resolver", "storyId", "status", "proposedFiles"],
+      "properties": {
+        "schemaVersion": { "type": "string", "minLength": 1 },
+        "resolver": { "type": "string", "enum": ["ei-scope-resolver"] },
+        "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+        "status": { "type": "string", "enum": ["resolved"] },
+        "proposedFiles": { "type": "array", "minItems": 1 }
+      }
+    }
+  }
+}

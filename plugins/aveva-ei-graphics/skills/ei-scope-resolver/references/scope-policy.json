@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Deterministic conservatism policy for ei-scope-resolver. The model proposes candidates; these rules decide what survives and what the resolver status may be. Rules only ever narrow a scope or lower a status.",
+  "limits": {
+    "maxProposedFiles": 12,
+    "maxProposedModules": 2,
+    "maxSymbolsPerFile": 10,
+    "minConfidence": 0.7
+  },
+  "rules": [
+    {
+      "code": "EISR-EVIDENCE-MISSING",
+      "blocking": true,
+      "drops": true,
+      "question": "A proposed path, module or test cited no evidence, or cited an evidence id that does not exist. It was removed from the scope. Re-run the resolver with evidence, or confirm it is genuinely out of scope."
+    },
+    {
+      "code": "EISR-PROTECTED-OVERLAP",
+      "blocking": true,
+      "drops": true,
+      "question": "A proposed path falls inside a declared protected area and was removed. Confirm the protected area, or justify why it must change."
+    },
+    {
+      "code": "EISR-DEPENDENCY-ABSORBED",
+      "blocking": true,
+      "drops": true,
+      "question": "A proposed path or module belongs to a dependency that is still unresolved. Scope may not silently grow to cover it. Resolve the dependency first."
+    },
+    {
+      "code": "EISR-EMPTY-SCOPE",
+      "blocking": true,
+      "drops": false,
+      "question": "No defensible file survived the policy checks, so there is no scope to propose. Re-run the resolver with better evidence."
+    },
+    {
+      "code": "EISR-CONTEXT-MISSING",
+      "blocking": false,
+      "drops": false,
+      "question": "No domain context was supplied, so the owning implementation area could not be confirmed. Supply vocabulary/domain context and re-run."
+    },
+    {
+      "code": "EISR-AREA-AMBIGUOUS",
+      "blocking": false,
+      "drops": false,
+      "question": "The domain context reported ambiguous terms, so more than one implementation area may own this behaviour. A human must choose the area."
+    },
+    {
+      "code": "EISR-SCOPE-BREADTH",
+      "blocking": false,
+      "drops": false,
+      "question": "The proposed scope exceeds the defensible-size limits. Split the story or justify the breadth."
+    },
+    {
+      "code": "EISR-DEPENDENCY-UNRESOLVED",
+      "blocking": false,
+      "drops": false,
+      "question": "The story depends on something outside the apparent scope. The dependency is recorded, not included. A human must decide how it is handled."
+    },
+    {
+      "code": "EISR-PATH-UNVERIFIED",
+      "blocking": false,
+      "drops": false,
+      "question": "A proposed path could not be verified against the repository. Confirm the path exists, or that the file is genuinely new."
+    },
+    {
+      "code": "EISR-CONFIDENCE-LOW",
+      "blocking": false,
+      "drops": false,
+      "question": "Resolver confidence is below the minimum. Treat the proposal as a starting point for a human, not a conclusion."
+    },
+    {
+      "code": "EISR-TESTS-MISSING",
+      "blocking": false,
+      "drops": false,
+      "question": "No related tests were proposed. Identify the tests that prove the change, or state why none exist."
+    }
+  ]
+}

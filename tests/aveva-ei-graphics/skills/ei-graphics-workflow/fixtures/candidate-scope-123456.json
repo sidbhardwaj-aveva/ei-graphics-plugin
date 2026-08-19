@@ -1,0 +1,31 @@
+{
+  "confidence": 0.85,
+  "rationale": "The story changes only the label placement rule for shared cable points, which lives in one rendering file.",
+  "evidence": [
+    { "id": "E1", "kind": "story", "value": "terminal arrangement labels share a point", "note": null },
+    { "id": "E2", "kind": "vocabulary", "value": "cable", "note": null },
+    { "id": "E3", "kind": "path", "value": "src/Ei.Graphics.Rendering/LabelPlacement.cs", "note": null }
+  ],
+  "proposedFiles": [
+    {
+      "path": "src/Ei.Graphics.Rendering/LabelPlacement.cs",
+      "changeIntent": "modify",
+      "symbols": ["ResolveSharedPointLabels"],
+      "evidence": ["E1", "E2", "E3"],
+      "confidence": 0.86
+    }
+  ],
+  "proposedModules": [],
+  "relatedTests": [
+    {
+      "target": "tests/Ei.Graphics.Rendering.Tests/LabelPlacementTests.cs",
+      "kind": "targeted",
+      "evidence": ["E3"]
+    }
+  ],
+  "protectedAreas": [],
+  "dependencies": [],
+  "excluded": [],
+  "risks": [],
+  "unresolved": []
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Cross-plugin capabilities required by ei-graphics-workflow. Dependency metadata does not install a plugin, so the workflow preflights these and fails closed when one is missing.",
+  "capabilities": [
+    {
+      "plugin": "aveva-rnd",
+      "skill": "code-review",
+      "usedByStage": "code-review",
+      "required": true,
+      "requiredFromPhase": "D"
+    },
+    {
+      "plugin": "aveva-rnd",
+      "skill": "get-reviewresults",
+      "usedByStage": "code-review",
+      "required": true,
+      "requiredFromPhase": "D"
+    },
+    {
+      "plugin": "aveva-rnd",
+      "skill": "git-commit",
+      "usedByStage": "commit",
+      "required": true,
+      "requiredFromPhase": "D"
+    },
+    {
+      "plugin": "aveva-rnd",
+      "skill": "create-pr",
+      "usedByStage": "pr",
+      "required": true,
+      "requiredFromPhase": "D"
+    },
+    {
+      "plugin": "aveva-rnd",
+      "skill": "speckit-bootstrap",
+      "usedByStage": "specification",
+      "required": true,
+      "requiredFromPhase": "D"
+    },
+    {
+      "plugin": "aveva-rnd",
+      "skill": "bug-diagnosis",
+      "usedByStage": "diagnosis",
+      "required": true,
+      "requiredFromPhase": "E"
+    },
+    {
+      "plugin": "aveva-core",
+      "skill": "create-audit",
+      "usedByStage": "audit",
+      "required": true,
+      "requiredFromPhase": "D"
+    }
+  ],
+  "localSkills": [
+    {
+      "plugin": "aveva-ei-graphics",
+      "skill": "ei-workflow-state",
+      "usedByStage": "state-init",
+      "required": true,
+      "requiredFromPhase": "A"
+    },
+    {
+      "plugin": "aveva-ei-graphics",
+      "skill": "ei-azure-devops-cli-intake",
+      "usedByStage": "ado-intake",
+      "required": true,
+      "requiredFromPhase": "C"
+    },
+    {
+      "plugin": "aveva-ei-graphics",
+      "skill": "ei-vocabulary-navigator",
+      "usedByStage": "domain-context",
+      "required": true,
+      "requiredFromPhase": "C"
+    },
+    {
+      "plugin": "aveva-ei-graphics",
+      "skill": "ei-scope-resolver",
+      "usedByStage": "proposed-scope",
+      "required": true,
+      "requiredFromPhase": "B"
+    },
+    {
+      "plugin": "aveva-ei-graphics",
+      "skill": "ei-scope-validator",
+      "usedByStage": "scope-analysis",
+      "required": true,
+      "requiredFromPhase": "B"
+    },
+    {
+      "plugin": "aveva-ei-graphics",
+      "skill": "ei-layer-guard",
+      "usedByStage": "invariant-validation",
+      "required": true,
+      "requiredFromPhase": "D"
+    },
+    {
+      "plugin": "aveva-ei-graphics",
+      "skill": "ei-test-scaffolder",
+      "usedByStage": "targeted-tests",
+      "required": true,
+      "requiredFromPhase": "D"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics scope validation evidence",
+  "description": "Evidence written by ei-scope-validator. One envelope serves both validator gates: scope-analysis judges whether a proposed scope is defensible enough to put in front of a human, and scope-validation judges whether the files a writing stage touched are inside the sealed scope. The validator records findings; it never edits the scope it judged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "validator",
+    "gate",
+    "stage",
+    "storyId",
+    "generatedAt",
+    "verdict",
+    "approvedScopeVersion",
+    "contentHash",
+    "summary",
+    "findings",
+    "paths"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "validator": { "type": "string", "enum": ["ei-scope-validator"] },
+    "gate": { "type": "string", "enum": ["scope-analysis", "scope-validation"] },
+    "stage": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The lifecycle stage this evidence belongs to. For scope-validation it is the writing stage whose output was checked, which is not the same as the gate."
+    },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "verdict": { "type": "string", "enum": ["pass", "block"] },
+    "approvedScopeVersion": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "The sealed scope version the check ran against. Null for scope-analysis, which runs before anything is sealed."
+    },
+    "contentHash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Canonical hash of the scope that was judged, so an approval cannot be granted against a scope that changed after the analysis."
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "severity", "target", "message"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^EISV-[A-Z-]+$" },
+          "severity": { "type": "string", "enum": ["blocking", "advisory"] },
+          "target": { "type": ["string", "null"] },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "classification", "detail"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "classification": {
+            "type": "string",
+            "enum": ["in-scope", "out-of-scope", "protected", "allowed"]
+          },
+          "detail": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

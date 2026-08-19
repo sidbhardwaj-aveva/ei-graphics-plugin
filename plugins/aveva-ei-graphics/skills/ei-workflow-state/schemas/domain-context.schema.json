@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics domain context",
+  "description": "Vocabulary resolution written by ei-vocabulary-navigator at the domain-context stage. Only candidate terms that resolved to a domain pack survive into `terms`; everything else is recorded in `unresolvedTerms` so the narrowing is auditable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "storyId",
+    "generatedAt",
+    "confidence",
+    "terms",
+    "domainPacks",
+    "ambiguities",
+    "unresolvedTerms"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "enum": ["ei-vocabulary-navigator"] },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "terms": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "domainPacks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "term",
+          "matchedUris",
+          "domainModels",
+          "repositoryInterfaces",
+          "services",
+          "commands",
+          "confidence"
+        ],
+        "properties": {
+          "term": { "type": "string", "minLength": 1 },
+          "matchedUris": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "domainModels": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "repositoryInterfaces": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "services": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "commands": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "ambiguities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["term", "alternatives"],
+        "properties": {
+          "term": { "type": "string", "minLength": 1 },
+          "alternatives": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "unresolvedTerms": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  }
+}

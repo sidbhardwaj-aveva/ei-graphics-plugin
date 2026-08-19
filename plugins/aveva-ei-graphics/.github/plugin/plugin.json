@@ -1,0 +1,17 @@
+{
+  "name": "aveva-ei-graphics",
+  "description": "AVEVA EI Graphics - gated delivery lifecycle for EI Graphics work: Azure DevOps intake, domain context, scope control, IMPLEMENT/ITERATE routing, legacy-safe layer guards, code review, and PR",
+  "version": "1.0.0",
+  "author": {
+    "name": "siddhant.bhardwaj@aveva.com"
+  },
+  "keywords": [
+    "ei-graphics",
+    "azure-devops",
+    "legacy-safety",
+    "workflow",
+    "lifecycle"
+  ],
+  "skills": "skills/",
+  "agents": "agents/"
+}

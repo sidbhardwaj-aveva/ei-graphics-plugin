@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics workflow state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "workflowId",
+    "storyId",
+    "storyRef",
+    "path",
+    "status",
+    "stage",
+    "stateDir",
+    "createdAt",
+    "createdBy",
+    "updatedAt",
+    "approvedScopeHash",
+    "approvedScopeVersion",
+    "iterationIndex",
+    "correctionAttempts",
+    "maxCorrectionAttempts",
+    "stages",
+    "blocks"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "workflowId": { "type": "string", "minLength": 1 },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "storyRef": { "type": ["string", "null"] },
+    "path": { "type": "string", "enum": ["IMPLEMENT", "ITERATE"] },
+    "status": {
+      "type": "string",
+      "enum": ["in-progress", "awaiting-approval", "blocked", "completed", "failed"]
+    },
+    "stage": { "type": "string", "minLength": 1 },
+    "stateDir": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string", "minLength": 1 },
+    "createdBy": { "type": ["string", "null"] },
+    "updatedAt": { "type": "string", "minLength": 1 },
+    "approvedScopeHash": { "type": ["string", "null"] },
+    "approvedScopeVersion": { "type": ["integer", "null"], "minimum": 1 },
+    "iterationIndex": { "type": "integer", "minimum": 0 },
+    "correctionAttempts": { "type": "integer", "minimum": 0 },
+    "maxCorrectionAttempts": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "owner",
+          "artifact",
+          "writesFiles",
+          "gate",
+          "implementedInPhase",
+          "status",
+          "gateResult",
+          "startedAt",
+          "completedAt",
+          "blockReason"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "artifact": { "type": ["string", "null"] },
+          "writesFiles": { "type": "boolean" },
+          "gate": { "type": ["string", "null"] },
+          "implementedInPhase": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "running", "complete", "blocked", "skipped"]
+          },
+          "gateResult": { "type": "string", "enum": ["not-run", "pass", "block"] },
+          "startedAt": { "type": ["string", "null"] },
+          "completedAt": { "type": ["string", "null"] },
+          "blockReason": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "stage", "message", "remediation", "raisedAt"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "stage": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 },
+          "remediation": { "type": ["string", "null"] },
+          "raisedAt": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Deterministic domain-pack-selection policy for ei-vocabulary-navigator. It answers one question: did enough of the caller's candidate terms actually resolve to known EI vocabulary for the scope resolver to have real domain context to work from? Candidate terms are proposed by the caller; this policy decides which of them survive. It never invents a term, never widens a match, and never treats an unresolved term as resolved.",
+  "thresholds": {
+    "minResolvedTerms": 1,
+    "minTermConfidence": 0.7,
+    "minAggregateConfidence": 0.7
+  },
+  "rules": [
+    {
+      "code": "EIVN-NO-CANDIDATE-TERMS",
+      "severity": "blocking",
+      "message": "No candidate domain terms were supplied, so there is nothing to resolve. Name the EI terms the story is about and re-run the domain-context stage."
+    },
+    {
+      "code": "EIVN-DOMAIN-PACK-UNRESOLVED",
+      "severity": "blocking",
+      "message": "Too few candidate terms resolved to known EI vocabulary, so the scope resolver would be guessing at the domain. Correct the terms, or extend the vocabulary map, and re-run the domain-context stage."
+    },
+    {
+      "code": "EIVN-CONFIDENCE-LOW",
+      "severity": "blocking",
+      "message": "The resolved domain context is below the confidence floor, so it is an ambiguity-heavy match rather than a conclusion. Disambiguate the terms before scope resolution."
+    }
+  ]
+}

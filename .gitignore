@@ -1,0 +1,6 @@
+testResults.xml
+coverage.xml
+.copilottracking/
+.specify/feature.json
+.vscode/
+azdo-settings.json

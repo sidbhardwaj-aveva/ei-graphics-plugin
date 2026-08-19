@@ -1,0 +1,12 @@
+{
+  "id": 123456,
+  "rev": 7,
+  "fields": {
+    "System.Id": 123456,
+    "System.WorkItemType": "User Story",
+    "System.State": "Active",
+    "System.Title": "Termination labels overlap on shared cable points",
+    "System.Description": "<div><p>When two terminal arrangement labels share a point on the canvas drawing, the cable label placement collides and the drawing becomes unreadable.</p></div>"
+  },
+  "url": "https://dev.azure.com/example/_apis/wit/workItems/123456"
+}

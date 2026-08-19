@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "1.0.0",
+  "path": "ITERATE",
+  "description": "Ordered ITERATE lifecycle owned by ei-graphics-workflow. It recovers the sealed ApprovedScope, never restarts intake, and never broadens scope without a new human approval.",
+  "stages": [
+    {
+      "id": "preflight",
+      "name": "Prerequisite and dependency preflight",
+      "owner": "ei-graphics-workflow",
+      "artifact": null,
+      "writesFiles": false,
+      "gate": "prerequisites",
+      "implementedInPhase": "A"
+    },
+    {
+      "id": "state-recovery",
+      "name": "Workflow state and branch/PR recovery",
+      "owner": "ei-workflow-state",
+      "artifact": "workflow-state",
+      "writesFiles": false,
+      "gate": "state-integrity",
+      "implementedInPhase": "A"
+    },
+    {
+      "id": "scope-recovery",
+      "name": "ApprovedScope recovery and hash verification",
+      "owner": "ei-scope-validator",
+      "artifact": "approved-scope",
+      "writesFiles": false,
+      "gate": "scope-hash",
+      "implementedInPhase": "B"
+    },
+    {
+      "id": "iteration-recovery",
+      "name": "PR feedback and CI evidence recovery",
+      "owner": "ei-graphics-workflow",
+      "artifact": "iteration",
+      "writesFiles": false,
+      "gate": "ci-evidence",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "diagnosis",
+      "name": "Cross-plugin bug diagnosis",
+      "owner": "aveva-rnd:bug-diagnosis",
+      "artifact": "diagnosis",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "correction",
+      "name": "Minimal correction inside the sealed scope",
+      "owner": "aveva-rnd:speckit.implement",
+      "artifact": "implementation",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "targeted-tests",
+      "name": "Targeted tests for the correction",
+      "owner": "ei-test-scaffolder",
+      "artifact": "validation",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "regression-tests",
+      "name": "Regression test execution",
+      "owner": "ei-graphics-workflow",
+      "artifact": "validation",
+      "writesFiles": false,
+      "gate": "test-evidence",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "scope-validation",
+      "name": "Sealed-scope diff validation",
+      "owner": "ei-scope-validator",
+      "artifact": "validation",
+      "writesFiles": false,
+      "gate": "scope-validation",
+      "implementedInPhase": "B"
+    },
+    {
+      "id": "invariant-validation",
+      "name": "Domain invariant validation",
+      "owner": "ei-layer-guard",
+      "artifact": "validation",
+      "writesFiles": false,
+      "gate": "invariant-validation",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "code-review",
+      "name": "Cross-plugin code review",
+      "owner": "aveva-rnd:code-review",
+      "artifact": "code-review",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "audit",
+      "name": "Cross-plugin audit trail entry",
+      "owner": "aveva-core:create-audit",
+      "artifact": "audit",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "commit",
+      "name": "Commit on the same branch",
+      "owner": "aveva-rnd:git-commit",
+      "artifact": null,
+      "writesFiles": false,
+      "gate": "artifact-present",
+      "implementedInPhase": "E"
+    },
+    {
+      "id": "pr-update",
+      "name": "Update the same pull request",
+      "owner": "aveva-rnd:create-pr",
+      "artifact": "pr",
+      "writesFiles": false,
+      "gate": "artifact-present",
+      "implementedInPhase": "E"
+    }
+  ]
+}

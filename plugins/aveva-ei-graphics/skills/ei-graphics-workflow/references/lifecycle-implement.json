@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.0.0",
+  "path": "IMPLEMENT",
+  "description": "Ordered IMPLEMENT lifecycle owned by ei-graphics-workflow. Any stage with writesFiles=true must be followed by an independent scope validation gate.",
+  "stages": [
+    {
+      "id": "preflight",
+      "name": "Prerequisite and dependency preflight",
+      "owner": "ei-graphics-workflow",
+      "artifact": null,
+      "writesFiles": false,
+      "gate": "prerequisites",
+      "implementedInPhase": "A"
+    },
+    {
+      "id": "state-init",
+      "name": "Workflow state initialisation and resume detection",
+      "owner": "ei-workflow-state",
+      "artifact": "workflow-state",
+      "writesFiles": false,
+      "gate": "state-integrity",
+      "implementedInPhase": "A"
+    },
+    {
+      "id": "ado-intake",
+      "name": "Azure DevOps story intake",
+      "owner": "ei-azure-devops-cli-intake",
+      "artifact": "ado",
+      "writesFiles": false,
+      "gate": "artifact-present",
+      "implementedInPhase": "C"
+    },
+    {
+      "id": "domain-context",
+      "name": "Vocabulary and domain-pack resolution",
+      "owner": "ei-vocabulary-navigator",
+      "artifact": "domain-context",
+      "writesFiles": false,
+      "gate": "domain-pack-selection",
+      "implementedInPhase": "C"
+    },
+    {
+      "id": "proposed-scope",
+      "name": "Conservative proposed scope resolution",
+      "owner": "ei-scope-resolver",
+      "artifact": "proposed-scope",
+      "writesFiles": false,
+      "gate": "artifact-present",
+      "implementedInPhase": "B"
+    },
+    {
+      "id": "scope-analysis",
+      "name": "Deterministic proposed-scope analysis",
+      "owner": "ei-scope-validator",
+      "artifact": "validation",
+      "writesFiles": false,
+      "gate": "scope-analysis",
+      "implementedInPhase": "B"
+    },
+    {
+      "id": "scope-approval",
+      "name": "Human scope approval and scope sealing",
+      "owner": "human",
+      "artifact": "approved-scope",
+      "writesFiles": false,
+      "gate": "human-approval",
+      "implementedInPhase": "B"
+    },
+    {
+      "id": "specification",
+      "name": "Specification authoring",
+      "owner": "aveva-rnd:speckit.specify",
+      "artifact": "specification",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "plan",
+      "name": "Implementation planning",
+      "owner": "aveva-rnd:speckit.plan",
+      "artifact": "plan",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "tasks",
+      "name": "Task breakdown",
+      "owner": "aveva-rnd:speckit.tasks",
+      "artifact": "tasks",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "implementation",
+      "name": "Implementation by untrusted writer",
+      "owner": "aveva-rnd:speckit.implement",
+      "artifact": "implementation",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "targeted-tests",
+      "name": "Targeted tests for changed behaviour",
+      "owner": "ei-test-scaffolder",
+      "artifact": "validation",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "regression-tests",
+      "name": "Regression test execution",
+      "owner": "ei-graphics-workflow",
+      "artifact": "validation",
+      "writesFiles": false,
+      "gate": "test-evidence",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "scope-validation",
+      "name": "Sealed-scope diff validation",
+      "owner": "ei-scope-validator",
+      "artifact": "validation",
+      "writesFiles": false,
+      "gate": "scope-validation",
+      "implementedInPhase": "B"
+    },
+    {
+      "id": "invariant-validation",
+      "name": "Domain invariant validation",
+      "owner": "ei-layer-guard",
+      "artifact": "validation",
+      "writesFiles": false,
+      "gate": "invariant-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "code-review",
+      "name": "Cross-plugin code review",
+      "owner": "aveva-rnd:code-review",
+      "artifact": "code-review",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "audit",
+      "name": "Cross-plugin audit trail entry",
+      "owner": "aveva-core:create-audit",
+      "artifact": "audit",
+      "writesFiles": true,
+      "gate": "scope-validation",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "commit",
+      "name": "Commit on the feature branch",
+      "owner": "aveva-rnd:git-commit",
+      "artifact": null,
+      "writesFiles": false,
+      "gate": "artifact-present",
+      "implementedInPhase": "D"
+    },
+    {
+      "id": "pr",
+      "name": "Pull request creation",
+      "owner": "aveva-rnd:create-pr",
+      "artifact": "pr",
+      "writesFiles": false,
+      "gate": "artifact-present",
+      "implementedInPhase": "D"
+    }
+  ]
+}

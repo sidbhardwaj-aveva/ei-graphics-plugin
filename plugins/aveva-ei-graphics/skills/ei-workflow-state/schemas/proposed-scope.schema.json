@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics proposed scope",
+  "description": "Conservative implementation scope proposed by ei-scope-resolver. It proposes; it never authorises. Every proposed path, module and test is evidence-linked by construction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "resolver",
+    "storyId",
+    "storyRef",
+    "storySummary",
+    "generatedAt",
+    "status",
+    "confidence",
+    "domainContext",
+    "proposedFiles",
+    "proposedModules",
+    "relatedTests",
+    "protectedAreas",
+    "dependencies",
+    "evidence",
+    "excluded",
+    "risks",
+    "unresolved",
+    "rationale"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "resolver": { "type": "string", "enum": ["ei-scope-resolver"] },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "storyRef": { "type": ["string", "null"] },
+    "storySummary": { "type": ["string", "null"] },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["resolved", "needs-review", "blocked"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "domainContext": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["source", "terms", "ambiguities", "confidence"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "terms": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "ambiguities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    },
+    "proposedFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "changeIntent", "symbols", "evidence", "confidence"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "changeIntent": { "type": "string", "enum": ["modify", "add", "delete"] },
+          "symbols": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "proposedModules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "projectPath", "evidence"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "projectPath": { "type": ["string", "null"] },
+          "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "relatedTests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["target", "kind", "evidence"],
+        "properties": {
+          "target": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "enum": ["targeted", "regression"] },
+          "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "protectedAreas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "reason"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "kind", "resolution", "detail"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "enum": ["internal", "cross-area", "external"] },
+          "resolution": { "type": "string", "enum": ["in-scope", "unresolved"] },
+          "detail": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "value", "note"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "kind": {
+            "type": "string",
+            "enum": ["story", "vocabulary", "search-term", "path", "symbol", "convention"]
+          },
+          "value": { "type": "string", "minLength": 1 },
+          "note": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "excluded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["target", "reason"],
+        "properties": {
+          "target": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "severity"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] }
+        }
+      }
+    },
+    "unresolved": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "question", "blocking"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^EISR-[A-Z-]+$" },
+          "question": { "type": "string", "minLength": 1 },
+          "blocking": { "type": "boolean" }
+        }
+      }
+    },
+    "rationale": { "type": "string", "minLength": 1 }
+  }
+}

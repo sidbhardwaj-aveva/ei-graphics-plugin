@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Deterministic approval-readiness policy for ei-scope-validator. It answers a different question from ei-scope-resolver's scope-policy.json: not 'is this artifact internally consistent?' but 'is this scope narrow and defensible enough to put in front of a human, and did a writing stage stay inside it?'. Rules only ever record findings; they never widen a scope or downgrade a resolver finding.",
+  "reuses": {
+    "policy": "ei-scope-resolver/references/scope-policy.json",
+    "values": [
+      "limits.maxProposedFiles",
+      "limits.maxProposedModules",
+      "limits.minConfidence"
+    ],
+    "note": "Hard size limits and the scope-level confidence floor are owned by the resolver policy and are not restated here."
+  },
+  "thresholds": {
+    "reviewFileCount": 6,
+    "reviewAddedFileCount": 3,
+    "minFileConfidence": 0.7,
+    "maxImplementationAreas": 2,
+    "areaSegmentDepth": 2
+  },
+  "drift": {
+    "allowedPathPrefixes": [".copilottracking"]
+  },
+  "rules": [
+    {
+      "code": "EISV-SCOPE-NOT-RESOLVED",
+      "severity": "blocking",
+      "message": "The proposed scope is not 'resolved', so there is nothing defensible to approve. Answer the resolver findings and re-run the resolver."
+    },
+    {
+      "code": "EISV-AREA-SPREAD",
+      "severity": "blocking",
+      "message": "The proposed files span more implementation areas than a single story should touch. Split the story or justify the spread and re-resolve."
+    },
+    {
+      "code": "EISV-FILE-CONFIDENCE-LOW",
+      "severity": "blocking",
+      "message": "A proposed file is below the per-file confidence floor, so it is a guess rather than a conclusion. Strengthen the evidence or drop the file."
+    },
+    {
+      "code": "EISV-SYMBOLS-MISSING",
+      "severity": "blocking",
+      "message": "A file is proposed for modification without naming a symbol, so its blast radius is the whole file. Name the symbols that change."
+    },
+    {
+      "code": "EISV-TEST-COVERAGE-GAP",
+      "severity": "blocking",
+      "message": "A proposed file has no related test that names it, so the change would be unprovable. Identify the test, or state why none can exist."
+    },
+    {
+      "code": "EISV-RISK-HIGH",
+      "severity": "blocking",
+      "message": "A high-severity risk is recorded against this scope. A human must answer it before approval, not during implementation."
+    },
+    {
+      "code": "EISV-BREADTH-REVIEW",
+      "severity": "advisory",
+      "message": "The proposed scope is larger than a routine change, so the approver should confirm the breadth is intended."
+    },
+    {
+      "code": "EISV-ADDED-FILE-BREADTH",
+      "severity": "advisory",
+      "message": "The proposed scope creates several new files, which widens the surface the approver is authorising."
+    },
+    {
+      "code": "EISV-DELETE-PRESENT",
+      "severity": "advisory",
+      "message": "The proposed scope deletes files. Deletions are irreversible for the approver, so they are surfaced explicitly."
+    },
+    {
+      "code": "EISV-DEPENDENCY-UNRESOLVED",
+      "severity": "advisory",
+      "message": "The scope records an unresolved dependency. It is not in scope and must not be absorbed during implementation."
+    },
+    {
+      "code": "EISV-DRIFT-OUT-OF-SCOPE",
+      "severity": "blocking",
+      "message": "A file was changed that the sealed scope does not authorise. Raise a scope-change request; do not widen the seal."
+    },
+    {
+      "code": "EISV-DRIFT-PROTECTED",
+      "severity": "blocking",
+      "message": "A file inside a declared protected area was changed. This is never resolved by widening the scope."
+    }
+  ]
+}
