@@ -40,12 +40,20 @@ Exit code `0` means `Status = Valid`; `1` means a dependency is missing.
 
 ## Installation
 
-Add this repository as an agent plugin marketplace source in VS Code — the same mechanism used for
-`AVEVA-Copilot-Access/aveva-agent-plugins` — then install the `aveva-ei-graphics` plugin from it.
+Add this repository to `chat.plugins.marketplaces` in your VS Code user settings
+(**Preferences: Open User Settings (JSON)**):
 
+```jsonc
+"chat.plugins.marketplaces": [
+    "https://github.com/AVEVA-Copilot-Access/aveva-agent-plugins",
+    "https://github.com/sidbhardwaj-aveva/ei-graphics-plugin"
+]
 ```
-https://github.com/sidbhardwaj-aveva/ei-graphics-plugin.git
-```
+
+Keep the `aveva-agent-plugins` entry — that is where the required `aveva-rnd` and `aveva-core`
+plugins come from.
+
+Then reload the window and install the **`aveva-ei-graphics`** plugin from the plugin picker.
 
 Marketplace manifests are provided for both hosts:
 
