@@ -96,8 +96,7 @@ supplied explicitly, so an unfinished run can never be reported as a success.
 # Full EI suite (Pester 5+ required)
 Invoke-Pester -Path './tests/aveva-ei-graphics' -Tag 'Unit'
 
-# Single agent/skill
-Invoke-Pester -Path './tests/aveva-ei-graphics/agents/ei-ado-ingest'
+# Single skill
 Invoke-Pester -Path './tests/aveva-ei-graphics/skills/ei-workflow-state'
 ```
 

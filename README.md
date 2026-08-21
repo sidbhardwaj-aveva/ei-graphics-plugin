@@ -1,6 +1,6 @@
 # EI Graphics Plugin
 
-Distribution repository for the **`aveva-ei-graphics`** agent plugin.
+Development and distribution repository for the **`aveva-ei-graphics`** agent plugin.
 
 The plugin is a gated delivery lifecycle for EI Graphics work. It takes a story from Azure DevOps
 (or an existing PR/branch) through domain context, an approved scope checkpoint, implementation,
@@ -71,10 +71,26 @@ the lifecycle.
 ```
 plugins/aveva-ei-graphics/
 ├── .github/plugin/plugin.json
-├── agents/          5 agents  (entry point, ADO ingest, code review, PR review, bug-diagnosis-to-spec)
+├── agents/          1 agent   (EI Graphics conversational entry point)
 └── skills/          9 skills  (workflow controller, state, scope resolve/validate, ADO intake,
                                 vocabulary, layer guard, test scaffolder, bug reproducer)
+specs/002-ei-graphics-plugin-foundation/
+                                Planning workspace: plan, roadmap, todo list, current status,
+                                progress log, decisions, risks, and design/ history
 tests/aveva-ei-graphics/        Pester tests for the gate scripts
+tools/                          Repository gates (spec-sync)
+```
+
+## Planning and status
+
+Before starting a tranche, read `specs/002-ei-graphics-plugin-foundation/current-status.md` and the
+tail of `progress-log.md`. Repository conventions live in `.github/copilot-instructions.md`.
+
+Any change under `plugins/aveva-ei-graphics/**` requires a matching change under
+`specs/002-ei-graphics-plugin-foundation/**`:
+
+```powershell
+pwsh -NoProfile -File ./tools/Test-EiGraphicsSpecSync.ps1 -FromRef origin/main -ToRef HEAD
 ```
 
 ## Determinism
@@ -91,9 +107,8 @@ pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1
 
 ## Relationship to `aveva-agent-plugins`
 
-This plugin also ships inside the `AVEVA-Copilot-Access/aveva-agent-plugins` monorepo. That repo is
-the upstream source of truth; this repository exists to distribute the plugin to the EI Graphics
-team independently.
+This plugin also exists inside the `AVEVA-Copilot-Access/aveva-agent-plugins` monorepo. **Active
+development now happens here**; the monorepo copy is downstream.
 
-Raise changes upstream in `aveva-agent-plugins`, not here — this repository is a distribution mirror
-and direct edits will be overwritten on the next sync.
+When a tranche lands here, mirror `plugins/aveva-ei-graphics/**` and `tests/aveva-ei-graphics/**`
+back to the monorepo so the two stay aligned.

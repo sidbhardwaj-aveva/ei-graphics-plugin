@@ -18,10 +18,8 @@ Deterministic Phase 1 slices are implemented for bug reproduction, vocabulary na
 | Agent | Purpose |
 |-------|---------|
 | `EI Graphics` (`ei-graphics.agent.md`) | Thin conversational entry point: collects the story or PR, routes IMPLEMENT vs ITERATE, invokes `ei-graphics-workflow`, reports the contract |
-| `ei-pr-reviewer` | Produces a structured first-pass review against EI-specific PR gates |
-| `ei-ado-ingest` | Normalizes Azure DevOps work item URL or ID input into deterministic EI intake payloads |
-| `ei-bug-diagnosis-to-spec` | Converts diagnosis evidence into an implementation-ready EI spec handoff |
-| `ei-code-review` | Packages EI-specific review findings and PR evidence with deterministic gate outputs |
+
+The lifecycle itself is owned by the `ei-graphics-workflow` skill, not by additional agents.
 
 ## Skills
 
@@ -74,11 +72,7 @@ aveva-ei-graphics/
 ├── .github/plugin/plugin.json
 ├── README.md
 ├── agents/
-│   ├── ei-graphics.agent.md
-│   ├── ei-pr-reviewer.agent.md
-│   ├── ei-ado-ingest.agent.md
-│   ├── ei-bug-diagnosis-to-spec.agent.md
-│   └── ei-code-review.agent.md
+│   └── ei-graphics.agent.md
 └── skills/
     ├── ei-graphics-workflow/SKILL.md
     ├── ei-workflow-state/SKILL.md
