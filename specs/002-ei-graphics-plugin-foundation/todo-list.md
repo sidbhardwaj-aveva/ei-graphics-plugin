@@ -20,7 +20,7 @@
 | T-009 | Add Pester tests for deterministic scripts | P1 | In Progress | Engineering | T-005,T-007,T-008 | Focused suites added for layer guard, bug reproducer, vocabulary navigator, and test scaffolder |
 | T-010 | Pilot with dev+QA users | P1 | Not Started | EI Graphics Team | T-004,T-009 | Track quality and speed metrics |
 | T-011 | Implement deterministic scripts for each skill | P0 | Done | Engineering | T-005,T-007,T-008 | Deterministic slices implemented for all 5 Phase 1 capabilities |
-| T-012 | Wire ADO live integration and auth checks | P0 | Done | Engineering | T-005,T-011 | Live retrieval validated against AVEVA-VSTS/Dabacon Products with Azure CLI token fallback; work item context now resolves with `ado-live` status |
+| T-012 | Wire ADO live integration and auth checks | P0 | Done | Engineering | T-005,T-011 | Live retrieval validated against the internal ADO organisation/project with Azure CLI token fallback; work item context now resolves with `ado-live` status |
 | T-013 | Run plugin structure and targeted tests | P1 | In Progress | Engineering | T-011,T-012 | Focused EI deterministic suites passing locally, including URL-driven work item intake coverage |
 | T-014 | Remove residual sample scaffold artifacts | P0 | Done | Engineering | T-004 | Removed sample agent and sample skill tree to keep EI-only scaffold |
 | T-015 | Fold workflow-discovery report into plugin plan | P0 | Done | Engineering | T-014 | Discovery now drives workflow refinement and capability prioritization |

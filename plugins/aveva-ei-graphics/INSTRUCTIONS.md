@@ -50,10 +50,10 @@ a commit or PR. `ei-workflow-state` owns it.
 $stateScripts = './plugins/aveva-ei-graphics/skills/ei-workflow-state/scripts'
 
 # Start or resume a run
-& "$stateScripts/Initialize-EiWorkflowState.ps1" -StoryId '468178' -WorkflowPath IMPLEMENT -Json
+& "$stateScripts/Initialize-EiWorkflowState.ps1" -StoryId '123456' -WorkflowPath IMPLEMENT -Json
 
 # Confirm the run is usable before continuing
-& "$stateScripts/Validate-EiWorkflowState.ps1" -StateDir '.copilottracking/ei-graphics/468178' -Json
+& "$stateScripts/Validate-EiWorkflowState.ps1" -StateDir '.copilottracking/ei-graphics/123456' -Json
 ```
 
 Re-running `Initialize-EiWorkflowState.ps1` resumes rather than overwrites. Use `-Force` only to
@@ -65,7 +65,7 @@ Every run returns a schema-validated contract, persisted as `workflow-result.jso
 
 ```powershell
 & './plugins/aveva-ei-graphics/skills/ei-graphics-workflow/scripts/New-EiWorkflowResult.ps1' `
-    -StateDir '.copilottracking/ei-graphics/468178' `
+    -StateDir '.copilottracking/ei-graphics/123456' `
     -Summary 'Phase A skeleton initialised.' `
     -NextAction 'Wait for Phase B.' `
     -Status blocked `

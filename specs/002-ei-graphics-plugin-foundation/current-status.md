@@ -23,7 +23,7 @@
 7. CODEOWNERS entry added for /plugins/aveva-ei-graphics/.
 8. Initial EI Graphics agent and skill contracts scaffolded.
 9. Residual hello-world sample artifacts removed from the EI Graphics plugin scaffold.
-10. Plugin manifest creator updated to siddhant.bhardwaj@aveva.com.
+10. Plugin manifest creator set to the repository owner.
 11. Evidence-backed workflow discovery completed from the real EI codebase.
 12. Phase 1 capability map locked from workflow evidence.
 13. Exact architecture and review gates documented for Phase 1.
@@ -50,7 +50,7 @@
 31. T-012 calibration extended with reason-based confidence caps and transient classification for live retrieval failures, with focused EI suites passing (16/16).
 32. Live ADO probe calibration identified auth redirect behavior (302 to sign-in); bug reproducer now suppresses federated redirect and maps redirect loops to auth failure classification.
 33. EI bug reproducer now follows RND-style ADO request strategy: explicit content-type/redirect validation, structured response classification, optional Azure CLI token fallback, and context normalization.
-34. Live ADO retrieval now succeeds with explicit org/project context and Azure CLI token fallback (`authSource=az-cli-token`, `retrieval.reason=ado-live`) for work item 468178.
+34. Live ADO retrieval now succeeds with explicit org/project context and Azure CLI token fallback (`authSource=az-cli-token`, `retrieval.reason=ado-live`) against a real work item.
 35. EI bug reproducer now accepts Azure DevOps work item URLs and auto-resolves bug ID, organization, and project context for URL-driven entry.
 36. Added `ei-azure-devops-cli-intake` skill and wired `ei-bug-reproducer` to consume URL-driven ADO context and description retrieval via the new intake path.
 37. Defined EI-specific adapted-agent contract set for RND-pattern-inspired Phase 2A expansion.

@@ -4,3 +4,8 @@ coverage.xml
 .specify/feature.json
 .vscode/
 azdo-settings.json
+
+# Planning workspace names the internal monorepo, ADO org/project, and customer SR-linked work
+# items. Remove this entry once the repository is private; until then it must not be committed.
+specs/
+outputs_of_prompts_for_improving/

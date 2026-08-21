@@ -30,7 +30,7 @@
 - Reconciled planning artifacts after status mismatch report.
 - Updated plan current-status text to reflect implementation scaffold progress.
 - Removed residual sample template artifacts from the plugin scaffold to keep an EI-only structure.
-- Updated plugin manifest author to siddhant.bhardwaj@aveva.com.
+- Updated plugin manifest author to the repository owner.
 
 ### Entry 5
 
@@ -164,7 +164,7 @@
 
 ### Entry 21
 
-- Confirmed successful live ADO retrieval for work item `468178` using explicit org/project inputs with `-UseAzCliToken`.
+- Confirmed successful live ADO retrieval for a real work item using explicit org/project inputs with `-UseAzCliToken`.
 - Retrieval output now resolves as:
   - `retrieval.status = retrieved`
   - `retrieval.reason = ado-live`
