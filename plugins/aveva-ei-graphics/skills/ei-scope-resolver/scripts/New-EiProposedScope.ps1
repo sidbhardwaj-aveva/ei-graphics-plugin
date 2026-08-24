@@ -258,24 +258,17 @@ $excluded += $script:DroppedTargets
 
 $domainContext = $null
 if ($null -ne $domainContextRaw) {
-    $terms = @(ConvertTo-EiArray (Get-EiJsonValue -InputObject $domainContextRaw -Name 'terms'))
-    if ($terms.Count -eq 0) {
-        $singleTerm = Get-EiJsonValue -InputObject $domainContextRaw -Name 'term'
-        if ($null -ne $singleTerm) { $terms = @($singleTerm) }
-    }
-
-    $ambiguities = @(ConvertTo-EiArray (Get-EiJsonValue -InputObject $domainContextRaw -Name 'ambiguities') | ForEach-Object {
-            $ambiguityTerm = Get-EiJsonValue -InputObject $_ -Name 'term'
-            if ($null -ne $ambiguityTerm) { [string]$ambiguityTerm } else { [string]$_ }
-        })
-
-    $contextConfidence = Get-EiJsonValue -InputObject $domainContextRaw -Name 'confidence'
+    $domainSkills = @(ConvertTo-EiArray (Get-EiJsonValue -InputObject $domainContextRaw -Name 'domainSkills'))
+    $detectedIds  = @($domainSkills | ForEach-Object {
+            $id = Get-EiJsonValue -InputObject $_ -Name 'domainId'
+            if ($null -ne $id) { [string]$id }
+        } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
     $domainContext = [ordered]@{
-        source      = [string](Get-EiJsonValue -InputObject $domainContextRaw -Name 'source' -Default 'ei-vocabulary-navigator')
-        terms       = @($terms | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-        ambiguities = @($ambiguities | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-        confidence  = if ($null -eq $contextConfidence) { $null } else { [double]$contextConfidence }
+        source      = [string](Get-EiJsonValue -InputObject $domainContextRaw -Name 'source' -Default 'ei-domain-skill-registry')
+        terms       = @($detectedIds)
+        ambiguities = @()
+        confidence  = $null
     }
 }
 
@@ -285,11 +278,8 @@ foreach ($code in $drops.Keys) {
     $findings.Add((New-EiScopeFinding -Policy $policy -Code $code -Detail "Removed: $(@($drops[$code]) -join ', ')."))
 }
 
-if ($null -eq $domainContext -or $domainContext.terms.Count -eq 0) {
+if ($null -eq $domainContext) {
     $findings.Add((New-EiScopeFinding -Policy $policy -Code 'EISR-CONTEXT-MISSING'))
-}
-elseif ($domainContext.ambiguities.Count -gt 0) {
-    $findings.Add((New-EiScopeFinding -Policy $policy -Code 'EISR-AREA-AMBIGUOUS' -Detail "Ambiguous terms: $(@($domainContext.ambiguities) -join ', ')."))
 }
 
 if ($proposedFiles.Count -eq 0) {

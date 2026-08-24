@@ -119,7 +119,6 @@ Use this skill when working on wiring rule features.
         It 'detects the termination-drawing domain and injects its Key Files into the artifact' {
             $result = & $script:ContextStagePath `
                 -StateDir $script:StateDir `
-                -Terms @('cable', 'terminal arrangement') `
                 -RegistryPath $script:ProductionRegistryPath `
                 -Json | ConvertFrom-Json
 
@@ -176,7 +175,6 @@ Use this skill when working on wiring rule features.
 
             $result = & $script:ContextStagePath `
                 -StateDir $script:StateDir `
-                -Terms @('cable', 'terminal arrangement') `
                 -RegistryPath $customRegistryPath `
                 -Json | ConvertFrom-Json
 
@@ -203,7 +201,6 @@ Use this skill when working on wiring rule features.
 
             $result = & $script:ContextStagePath `
                 -StateDir $cableStateDir `
-                -Terms @('cable', 'terminal arrangement') `
                 -RegistryPath $script:ProductionRegistryPath `
                 -Json | ConvertFrom-Json
 
@@ -266,12 +263,11 @@ Use this when you need domain context without any key files.
         }
     }
 
-    # ── Test 5: Key Files are NOT automatic scope ─────────────────────────────────────────────────
-    Context 'Key Files must not bleed into domainPacks' {
-        It 'keeps Key File paths out of domainPacks so the scope-resolver cannot mistake them for resolved terms' {
+    # ── Test 5: Key Files stay inside domainSkills only ───────────────────────────────────────────
+    Context 'Key Files are scoped to domainSkills' {
+        It 'keeps Key File paths inside domainSkills entries and not at the artifact top level' {
             $result = & $script:ContextStagePath `
                 -StateDir $script:StateDir `
-                -Terms @('cable', 'terminal arrangement') `
                 -RegistryPath $script:ProductionRegistryPath `
                 -Json | ConvertFrom-Json
 
@@ -279,13 +275,10 @@ Use this when you need domain context without any key files.
 
             $artifact = script:Get-EiArtifact -StateDir $script:StateDir -Name 'domain-context'
 
-            # domainPacks must contain only the vocabulary-resolved terms, not any Key File paths.
-            $domainPackTerms = @($artifact.domainPacks | ForEach-Object { $_.term })
-            $domainPackTerms | Should -Contain 'cable'
-            $domainPackTerms | Should -Contain 'terminal arrangement'
-
-            $keyFilePathsInPacks = $domainPackTerms | Where-Object { $_ -like '*.cs' -or $_ -like '*.md' }
-            @($keyFilePathsInPacks).Count | Should -Be 0
+            # The artifact top-level keys must not contain any .cs or .md paths.
+            $topLevelKeys = @($artifact.PSObject.Properties.Name)
+            $topLevelKeys | ForEach-Object { $_ | Should -Not -BeLike '*.cs' }
+            $topLevelKeys | ForEach-Object { $_ | Should -Not -BeLike '*.md' }
 
             # keyFilesNote must be present on every domain skill entry.
             @($artifact.domainSkills) | ForEach-Object {

@@ -60,7 +60,7 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
         $intake.Details.GateResult | Should -Be 'pass'
 
         # domain-context
-        $context = & $script:ContextStagePath -StateDir $stateDir -Terms @('cable', 'terminal arrangement', 'canvas drawing') -Json | ConvertFrom-Json
+        $context = & $script:ContextStagePath -StateDir $stateDir -Json | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $context.Details.GateResult | Should -Be 'pass'
 
@@ -72,7 +72,7 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
             -RepositoryRoot $workspace -StateDir $stateDir -Json | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $scope.Details.ScopeStatus | Should -Be 'resolved'
-        @($scope.Details.Payload.domainContext.terms) | Should -Contain 'cable'
+        $scope.Details.Payload.domainContext.source | Should -Be 'ei-domain-skill-registry'
         $scope.Details.Payload.storyRef | Should -Be 'https://dev.azure.com/example/MyProject/_workitems/edit/123456'
         & $script:StagePath -StateDir $stateDir -StageId 'proposed-scope' -Action start -Json | Out-Null
         & $script:StagePath -StateDir $stateDir -StageId 'proposed-scope' -Action complete -GateResult pass -Json | Out-Null
@@ -100,7 +100,7 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
         $seal.approvedBy | Should -Be 'approver@aveva.com'
         $seal.storyRef | Should -Be 'https://dev.azure.com/example/MyProject/_workitems/edit/123456'
         @($seal.scope.proposedFiles | ForEach-Object { $_.path }) | Should -Contain 'src/Ei.Graphics.Rendering/LabelPlacement.cs'
-        @($seal.scope.domainContext.terms) | Should -Contain 'terminal arrangement'
+        $seal.scope.domainContext.source | Should -Be 'ei-domain-skill-registry'
 
         # Every stage up to and including approval is complete, on the real lifecycle, with no skips.
         $final = & $script:ValidatePath -StateDir $stateDir -Json | ConvertFrom-Json

@@ -68,9 +68,8 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
         $LASTEXITCODE | Should -Be 0
         $intake.Details.GateResult | Should -Be 'pass'
 
-        # domain-context — terms resolve AND the termination-drawing domain is detected.
+        # domain-context — termination-drawing domain is detected from registry.
         $context = & $script:ContextStagePath -StateDir $stateDir `
-            -Terms @('cable', 'terminal arrangement') `
             -Json | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $context.Details.GateResult | Should -Be 'pass'
@@ -78,9 +77,7 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
         # Verify domain skill injection in the persisted artifact.
         $domainCtxArtifact = Get-Content -LiteralPath (Join-Path $stateDir 'domain-context.json') -Raw | ConvertFrom-Json
 
-        # Vocabulary resolution is intact.
-        @($domainCtxArtifact.terms) | Should -Contain 'cable'
-        @($domainCtxArtifact.terms) | Should -Contain 'terminal arrangement'
+        $domainCtxArtifact.source | Should -Be 'ei-domain-skill-registry'
 
         # Domain skill was injected.
         $skills = @($domainCtxArtifact.domainSkills)
@@ -94,9 +91,9 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
         $keyFiles.Count | Should -BeGreaterOrEqual 1
         $td.keyFilesNote | Should -BeLike '*candidate evidence*'
 
-        # Key Files must NOT bleed into vocabulary domain packs.
-        $domainPackTerms = @($domainCtxArtifact.domainPacks | ForEach-Object { $_.term })
-        $domainPackTerms | ForEach-Object { $_ | Should -Not -BeLike '*.cs' }
+        # Key Files are inside domainSkills only — not as top-level artifact keys.
+        $topKeys = @($domainCtxArtifact.PSObject.Properties.Name)
+        $topKeys | ForEach-Object { $_ | Should -Not -BeLike '*.cs' }
 
         # proposed-scope — the domain-context.json (now enriched) is passed as context.
         $scope = & $script:ResolverPath `
@@ -108,7 +105,7 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
             -Json | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $scope.Details.ScopeStatus | Should -Be 'resolved'
-        @($scope.Details.Payload.domainContext.terms) | Should -Contain 'cable'
+        $scope.Details.Payload.domainContext.source | Should -Be 'ei-domain-skill-registry'
         & $script:StagePath -StateDir $stateDir -StageId 'proposed-scope' -Action start -Json | Out-Null
         & $script:StagePath -StateDir $stateDir -StageId 'proposed-scope' -Action complete -GateResult pass -Json | Out-Null
         $LASTEXITCODE | Should -Be 0
@@ -137,7 +134,7 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
         $seal = Get-Content -LiteralPath (Join-Path $stateDir 'approved-scope.v1.json') -Raw | ConvertFrom-Json
         $seal.approvedBy | Should -Be 'reviewer@aveva.com'
         @($seal.scope.proposedFiles | ForEach-Object { $_.path }) | Should -Contain 'src/Ei.CanvasDrawings/EquipmentInserter.cs'
-        @($seal.scope.domainContext.terms) | Should -Contain 'cable'
+        @($seal.scope.domainContext.terms) | Should -Contain 'termination-drawing'
 
         # All stages from ado-intake through scope-approval must be complete with a passing gate.
         $state = Get-Content -LiteralPath (Join-Path $stateDir 'workflow-state.json') -Raw | ConvertFrom-Json

@@ -58,10 +58,10 @@ Describe 'New-EiProposedScope' -Tag 'Unit' {
         }
 
         $script:ContextPath = script:New-JsonFile (Join-Path $TestDrive 'domain-context.json') @{
-            source      = 'ei-vocabulary-navigator'
-            terms       = @('label placement')
-            ambiguities = @()
-            confidence  = 0.9
+            source      = 'ei-domain-skill-registry'
+            domainSkills = @(
+                @{ domainId = 'termination-drawing'; displayName = 'Termination Drawing'; summary = ''; keyFiles = @(); keyFilesNote = 'Key files are candidate evidence.' }
+            )
         }
 
         $script:OutPath = Join-Path $TestDrive 'proposed-scope.json'
@@ -92,25 +92,6 @@ Describe 'New-EiProposedScope' -Tag 'Unit' {
             @($artifact.proposedModules).Count | Should -Be 1
             @($artifact.relatedTests).Count | Should -Be 1
             @($artifact.unresolved).Count | Should -Be 0
-        }
-    }
-
-    Context 'an ambiguous story' {
-        It 'reports needs-review when the domain context is ambiguous' {
-            $contextPath = script:New-JsonFile (Join-Path $TestDrive 'ambiguous-context.json') @{
-                source      = 'ei-vocabulary-navigator'
-                terms       = @('termination')
-                ambiguities = @('termination')
-                confidence  = 0.4
-            }
-            $candidatePath = script:New-JsonFile (Join-Path $TestDrive 'candidate.json') (script:New-Candidate)
-
-            $result = & $script:ScriptPath -StoryInputPath $script:StoryPath -CandidatePath $candidatePath `
-                -DomainContextPath $contextPath -RepositoryRoot $script:Repo -OutputPath $script:OutPath -Json | ConvertFrom-Json
-
-            $LASTEXITCODE | Should -Be 0
-            $result.Details.ScopeStatus | Should -Be 'needs-review'
-            $result.Details.UnresolvedCodes | Should -Contain 'EISR-AREA-AMBIGUOUS'
         }
     }
 

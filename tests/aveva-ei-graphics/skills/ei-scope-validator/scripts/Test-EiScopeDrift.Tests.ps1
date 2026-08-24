@@ -33,10 +33,10 @@ Describe 'Post-write scope drift validation' -Tag 'Unit' {
 
         $contextPath = Join-Path $TestDrive 'domain-context.json'
         Set-Content -LiteralPath $contextPath -Value (@{
-                source      = 'ei-vocabulary-navigator'
-                terms       = @('label placement')
-                ambiguities = @()
-                confidence  = 0.9
+                source      = 'ei-domain-skill-registry'
+                domainSkills = @(
+                    @{ domainId = 'termination-drawing'; displayName = 'Termination Drawing'; summary = ''; keyFiles = @(); keyFilesNote = 'Key files are candidate evidence.' }
+                )
             } | ConvertTo-Json -Depth 10)
 
         $candidatePath = Join-Path $TestDrive 'candidate.json'

@@ -500,3 +500,30 @@
 - Deliberately not in this tranche: Phase D, automatic extraction of candidate scope terms from Key
   Files, a second registered domain beyond `termination-drawing`, and any changes to the scope-resolver
   or approval policy.
+
+### Entry 42
+
+- Vocabulary mechanism removed from the domain-context path. Domain detection and domain knowledge
+  discovery now come exclusively from `domain-skill-registry.json` → SKILL.md files. The vocabulary
+  navigator (`Invoke-EiVocabularyNavigator.ps1`) and `vocabulary-map.json` are retained because
+  `Invoke-EiBugReproducer.ps1` uses them directly; only the domain-context stage path was changed.
+- `Invoke-EiDomainContextStage.ps1` rewritten: removed `-Terms` and `-PolicyPath` parameters, the
+  `$navigatorPath` link, policy file read, vocabulary resolution loop, and the three blocking gate
+  codes (`EIVN-NO-CANDIDATE-TERMS`, `EIVN-DOMAIN-PACK-UNRESOLVED`, `EIVN-CONFIDENCE-LOW`). The stage
+  now reads the ADO artifact, matches story text against `domain-skill-registry.json`, calls
+  `Read-EiDomainSkillContext.ps1` for each match, writes the artifact, and completes. No domain match
+  is not a gate failure.
+- `domain-context.schema.json` updated: `required` now `[schemaVersion, source, storyId, generatedAt,
+  domainSkills]`; `source` enum changed from `["ei-vocabulary-navigator"]` to
+  `["ei-domain-skill-registry"]`; removed `confidence`, `terms`, `domainPacks`, `ambiguities`,
+  `unresolvedTerms`; `domainSkills` moved from optional to required.
+- `New-EiProposedScope.ps1` updated: reads `domainSkills` array from the domain-context artifact,
+  extracts `domainId` from each entry as `terms`, and sets `source` from the artifact.
+  `EISR-CONTEXT-MISSING` now fires only when no domain-context file is passed (not when `terms` is
+  empty). `EISR-AREA-AMBIGUOUS` removed entirely.
+- All test files updated to remove `-Terms` parameter calls and old `ei-vocabulary-navigator` fixture
+  shapes; integration and lifecycle tests assert `source = 'ei-domain-skill-registry'` and
+  `domainContext.terms` contains domain IDs (e.g. `termination-drawing`) rather than vocabulary terms.
+  Fixed stray closing braces in `Invoke-EiDomainContextStage.Tests.ps1` (parse error). Fixed fixture
+  relative path for `work-item-789012.json` in the same file.
+- Full test suite: 209 tests, 0 failures.
