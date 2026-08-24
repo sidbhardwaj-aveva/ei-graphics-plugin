@@ -19,6 +19,12 @@ context would make every candidate match the union of everything the story menti
 hand the scope resolver a domain context far wider than the terms it was given. The story text is
 used only to prove the term belongs to this story.
 
+After vocabulary resolution, the domain skill registry is consulted to detect which domain SKILL.md
+files are relevant to the story. Matched skills contribute a `domainSkills` array to the artifact:
+each entry carries the skill's Key Files and a note that those files are candidate evidence, not
+automatic scope. If no domain is detected the array is empty and no gate is raised; vocabulary
+resolution alone is sufficient to pass the stage.
+
 The stage fails closed. If too few terms resolve, or the aggregate confidence is below the floor,
 the stage is blocked instead of writing a thin domain context that would let the scope resolver
 guess at the domain.
@@ -32,6 +38,7 @@ param(
     [Parameter(Mandatory)][string]$StateDir,
     [string[]]$Terms = @(),
     [string]$PolicyPath = '',
+    [string]$RegistryPath = '',
     [string]$StageId = 'domain-context',
     [switch]$Json
 )
@@ -54,6 +61,12 @@ $navigatorPath = Join-Path $PSScriptRoot 'Invoke-EiVocabularyNavigator.ps1'
 if ([string]::IsNullOrWhiteSpace($PolicyPath)) {
     $PolicyPath = Join-Path $PSScriptRoot '..' 'references' 'domain-pack-policy.json'
 }
+
+if ([string]::IsNullOrWhiteSpace($RegistryPath)) {
+    $RegistryPath = Join-Path $PSScriptRoot '..' 'references' 'domain-skill-registry.json'
+}
+
+$domainSkillReaderPath = Join-Path $PSScriptRoot 'helpers' 'Read-EiDomainSkillContext.ps1'
 
 function Block-EiDomainContextStage {
     param(
@@ -174,6 +187,60 @@ if ($aggregate -lt [double]$thresholds.minAggregateConfidence) {
     Exit-EiResult -Result $result -Json:$Json
 }
 
+# ── Domain skill injection ────────────────────────────────────────────────────
+# Detect which domain SKILL.md files are relevant to this story and inject their
+# Key Files as candidate evidence. No domain match is not a failure.
+$domainSkills = [System.Collections.Generic.List[object]]::new()
+$storySummary     = [string]$adoArtifact.Details.Payload.summary
+$storyDescription = [string]$adoArtifact.Details.Payload.description
+$storySearchText  = (($storySummary + ' ' + $storyDescription + ' ' + $contextText).Trim())
+
+if (Test-Path -LiteralPath $RegistryPath) {
+    try {
+        $registry = Get-Content -LiteralPath $RegistryPath -Raw | ConvertFrom-Json
+        $pluginRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' '..' '..')).Path
+
+        foreach ($domain in @($registry.domains)) {
+            $matched = $false
+            foreach ($term in @($domain.detectionTerms)) {
+                if ($storySearchText.IndexOf([string]$term, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+                    $matched = $true
+                    break
+                }
+            }
+            if (-not $matched) { continue }
+
+            $domainSkillPathRaw = [string]$domain.skillPath
+            $skillAbsPath = if ([System.IO.Path]::IsPathRooted($domainSkillPathRaw)) {
+                $domainSkillPathRaw
+            } else {
+                Join-Path $pluginRoot $domainSkillPathRaw
+            }
+            try {
+                $ctx = & $domainSkillReaderPath `
+                    -SkillPath $skillAbsPath `
+                    -DomainId ([string]$domain.id) `
+                    -DisplayName ([string]$domain.displayName)
+                $domainSkills.Add($ctx)
+            }
+            catch {
+                $result = Add-EiWarning -Result $result `
+                    -Message "Could not load domain skill '$($domain.id)' from '$skillAbsPath': $($_.Exception.Message)"
+            }
+        }
+    }
+    catch {
+        $result = Add-EiWarning -Result $result `
+            -Message "Domain skill registry could not be parsed from '$RegistryPath': $($_.Exception.Message)"
+    }
+}
+else {
+    $result = Add-EiWarning -Result $result `
+        -Message "Domain skill registry was not found at '$RegistryPath'; no domain skill context will be injected."
+}
+
+$result = Set-EiDetail -Result $result -Name 'DetectedDomains' -Value @($domainSkills | ForEach-Object { $_.domainId })
+
 $artifact = [ordered]@{
     schemaVersion   = $script:EiStateSchemaVersion
     source          = 'ei-vocabulary-navigator'
@@ -184,6 +251,7 @@ $artifact = [ordered]@{
     domainPacks     = @($packs)
     ambiguities     = @($ambiguities)
     unresolvedTerms = @($unresolved)
+    domainSkills    = @($domainSkills)
 }
 
 $written = & $writePath -StateDir $StateDir -Name 'domain-context' -Content ($artifact | ConvertTo-Json -Depth 10) -Json | ConvertFrom-Json

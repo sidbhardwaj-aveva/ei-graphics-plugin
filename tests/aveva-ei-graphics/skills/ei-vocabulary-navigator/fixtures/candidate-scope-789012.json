@@ -1,0 +1,32 @@
+{
+  "confidence": 0.82,
+  "rationale": "The story changes the composite key lookup in the UpdateDrawing method, which lives in TerminationDrawingGenerationWorkflow.cs and the insertedTags composite key system in EquipmentInserter.cs. No shared contracts are touched.",
+  "evidence": [
+    { "id": "E1", "kind": "story", "value": "UpdateDrawing uses plain IDs instead of composite key from insertedTags", "note": null },
+    { "id": "E2", "kind": "vocabulary", "value": "cable", "note": null },
+    { "id": "E3", "kind": "vocabulary", "value": "terminal arrangement", "note": null },
+    { "id": "E4", "kind": "path", "value": "src/Ei.CanvasDrawings/EquipmentInserter.cs", "note": null }
+  ],
+  "proposedFiles": [
+    {
+      "path": "src/Ei.CanvasDrawings/EquipmentInserter.cs",
+      "changeIntent": "modify",
+      "symbols": ["UpdateDrawing", "IsShapeFoundOnDrawing"],
+      "evidence": ["E1", "E4"],
+      "confidence": 0.83
+    }
+  ],
+  "proposedModules": [],
+  "relatedTests": [
+    {
+      "target": "tests/Ei.CanvasDrawings.Tests/EquipmentInserterTests.cs",
+      "kind": "targeted",
+      "evidence": ["E4"]
+    }
+  ],
+  "protectedAreas": [],
+  "dependencies": [],
+  "excluded": [],
+  "risks": [],
+  "unresolved": []
+}

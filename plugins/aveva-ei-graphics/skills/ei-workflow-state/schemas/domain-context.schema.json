@@ -64,6 +64,33 @@
         }
       }
     },
-    "unresolvedTerms": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+    "unresolvedTerms": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "domainSkills": {
+      "type": "array",
+      "description": "Domain-specific context injected from matching domain SKILL.md files. Each entry carries the domain knowledge and a Key Files section. Key files are candidate evidence, not automatic scope.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["domainId", "displayName", "summary", "keyFiles", "keyFilesNote"],
+        "properties": {
+          "domainId": { "type": "string", "minLength": 1 },
+          "displayName": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string" },
+          "keyFiles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["file", "purpose"],
+              "properties": {
+                "file": { "type": "string", "minLength": 1 },
+                "purpose": { "type": "string" }
+              }
+            }
+          },
+          "keyFilesNote": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
   }
 }

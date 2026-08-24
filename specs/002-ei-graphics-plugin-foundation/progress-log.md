@@ -444,3 +444,59 @@
 - Historical references to the removed agents remain in this planning workspace by design; they are
   dated records, not current documentation.
 - Result: full EI Graphics suite passing locally (201 passed, 0 failed, 22 files).
+
+## 2026-08-24
+
+### Entry 41
+
+- Phase C second tranche: domain skill injection into the `domain-context` stage. The domain-context
+  artifact now carries a `domainSkills` array alongside the existing vocabulary resolution fields.
+  Phase B safety gates and contracts are unchanged; the lifecycle, schemas, and scope-resolver boundary
+  all remain intact. Phase D is deliberately not started.
+- Added `ei-vocabulary-navigator/references/domain-skill-registry.json`: a data-driven registry mapping
+  domain IDs to their SKILL.md paths (relative to the plugin root) and the detection terms that trigger
+  them in the story title and description. The registry follows the existing `references/` convention
+  already used for `domain-pack-policy.json` and the scope policies. `termination-drawing` is the first
+  and currently only registered domain.
+- Added `ei-vocabulary-navigator/scripts/helpers/Read-EiDomainSkillContext.ps1`: a stateless helper
+  that reads a SKILL.md and returns `{ domainId, displayName, summary, keyFiles[], keyFilesNote }`.
+  Key Files are extracted from the first markdown table under the "Key Files" heading at any level.
+  The parser skips code blocks, strips backtick quoting from file paths, ignores the header and
+  separator rows, and stops at the next heading or at a non-table non-blank line. Returns empty
+  `keyFiles` when no Key Files section is found.
+- Extended `Invoke-EiDomainContextStage.ps1` with a new `-RegistryPath` parameter (defaults to the
+  production registry). After vocabulary resolution passes its confidence gate, the script loads the
+  registry, case-insensitively scans the combined story title and description for each domain's
+  detection terms, and for every match calls `Read-EiDomainSkillContext.ps1` to load the SKILL.md.
+  The resulting `domainSkills` array is added to the artifact. A missing or unparseable registry is a
+  warning, not a block: vocabulary resolution alone is sufficient to pass the stage, so a domain-skill
+  lookup failure never prevents the run from reaching scope resolution. Each domain skill entry carries
+  `keyFilesNote` explicitly labelling Key Files as candidate evidence, not automatic scope. The scope-
+  resolver receives the enriched domain-context artifact unchanged; nothing in `New-EiProposedScope.ps1`
+  or downstream scripts was modified.
+- Updated `domain-context.schema.json` to add an optional `domainSkills` array property with item
+  schema enforcing `domainId`, `displayName`, `summary`, `keyFiles[]` (`file`+`purpose`), and
+  `keyFilesNote`. The property is not in `required`, so pre-existing artifacts without it still pass.
+- Added test fixture `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-789012.json`:
+  a termination-drawing story with detection terms (`TerminationDrawing`, `insertedTags`, `UpdateDrawing`,
+  `EquipmentInserter`) in the title and description, and with `cable` and `terminal arrangement` in the
+  description so the vocabulary gate passes without new vocabulary entries.
+- Added candidate scope fixture `tests/aveva-ei-graphics/skills/ei-graphics-workflow/fixtures/candidate-scope-789012.json`
+  for the integration test.
+- Added `tests/aveva-ei-graphics/skills/ei-vocabulary-navigator/scripts/Invoke-EiDomainContextStage.DomainSkill.Tests.ps1`
+  with five focused tests:
+  1. Single-domain story: termination-drawing detected, Key Files injected, stage completes.
+  2. Multi-domain story: two domains detected via custom registry when story contains terms from each.
+  3. Ambiguous story: no domain terms match, `domainSkills` is empty, stage still passes.
+  4. Key Files extraction: correct file/purpose pairs from the SKILL.md table; empty set when no
+     Key Files section exists.
+  5. Key Files not treated as scope: Key Files appear only in `domainSkills`, never in `domainPacks`;
+     `keyFilesNote` is present on every domain skill entry.
+- Added `tests/aveva-ei-graphics/skills/ei-vocabulary-navigator/scripts/Invoke-EiDomainContextStage.Integration.Tests.ps1`:
+  one end-to-end test running the real lifecycle from ADO intake (story 789012) through domain-context
+  (with domain skill detection), proposed-scope, scope-analysis, and human approval to a sealed
+  `approved-scope.v1.json`. It asserts `domainSkills` in the artifact, Key Files absent from
+  `domainPacks`, all stages complete with a passing gate, and zero blocks.
+- Deliberately not in this tranche: Phase D, automatic extraction of candidate scope terms from Key
+  Files, a second registered domain beyond `termination-drawing`, and any changes to the scope-resolver
+  or approval policy.
