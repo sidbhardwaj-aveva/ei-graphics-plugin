@@ -96,7 +96,9 @@ function Get-EiSchemaRoot {
     [CmdletBinding()]
     param()
 
-    (Resolve-Path (Join-Path $PSScriptRoot '..' '..' 'schemas')).Path
+    # Use ScriptBlock.File so this resolves to the helper's own directory regardless of PS version or dot-source caller.
+    $helperDir = Split-Path -Parent $MyInvocation.MyCommand.ScriptBlock.File
+    (Resolve-Path (Join-Path $helperDir '..' '..' 'schemas')).Path
 }
 
 function Get-EiArtifactRegistry {
