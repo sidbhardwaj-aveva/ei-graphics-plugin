@@ -44,20 +44,41 @@ one, and never describe a gate as passing because it looks fine to you.
      exactly. Never skip a stage because a skill could not be invoked.
 5. **Communicate the result.** Report the workflow contract in plain language.
 
-## Reporting the contract
+## Reporting the result
 
-The workflow returns a validated contract with `status`, `stage`, `stateDir`, `summary`,
-`artifacts`, `gates`, `blocks`, and `nextAction`. Translate it:
+When a workflow stage completes or pauses, run the human-readable formatter before replying:
 
-| `status` | What to tell the user |
-|---|---|
-| `awaiting-approval` | What scope is proposed, why it stopped, and exactly what to approve |
-| `blocked` | The block code, the plain-language reason, and the remediation |
-| `failed` | What failed, where the evidence is, and that a human must take over |
-| `completed` | What was delivered, the PR reference, and the audit/review evidence |
+```powershell
+$eiSkills = "<plugins>/aveva-ei-graphics/skills"
+& "$eiSkills/ei-graphics-workflow/scripts/Format-EiWorkflowSummary.ps1" `
+    -StateDir '<state-dir>' -Json
+```
 
-Always include the state directory so the user can inspect the artifacts, and always finish with
-`nextAction`.
+Present `Details.Summary` to the user verbatim. It is already structured in plain language:
+
+```
+## Story
+## Understanding
+## Relevant Area
+## Proposed Scope
+## Validation
+## Next Step
+```
+
+If the status is `awaiting-approval`, the formatter also emits a **Review Required** section
+explaining what the user needs to decide and how to approve or reject.
+
+If the status is `blocked` or `failed`, the formatter surfaces the plain-language reason and
+remediation steps from the blocked stage — never the raw block code.
+
+Append `Details.Summary` with the `stateDir` path so the user can inspect the full artifacts if
+they want:
+
+> State files are in `<stateDir>`. Run `Format-EiWorkflowSummary.ps1 -Technical` for diagnostic
+> detail including gate results and block codes.
+
+Do **not** translate the status codes or stage IDs into prose yourself. The formatter is the
+canonical presentation layer. If it fails to run, report the error and the raw `nextAction` only.
 
 ## Guardrails
 
@@ -70,7 +91,10 @@ Always include the state directory so the user can inspect the artifacts, and al
 
 ## Implementation status
 
-Phase A (skeleton) is implemented: this agent, `ei-graphics-workflow`, the result contract, the
-`.copilottracking/ei-graphics/<story-id>/` state directory, and the state schemas. Lifecycle stages
-from later phases are explicit BLOCK states until they land — report them, do not improvise a
+The intake, domain-context, scope-resolution, scope-analysis, and scope-approval stages are
+implemented end-to-end. Stages beyond scope approval (specification, plan, tasks, implementation,
+tests, code-review, commit, PR) are explicit BLOCK states — report them, do not improvise a
 replacement.
+
+When a stage is not yet implemented, the workflow returns `blocked` with a plain-language message.
+Present that message through the formatter; never invent a workaround.

@@ -54,6 +54,7 @@
 | T-034 | Define EI adaptation blueprint for selected RND agents | P1 | Done | Engineering + EI Leads | T-012,T-013,T-031 | Defined EI adaptation contract set and workflow intent for first selected patterns; no copy/paste adoption |
 | T-035 | Prioritize adapted-agent rollout phases | P1 | Done | Engineering + QA | T-034 | Prioritized first rollout on core workflow support contracts (ADO ingest, diagnosis-to-spec, EI code review) |
 | T-036 | Author EI-specific contracts for first adapted agent set | P1 | Done | Engineering | T-035 | Authored first EI contract files: ei-ado-ingest, ei-bug-diagnosis-to-spec, ei-code-review |
+| T-046 | Add human-readable output formatter to workflow | P1 | Done | Engineering | T-032,T-062 | Added `Format-EiWorkflowSummary.ps1`; updated `ei-graphics.agent.md` to use formatter; 13 focused tests; full suite 222/222 passing |
 
 ## Immediate next actions
 

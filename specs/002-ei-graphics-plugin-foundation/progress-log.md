@@ -527,3 +527,24 @@
   Fixed stray closing braces in `Invoke-EiDomainContextStage.Tests.ps1` (parse error). Fixed fixture
   relative path for `work-item-789012.json` in the same file.
 - Full test suite: 209 tests, 0 failures.
+
+### Entry 43
+
+- Human-readable output tranche. Added `Format-EiWorkflowSummary.ps1` as a deterministic
+  presentation layer in `ei-graphics-workflow/scripts/`. The script reads the workflow state and
+  available artifacts (ado, domain-context, proposed-scope, scope-analysis evidence, approved-scope)
+  and builds a structured markdown summary with these sections: Story → Understanding → Relevant
+  Area → Proposed Scope → Validation → Review Required (when awaiting approval) → Next Step.
+- Internal terminology is kept out of the primary output: lifecycle phase labels, gate codes
+  (`EISR-*`, `EISV-*`, `EIWF-*`), artifact file names, and block reason codes are never shown
+  unless the caller opts in with `-Technical`, which appends a gate-result table and raw block
+  records for developer debugging.
+- Updated `ei-graphics.agent.md`: the "Reporting the contract" section is replaced by instructions
+  to run `Format-EiWorkflowSummary.ps1` and present `Details.Summary` verbatim. The formatter
+  is declared the canonical presentation layer. The "Implementation status" section no longer
+  references phase labels.
+- Added 13 focused Pester tests covering: required sections present, no internal terminology in
+  primary output, awaiting-approval shows Review Required, blocked surfaces plain-language reason
+  (not the code), validation lists completed checks, domain area populated from domain-context
+  artifact, -Technical reveals diagnostic detail, missing state directory returns an error.
+- Full test suite: 222 tests, 0 failures. Spec-sync gate: PASS.
