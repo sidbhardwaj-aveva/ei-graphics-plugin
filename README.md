@@ -55,6 +55,17 @@ plugins come from.
 
 Then reload the window and install the **`aveva-ei-graphics`** plugin from the plugin picker.
 
+### Keeping the plugin up to date
+
+VS Code installs the plugin into `~/.vscode/agent-plugins/`. That clone does not auto-update.
+After pushing new commits to `origin/main`, pull in the installed copy and reload the window:
+
+```powershell
+git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" pull
+```
+
+Then `Ctrl+Shift+P` → **Developer: Reload Window**.
+
 Marketplace manifests are provided for both hosts:
 
 - `.github/plugin/marketplace.json`
