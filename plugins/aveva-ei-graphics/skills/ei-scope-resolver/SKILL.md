@@ -63,8 +63,17 @@ Work in this order and stop as soon as you are guessing.
 1. **Read the story.** Extract the behaviour being changed, not the implementation you imagine.
 2. **Anchor on domain context.** Use the supplied domain context to name the implementation area.
    With no domain context you cannot confirm the area, and the scope can never be `resolved`.
-3. **Search for the anchor terms**, then for the symbols those searches reveal. Record each search
-   term and each path you relied on as an `evidence` entry.
+3. **Consult the domain skill's Key Files table before searching the codebase.** The loaded domain
+   skill (e.g. `termination-drawing`) may document a **Key Files** table listing the exact source
+   files for this area. If it does:
+   - Read those files directly with `read_file`. Do **not** run `grep_search` or `semantic_search`
+     for a file that is already in the Key Files table.
+   - Cite the skill doc path as the evidence entry (`"kind": "path"`, `"note": "documented in
+     <skill> SKILL.md Key Files"`).
+   - Only search the codebase for anchor terms or symbols that are **not** covered by the Key Files
+     table.
+
+   If no domain skill Key Files table exists, fall back to searching the codebase for anchor terms.
 4. **Propose only what the evidence covers.** Every proposed file cites at least one evidence id.
    If you cannot cite one, do not propose the file.
 5. **Name the dependencies.** Anything the change touches that is outside the area is a
