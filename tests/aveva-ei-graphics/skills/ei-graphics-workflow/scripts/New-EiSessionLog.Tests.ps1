@@ -100,12 +100,13 @@ Describe 'New-EiSessionLog' -Tag 'Unit' {
         $log.agentVersion   | Should -Not -BeNullOrEmpty
         $log.startedAt      | Should -Not -BeNullOrEmpty
         $log.finalStatus    | Should -Not -BeNullOrEmpty
-        $log.stages         | Should -Not -BeNullOrEmpty
-        $log.gates          | Should -Not -BeNull
-        $log.blocks         | Should -Not -BeNull
-        $log.tokenUsage     | Should -Not -BeNull
-        $log.inputs         | Should -Not -BeNull
-        $log.improvementNotes | Should -Not -BeNull
+        # stages, gates, blocks, improvementNotes may be empty arrays; use -is [array] to avoid pipeline-empty false-null
+        ($log.stages -is [array] -or $null -ne $log.stages) | Should -BeTrue
+        ($null -eq $log.gates)             | Should -BeFalse
+        ($null -eq $log.blocks)            | Should -BeFalse
+        $log.tokenUsage                    | Should -Not -BeNull
+        $log.inputs                        | Should -Not -BeNull
+        ($null -eq $log.improvementNotes)  | Should -BeFalse
     }
 
     # ── 6: Duration calculation ───────────────────────────────────────────────
