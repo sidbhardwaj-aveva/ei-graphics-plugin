@@ -600,3 +600,28 @@
   the end of the workflow.
 - Added 21 Pester tests for `New-EiSessionLog.ps1` and 10 for `Read-EiSessionLogs.ps1`.
   Full test suite: 289 tests, 0 failures. Spec-sync gate: PASS.
+
+## Tranche T-051 — `ado-intake` resolves its work item reference from state
+
+- Defect: `ei-graphics-workflow/SKILL.md` documents the stage call as
+  `Invoke-EiAdoIntakeStage.ps1 -StateDir <dir> -Json`, but the script passed neither a URL nor an id
+  to `Invoke-EiAdoCliIntake.ps1` unless the caller supplied one. The documented call therefore always
+  blocked the run with `EIAI-INTAKE-FAILED (missing-work-item-url-or-id)` even though
+  `workflow-state.json` already carried `storyRef` and `storyId`.
+- Observed cost on story 4983245: three consecutive blocked `ado-intake` attempts, an attempted
+  `Set-EiWorkflowStage.ps1 -Action unblock` (no such action), and a recovery via
+  `Initialize-EiWorkflowState.ps1 -Force` that discarded the run before the fourth attempt succeeded
+  with an explicit `-WorkItemUrl`.
+- Fix: `Invoke-EiAdoIntakeStage.ps1` resolves an omitted reference from workflow state — `storyRef`
+  first, then `storyId` — and records the origin in `Details.ReferenceSource`
+  (`parameter` | `workflow-state.storyRef` | `workflow-state.storyId`). An explicit
+  `-WorkItemUrl`/`-WorkItemId` still takes precedence, so overrides are unchanged.
+- Not a retrieval problem: `az` and `Invoke-EiAdoCliIntake.ps1` worked on every attempt that was
+  given a reference, so swapping in the `aveva-rnd` ADO intake would not have changed the outcome.
+- Added three tests to `Invoke-EiAdoIntakeStage.Tests.ps1` (storyRef fallback, storyId fallback,
+  explicit parameter precedence). Documentation updated in `ei-azure-devops-cli-intake/SKILL.md` and
+  the `ado-intake` stage section of `ei-graphics-workflow/SKILL.md`.
+- Known limitation left open: a blocked stage has no retry path. `Set-EiWorkflowStage.ps1` allows
+  only `start | complete | block`, `start` requires a `pending` stage and an `in-progress` workflow,
+  and `state.blocks` is append-only while `workflow-state.json` records no per-stage attempt count —
+  so repeated failures of the same stage are not observable after the fact.

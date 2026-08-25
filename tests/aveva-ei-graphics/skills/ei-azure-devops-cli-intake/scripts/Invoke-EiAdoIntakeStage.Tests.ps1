@@ -99,4 +99,45 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
             Test-Path -LiteralPath (Join-Path $script:StateDir 'ado.json') | Should -BeFalse
         }
     }
+
+    Context 'resolving the work item reference' {
+        # The documented call in ei-graphics-workflow passes only -StateDir, so the stage has to find
+        # the reference itself instead of blocking on `missing-work-item-url-or-id`.
+        It 'falls back to the storyRef recorded in workflow state' {
+            & $script:InitPath -StoryId '123456' -StoryRef $script:WorkItemUrl -WorkspaceRoot $TestDrive -Force -Json | Out-Null
+            script:Complete-EiStagesBeforeIntake
+
+            $result = & $script:IntakeStagePath -StateDir $script:StateDir -CliWorkItemJson $script:WorkItemJson -Json | ConvertFrom-Json
+
+            $LASTEXITCODE | Should -Be 0
+            $result.Details.ReferenceSource | Should -Be 'workflow-state.storyRef'
+            $result.Details.StageStatus | Should -Be 'complete'
+            $result.Details.Payload.workItem.id | Should -Be '123456'
+            $result.Details.Payload.workItem.organization | Should -Be 'example'
+        }
+
+        It 'falls back to the storyId when workflow state carries no storyRef' {
+            script:Complete-EiStagesBeforeIntake
+
+            $result = & $script:IntakeStagePath -StateDir $script:StateDir -Organization 'example' -Project 'MyProject' `
+                -CliWorkItemJson $script:WorkItemJson -Json | ConvertFrom-Json
+
+            $LASTEXITCODE | Should -Be 0
+            $result.Details.ReferenceSource | Should -Be 'workflow-state.storyId'
+            $result.Details.Payload.workItem.id | Should -Be '123456'
+        }
+
+        It 'prefers an explicit reference over the one held in state' {
+            & $script:InitPath -StoryId '123456' -StoryRef 'https://dev.azure.com/other/OtherProject/_workitems/edit/123456' `
+                -WorkspaceRoot $TestDrive -Force -Json | Out-Null
+            script:Complete-EiStagesBeforeIntake
+
+            $result = & $script:IntakeStagePath -StateDir $script:StateDir -WorkItemUrl $script:WorkItemUrl `
+                -CliWorkItemJson $script:WorkItemJson -Json | ConvertFrom-Json
+
+            $LASTEXITCODE | Should -Be 0
+            $result.Details.ReferenceSource | Should -Be 'parameter'
+            $result.Details.Payload.workItem.organization | Should -Be 'example'
+        }
+    }
 }

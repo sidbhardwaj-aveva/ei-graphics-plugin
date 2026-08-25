@@ -77,6 +77,10 @@ believe afterwards.
 
 - Takes `storyId` from `workflow-state.json`, never from the caller, so the artifact cannot be written
   under an id the run was not initialised with.
+- Resolves the retrieval reference when the caller supplies neither `-WorkItemUrl` nor `-WorkItemId`:
+  `storyRef` from `workflow-state.json` first, then `storyId`. An explicit parameter always wins.
+  `Details.ReferenceSource` reports which of `parameter`, `workflow-state.storyRef` or
+  `workflow-state.storyId` was used.
 - Writes the `ado` artifact (`schemas/ado.schema.json`, owned by `ei-workflow-state`).
 - Evaluates the `artifact-present` gate by reading the persisted artifact back; the gate is never
   asserted from intent.

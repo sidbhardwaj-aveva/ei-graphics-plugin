@@ -76,6 +76,22 @@ if ($statePayload.Status -ne 'Valid') {
 $storyId = $statePayload.Details.Payload.storyId
 $result = Set-EiDetail -Result $result -Name 'StoryId' -Value $storyId
 
+# The documented call passes only -StateDir, so an omitted reference is resolved from the state the
+# run was initialised with rather than blocking on `missing-work-item-url-or-id`.
+$referenceSource = 'parameter'
+if ([string]::IsNullOrWhiteSpace($WorkItemUrl) -and [string]::IsNullOrWhiteSpace($WorkItemId)) {
+    $storyRef = [string]$statePayload.Details.Payload.storyRef
+    if (-not [string]::IsNullOrWhiteSpace($storyRef)) {
+        $WorkItemUrl = $storyRef
+        $referenceSource = 'workflow-state.storyRef'
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace([string]$storyId)) {
+        $WorkItemId = [string]$storyId
+        $referenceSource = 'workflow-state.storyId'
+    }
+}
+$result = Set-EiDetail -Result $result -Name 'ReferenceSource' -Value $referenceSource
+
 $started = & $stagePath -StateDir $StateDir -StageId $StageId -Action start -Json | ConvertFrom-Json
 if ($started.Status -ne 'Valid') {
     $result = Add-EiError -Result $result -Code 'EIAI-STAGE-NOT-STARTED' -Message "Stage '$StageId' could not be started: $(@($started.Errors) -join '; ')"

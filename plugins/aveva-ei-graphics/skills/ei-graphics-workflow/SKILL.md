@@ -202,6 +202,11 @@ The script marks the stage `running`, calls `Invoke-EiAdoCliIntake.ps1` internal
 `ado` artifact, evaluates the `artifact-present` gate, and marks the stage `complete` or `blocked`.
 Do not call `Set-EiWorkflowStage.ps1 -Action start` separately; the script manages that.
 
+The work item reference is taken from `workflow-state.json` (`storyRef`, then `storyId`), so
+`-StateDir` is the only argument a normal run needs. Pass `-WorkItemUrl` or `-WorkItemId` only to
+override the reference the run was initialised with. Initialise the run with `-StoryRef` so the
+URL — and therefore the organisation and project — is carried by state.
+
 | Gate outcome | Action |
 |---|---|
 | `status: retrieved`, artifact present | Stage complete; advance to `domain-context` |
