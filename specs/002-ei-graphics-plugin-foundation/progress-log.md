@@ -577,3 +577,26 @@
 
 - Updated `ei-scope-resolver/SKILL.md` and `ei-graphics-workflow/SKILL.md` to document the new
   stage, script, and evidence generation rules.
+
+## Tranche T-050 — Session logging system + progressive stage capture
+
+- Added `New-EiSessionLog.ps1` (`ei-graphics-workflow/scripts/`) — writes a per-run JSON session
+  log to `.ei-session-logs/<storyId>/<sessionId>.json` (gitignored). Captures: timing per stage,
+  gate results, block codes, token usage, estimated cost, and auto-generated improvement notes
+  (slow stages, gate failures, correction attempts, interrupted runs).
+- Added `Read-EiSessionLogs.ps1` — scans `.ei-session-logs/` and produces a Markdown improvement
+  report. Supports `-StoryId` filter and `-Last N` limit.
+- Added `session-log.schema.json` in `ei-workflow-state/schemas/` — JSON Schema (draft-07) for
+  session log files.
+- Stable filename (`<sessionId>.json`) enables the **progressive overwrite pattern**: writing with
+  the same `$sessionId` after every `Set-EiWorkflowStage.ps1 -Action complete` call and at every
+  BLOCK exit ensures interrupted sessions reflect the furthest stage reached, not just the Step 0
+  start marker.
+- Bugs fixed during implementation: DateTime locale-drift (ConvertFrom-Json converts UTC ISO 8601
+  to locale-formatted string; fixed via `script:AsIsoUtc` + `[DateTimeOffset]::Parse`); gate
+  detail was `""` instead of `null` when `blockReason` is null (fixed with explicit null check).
+- Updated `ei-graphics-workflow/SKILL.md` Step 6 to document the progressive logging pattern:
+  call `New-EiSessionLog.ps1` after **every** stage completion and BLOCK exit, not only once at
+  the end of the workflow.
+- Added 21 Pester tests for `New-EiSessionLog.ps1` and 10 for `Read-EiSessionLogs.ps1`.
+  Full test suite: 289 tests, 0 failures. Spec-sync gate: PASS.
