@@ -86,16 +86,14 @@ Use this skill when working on wiring rule features.
             description   = 'Test registry with two domains.'
             domains       = @(
                 [ordered]@{
-                    id             = 'termination-drawing'
-                    displayName    = 'Termination Drawing'
-                    skillPath      = 'skills/termination-drawing/SKILL.md'
-                    detectionTerms = @('TerminationDrawing', 'insertedTags', 'UpdateDrawing')
+                    id          = 'termination-drawing'
+                    displayName = 'Termination Drawing'
+                    skillPath   = 'skills/termination-drawing/SKILL.md'
                 },
                 [ordered]@{
-                    id             = 'wiring-rule'
-                    displayName    = 'Wiring Rule'
-                    skillPath      = ''      # overridden per-test via injected absolute path
-                    detectionTerms = @('wiring rule', 'WiringRule')
+                    id          = 'wiring-rule'
+                    displayName = 'Wiring Rule'
+                    skillPath   = ''      # overridden per-test via injected absolute path
                 }
             )
         }
@@ -116,10 +114,11 @@ Use this skill when working on wiring rule features.
 
     # ── Test 1: single-domain story ──────────────────────────────────────────────────────────────
     Context 'single-domain story' {
-        It 'detects the termination-drawing domain and injects its Key Files into the artifact' {
+        It 'injects Key Files into the artifact when agent selects and user confirms the domain' {
             $result = & $script:ContextStagePath `
                 -StateDir $script:StateDir `
                 -RegistryPath $script:ProductionRegistryPath `
+                -SelectedDomainIds @('termination-drawing') -HumanConfirmed `
                 -Json | ConvertFrom-Json
 
             $LASTEXITCODE | Should -Be 0
@@ -157,16 +156,14 @@ Use this skill when working on wiring rule features.
                 description   = 'Two-domain test registry.'
                 domains       = @(
                     [ordered]@{
-                        id             = 'termination-drawing'
-                        displayName    = 'Termination Drawing'
-                        skillPath      = 'skills/termination-drawing/SKILL.md'
-                        detectionTerms = @('TerminationDrawing', 'insertedTags')
+                        id          = 'termination-drawing'
+                        displayName = 'Termination Drawing'
+                        skillPath   = 'skills/termination-drawing/SKILL.md'
                     },
                     [ordered]@{
-                        id             = 'wiring-rule'
-                        displayName    = 'Wiring Rule'
-                        skillPath      = $script:SecondSkillPath   # absolute; Join-Path returns it directly on Windows
-                        detectionTerms = @('wiring rule', 'WiringRule')
+                        id          = 'wiring-rule'
+                        displayName = 'Wiring Rule'
+                        skillPath   = $script:SecondSkillPath   # absolute; Join-Path returns it directly on Windows
                     }
                 )
             }
@@ -176,6 +173,7 @@ Use this skill when working on wiring rule features.
             $result = & $script:ContextStagePath `
                 -StateDir $script:StateDir `
                 -RegistryPath $customRegistryPath `
+                -SelectedDomainIds @('termination-drawing', 'wiring-rule') -HumanConfirmed `
                 -Json | ConvertFrom-Json
 
             $LASTEXITCODE | Should -Be 0
@@ -189,10 +187,9 @@ Use this skill when working on wiring rule features.
         }
     }
 
-    # ── Test 3: ambiguous / no-domain-terms story ─────────────────────────────────────────────────
-    Context 'ambiguous story (no domain detection terms)' {
-        It 'completes successfully with empty domainSkills when the story contains no domain detection terms' {
-            # Use the cable-labels fixture (no termination drawing detection terms).
+    # ── Test 3: no domain applies ─────────────────────────────────────────────────────────────────
+    Context 'no domain (agent and user agree none applies)' {
+        It 'completes with empty domainSkills and humanConfirmation when agent selects no domain' {
             & $script:InitPath -StoryId '123456' -WorkspaceRoot $TestDrive -Json | Out-Null
             $cableStateDir = Join-Path $TestDrive '.copilottracking' 'ei-graphics' '123456'
             script:Set-EiBaseState -StateDir $cableStateDir `
@@ -202,13 +199,16 @@ Use this skill when working on wiring rule features.
             $result = & $script:ContextStagePath `
                 -StateDir $cableStateDir `
                 -RegistryPath $script:ProductionRegistryPath `
+                -HumanConfirmed `
                 -Json | ConvertFrom-Json
 
             $LASTEXITCODE | Should -Be 0
             $result.Details.StageStatus | Should -Be 'complete'
+            $result.Details.HumanConfirmed | Should -Be $true
 
             $artifact = script:Get-EiArtifact -StateDir $cableStateDir -Name 'domain-context'
             @($artifact.domainSkills).Count | Should -Be 0
+            $artifact.humanConfirmation.status | Should -Be 'confirmed'
         }
     }
 
@@ -269,6 +269,7 @@ Use this when you need domain context without any key files.
             $result = & $script:ContextStagePath `
                 -StateDir $script:StateDir `
                 -RegistryPath $script:ProductionRegistryPath `
+                -SelectedDomainIds @('termination-drawing') -HumanConfirmed `
                 -Json | ConvertFrom-Json
 
             $LASTEXITCODE | Should -Be 0

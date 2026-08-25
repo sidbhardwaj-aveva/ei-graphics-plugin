@@ -68,11 +68,13 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
         $LASTEXITCODE | Should -Be 0
         $intake.Details.GateResult | Should -Be 'pass'
 
-        # domain-context — termination-drawing domain is detected from registry.
+        # domain-context — agent selects termination-drawing and user confirms.
         $context = & $script:ContextStagePath -StateDir $stateDir `
+            -SelectedDomainIds @('termination-drawing') -HumanConfirmed `
             -Json | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $context.Details.GateResult | Should -Be 'pass'
+        $context.Details.HumanConfirmed | Should -Be $true
 
         # Verify domain skill injection in the persisted artifact.
         $domainCtxArtifact = Get-Content -LiteralPath (Join-Path $stateDir 'domain-context.json') -Raw | ConvertFrom-Json

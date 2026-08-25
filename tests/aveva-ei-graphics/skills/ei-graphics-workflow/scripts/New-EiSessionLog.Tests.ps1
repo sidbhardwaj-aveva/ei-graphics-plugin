@@ -48,6 +48,8 @@ Describe 'New-EiSessionLog' -Tag 'Unit' {
     AfterEach {
         Remove-Item -LiteralPath (Join-Path $TestDrive '.copilottracking') -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath (Join-Path $TestDrive '.ei-session-logs') -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath (Join-Path $TestDrive 'test-logs')         -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath (Join-Path $TestDrive 'custom-logs')       -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     # ── 1: Missing state directory ────────────────────────────────────────────
@@ -275,12 +277,17 @@ Describe 'New-EiSessionLog' -Tag 'Unit' {
         $sid       = [System.Guid]::NewGuid().ToString()
         # Write start marker
         & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -SessionId $sid -FinalStatus in-progress -Json | Out-Null
-        # Write final (state is in-progress from init; no FinalStatus override means it reads from state)
+
+        # Patch state to a terminal status so the second call doesn't see in-progress
+        $stateFile = Join-Path $stateDir 'workflow-state.json'
+        $state = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
+        $state.status = 'blocked'
+        $state | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $stateFile -Encoding UTF8
+
+        # Write final log — reads 'blocked' from state, no in-progress override
         $r2  = & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -SessionId $sid -Json | ConvertFrom-Json
         $log = Get-Content -LiteralPath $r2.Details.LogFile -Raw | ConvertFrom-Json
-        # The workflow state status from MakeMinimalState is 'in-progress' (not yet completed),
-        # so the final log reads 'in-progress' from state — but the key invariant is that it
-        # is NOT the hardcoded override value and the improvement note about interruption is gone.
+        $log.finalStatus | Should -Be 'blocked'
         @($log.improvementNotes | Where-Object { $_.note -like '*interrupted*' }).Count | Should -Be 0
     }
 }

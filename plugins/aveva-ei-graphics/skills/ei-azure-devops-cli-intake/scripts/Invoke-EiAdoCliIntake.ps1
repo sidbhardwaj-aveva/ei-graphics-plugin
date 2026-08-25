@@ -315,6 +315,10 @@ if ([string]::IsNullOrWhiteSpace($Project)) {
     $Project = [string]$env:AZDO_PROJECT
 }
 
+# Fixed AVEVA defaults — org and project never change for this plugin.
+if ([string]::IsNullOrWhiteSpace($Organization)) { $Organization = 'AVEVA-VSTS' }
+if ([string]::IsNullOrWhiteSpace($Project))      { $Project      = 'Dabacon Products' }
+
 if ($WorkItemId -notmatch '^[1-9][0-9]*$') {
     $failed = [PSCustomObject]@{
         status = 'failed'
@@ -398,9 +402,14 @@ else {
     }
 
     $orgUrl = "https://dev.azure.com/$([System.Uri]::EscapeDataString($Organization))"
-    $output = & az boards work-item show --id $WorkItemId --org $orgUrl --output json 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        $message = ($output -join [Environment]::NewLine)
+    # Capture stderr in a temp file so the cp1252 encoding warning never contaminates the JSON.
+    $stderrFile = [System.IO.Path]::GetTempFileName()
+    $output = & az boards work-item show --id $WorkItemId --org $orgUrl --output json 2>$stderrFile
+    $azExitCode = $LASTEXITCODE
+    $stderrText = Get-Content -LiteralPath $stderrFile -Raw -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $stderrFile -Force -ErrorAction SilentlyContinue
+    if ($azExitCode -ne 0) {
+        $message = [string]$stderrText
         $failed = [PSCustomObject]@{
             status = 'failed'
             reason = (Get-AdoCliFailureReason -Message $message)

@@ -103,7 +103,7 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
             & $script:IntakePath -StateDir $script:StateDir `
                 -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/123456' `
                 -CliWorkItemJson $script:WorkItemCableJson -Json | Out-Null
-            & $script:ContextPath -StateDir $script:StateDir -Json | Out-Null
+            & $script:ContextPath -StateDir $script:StateDir -HumanConfirmed -Json | Out-Null
 
             $result = & $script:ScriptPath -StateDir $script:StateDir -Json | ConvertFrom-Json
             $summary = $result.Details.Summary
@@ -136,7 +136,7 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
                 -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/900001' `
                 -CliWorkItemJson ($script:WorkItemCableJson -replace '"id": 123456', '"id": 900001' -replace '123456', '900001') `
                 -Json | Out-Null
-            & $script:ContextPath -StateDir $script:ApprovalStateDir -Json | Out-Null
+            & $script:ContextPath -StateDir $script:ApprovalStateDir -HumanConfirmed -Json | Out-Null
             # scope-candidate: write the known-good fixture and advance the stage.
             Copy-Item -LiteralPath $script:CandidatePath -Destination (Join-Path $script:ApprovalStateDir 'candidate.json') -Force
             & $script:StagePath -StateDir $script:ApprovalStateDir -StageId 'scope-candidate' -Action start    -Json | Out-Null
@@ -216,7 +216,7 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
             & $script:IntakePath -StateDir $script:StateDir `
                 -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/123456' `
                 -CliWorkItemJson $script:WorkItemCableJson -Json | Out-Null
-            & $script:ContextPath -StateDir $script:StateDir -Json | Out-Null
+            & $script:ContextPath -StateDir $script:StateDir -HumanConfirmed -Json | Out-Null
 
             $summary = (& $script:ScriptPath -StateDir $script:StateDir -Json | ConvertFrom-Json).Details.Summary
             $summary | Should -BeLike '*Domain area identified*'
@@ -236,7 +236,8 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
             & $script:IntakePath -StateDir $tdStateDir `
                 -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/789012' `
                 -CliWorkItemJson $script:WorkItemTerminationJson -Json | Out-Null
-            & $script:ContextPath -StateDir $tdStateDir -Json | Out-Null
+            & $script:ContextPath -StateDir $tdStateDir `
+                -SelectedDomainIds @('termination-drawing') -HumanConfirmed -Json | Out-Null
 
             $summary = (& $script:ScriptPath -StateDir $tdStateDir -Json | ConvertFrom-Json).Details.Summary
 
@@ -248,7 +249,7 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
             & $script:IntakePath -StateDir $script:StateDir `
                 -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/123456' `
                 -CliWorkItemJson $script:WorkItemCableJson -Json | Out-Null
-            & $script:ContextPath -StateDir $script:StateDir -Json | Out-Null
+            & $script:ContextPath -StateDir $script:StateDir -HumanConfirmed -Json | Out-Null
 
             $summary = (& $script:ScriptPath -StateDir $script:StateDir -Json | ConvertFrom-Json).Details.Summary
             $summary | Should -BeLike '*No specific domain area was detected*'

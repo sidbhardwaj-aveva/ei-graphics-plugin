@@ -62,8 +62,8 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
         $LASTEXITCODE | Should -Be 0
         $intake.Details.GateResult | Should -Be 'pass'
 
-        # domain-context
-        $context = & $script:ContextStagePath -StateDir $stateDir -Json | ConvertFrom-Json
+        # domain-context — no matching domain for this story; agent confirms empty selection.
+        $context = & $script:ContextStagePath -StateDir $stateDir -HumanConfirmed -Json | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $context.Details.GateResult | Should -Be 'pass'
 

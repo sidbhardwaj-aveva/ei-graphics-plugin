@@ -43,12 +43,13 @@ Describe 'Domain-context lifecycle stage' -Tag 'Unit' {
     }
 
     Context 'completing the stage' {
-        It 'completes with an empty domainSkills array when no registry entry matches the story' {
-            $result = & $script:ContextStagePath -StateDir $script:StateDir -Json | ConvertFrom-Json
+        It 'completes with an empty domainSkills array when agent confirms no domain applies' {
+            $result = & $script:ContextStagePath -StateDir $script:StateDir -HumanConfirmed -Json | ConvertFrom-Json
 
             $LASTEXITCODE | Should -Be 0
             $result.Details.StageStatus | Should -Be 'complete'
             $result.Details.GateResult | Should -Be 'pass'
+            $result.Details.HumanConfirmed | Should -Be $true
 
             $stage = script:Get-EiStage -StateDir $script:StateDir -StageId 'domain-context'
             $stage.status | Should -Be 'complete'
@@ -56,9 +57,10 @@ Describe 'Domain-context lifecycle stage' -Tag 'Unit' {
             $artifact = Get-Content -LiteralPath (Join-Path $script:StateDir 'domain-context.json') -Raw | ConvertFrom-Json
             $artifact.source | Should -Be 'ei-domain-skill-registry'
             @($artifact.domainSkills).Count | Should -Be 0
+            $artifact.humanConfirmation.status | Should -Be 'confirmed'
         }
 
-        It 'detects and injects the termination-drawing domain for a matching story' {
+        It 'injects the termination-drawing domain when agent selects and user confirms it' {
             $workItemJson = Get-Content -LiteralPath (Join-Path $PSScriptRoot '..' '..' 'ei-azure-devops-cli-intake' 'fixtures' 'work-item-789012.json') -Raw
             & $script:InitPath -StoryId '789012' -WorkspaceRoot $TestDrive -Json | Out-Null
             $stateDir = Join-Path $TestDrive '.copilottracking' 'ei-graphics' '789012'
@@ -68,7 +70,8 @@ Describe 'Domain-context lifecycle stage' -Tag 'Unit' {
             }
             & $script:IntakeStagePath -StateDir $stateDir -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/789012' -CliWorkItemJson $workItemJson -Json | Out-Null
 
-            $result = & $script:ContextStagePath -StateDir $stateDir -Json | ConvertFrom-Json
+            $result = & $script:ContextStagePath -StateDir $stateDir `
+                -SelectedDomainIds @('termination-drawing') -HumanConfirmed -Json | ConvertFrom-Json
 
             $LASTEXITCODE | Should -Be 0
             $result.Details.StageStatus | Should -Be 'complete'
@@ -76,14 +79,24 @@ Describe 'Domain-context lifecycle stage' -Tag 'Unit' {
 
             $artifact = Get-Content -LiteralPath (Join-Path $stateDir 'domain-context.json') -Raw | ConvertFrom-Json
             @($artifact.domainSkills | Where-Object { $_.domainId -eq 'termination-drawing' }) | Should -Not -BeNullOrEmpty
+            $artifact.humanConfirmation.status | Should -Be 'confirmed'
         }
     }
 
     Context 'refusing to run without prerequisites' {
+        It 'blocks when -HumanConfirmed is not set' {
+            $result = & $script:ContextStagePath -StateDir $script:StateDir `
+                -SelectedDomainIds @('termination-drawing') -Json | ConvertFrom-Json
+
+            $LASTEXITCODE | Should -Be 1
+            @($result.Errors) -join ' ' | Should -BeLike '*EIVN-DOMAIN-NOT-CONFIRMED*'
+            (script:Get-EiStage -StateDir $script:StateDir -StageId 'domain-context').status | Should -Be 'blocked'
+        }
+
         It 'refuses to run before the ado artifact exists' {
             Remove-Item -LiteralPath (Join-Path $script:StateDir 'ado.json') -Force
 
-            $result = & $script:ContextStagePath -StateDir $script:StateDir -Json | ConvertFrom-Json
+            $result = & $script:ContextStagePath -StateDir $script:StateDir -HumanConfirmed -Json | ConvertFrom-Json
 
             $LASTEXITCODE | Should -Be 1
             @($result.Errors) -join ' ' | Should -BeLike '*EIVN-ADO-UNREADABLE*'

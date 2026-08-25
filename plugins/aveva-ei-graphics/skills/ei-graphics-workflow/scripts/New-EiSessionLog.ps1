@@ -107,7 +107,8 @@ catch {
 
 # ── Resolve log directory ────────────────────────────────────────────────────
 if ([string]::IsNullOrWhiteSpace($LogDir)) {
-    $LogDir = Join-Path $WorkspaceRoot (Join-Path '.ei-session-logs' [string]$state.storyId)
+    $storyId = [string]$state.storyId   # explicit cast before Join-Path avoids command-mode ambiguity
+    $LogDir  = Join-Path (Join-Path $WorkspaceRoot '.ei-session-logs') $storyId
 }
 
 if (-not (Test-Path -LiteralPath $LogDir -PathType Container)) {
