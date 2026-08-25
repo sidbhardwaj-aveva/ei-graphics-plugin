@@ -57,8 +57,7 @@
 38. Authored first adapted agent contracts for `ei-ado-ingest`, `ei-bug-diagnosis-to-spec`, and `ei-code-review`.
 39. Updated plugin README and planning task tracker to reflect adaptation rollout prioritization and contract readiness.
 40. Implemented deterministic `ei-ado-ingest` runtime script to normalize ADO URL/ID intake output for agent-level consumption.
-41. Added focused Pester coverage for `ei-ado-ingest` runtime contract mapping and validated locally (3/3 passing).
-42. Implemented deterministic `ei-code-review` runtime script to package deterministic reviewer findings into the adapted EI code-review contract.
+41. Added focused Pester coverage for `ei-ado-ingest` runtime contract mapping and validated locally (3/3 passing).43. Added local session logging system: `New-EiSessionLog.ps1` writes per-run JSON logs to `.ei-session-logs/<storyId>/`, capturing timing, gate results, token usage, and auto-generated improvement notes; `Read-EiSessionLogs.ps1` generates cross-session Markdown summary reports for developer review. Schema validated via `session-log.schema.json`. Focused Pester suites added (14 + 10 tests). SKILL.md updated with Step 6 — Write the session log. `.ei-session-logs/` added to `.gitignore`.42. Implemented deterministic `ei-code-review` runtime script to package deterministic reviewer findings into the adapted EI code-review contract.
 43. Added focused Pester coverage for `ei-code-review` runtime and validated locally (3/3 passing).
 44. Implemented deterministic `ei-bug-diagnosis-to-spec` runtime script to convert diagnosis evidence into implementation-handoff spec sections.
 45. Added focused Pester coverage for `ei-bug-diagnosis-to-spec` runtime and validated locally (3/3 passing).

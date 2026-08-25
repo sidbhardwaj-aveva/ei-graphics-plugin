@@ -34,6 +34,7 @@ At least one of `workItemUrl` or `workItemId` is required.
 | Form | Behaviour |
 |---|---|
 | `https://dev.azure.com/<org>/<project>/_workitems/edit/<id>` | Org, project and id come from the URL |
+| `https://dev.azure.com/<org>/<project>/_boards/board/...?workitem=<id>` | Org, project and id come from the URL; boards view link |
 | `[Bug 4965976 SR205 - ...](https://dev.azure.com/.../edit/4965976)` | The href is used; the label is ignored |
 | `[Bug 4965976 SR205 - ...](vscode-file://.../workbench.html)` | The href is not an ADO address, so the id comes from the label; org and project must come from parameters or `AZDO_ORG` / `AZDO_PROJECT` |
 | `Bug 4965976 SR205 - ...` | Same as above, without a link |

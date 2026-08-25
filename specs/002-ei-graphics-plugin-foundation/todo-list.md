@@ -59,6 +59,8 @@
 | T-048 | Add fast-fail candidate gate to Validate-EiWorkflowPrerequisites.ps1 | P0 | Done | Engineering | T-047 | Added `-StateDir` parameter; Phase B+ check for `EIWF-CANDIDATE-MISSING` / `EIWF-CANDIDATE-INVALID` |
 | T-049 | Add Pester tests for New-EiScopeCandidate.ps1 and updated prerequisites | P0 | Done | Engineering | T-047,T-048 | New-EiScopeCandidate.Tests.ps1 (15 tests); Validate-EiWorkflowPrerequisites.Tests.ps1 extended with 6 candidate gate tests; ImplementLifecycleToApprovedScope.Tests.ps1 updated to run scope-candidate stage |
 
+| T-050 | Add local session logging system | P1 | Done | Engineering | T-044,T-046 | Added `New-EiSessionLog.ps1`, `Read-EiSessionLogs.ps1`, `session-log.schema.json`; SKILL.md Step 6; `.ei-session-logs/` gitignored; 24 focused Pester tests |
+
 ## Immediate next actions
 
 1. Continue T-006 ontology details with domain SME examples to expand vocabulary coverage and confidence rules.

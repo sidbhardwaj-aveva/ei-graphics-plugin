@@ -172,6 +172,10 @@ function Resolve-FromWorkItemUrl {
     if (-not $idMatch.Success) {
         $idMatch = [regex]::Match($uri.Query, '(?:^|[?&])id=(?<id>[1-9][0-9]*)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     }
+    # Boards URL: _boards/board/...?workitem=<id>
+    if (-not $idMatch.Success) {
+        $idMatch = [regex]::Match($uri.Query, '(?:^|[?&])workitem=(?<id>[1-9][0-9]*)', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    }
 
     if (-not $idMatch.Success) {
         $result.reason = 'missing-work-item-id-in-url'

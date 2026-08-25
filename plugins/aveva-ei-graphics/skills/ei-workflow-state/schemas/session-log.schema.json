@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics session log",
+  "description": "Per-run developer log capturing timing, inputs, outputs, gate results, and improvement metadata for every EI Graphics workflow execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sessionId",
+    "storyId",
+    "workflowPath",
+    "agentVersion",
+    "startedAt",
+    "endedAt",
+    "durationSeconds",
+    "stages",
+    "gates",
+    "blocks",
+    "finalStatus",
+    "summary",
+    "tokenUsage",
+    "inputs",
+    "improvementNotes"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "workflowPath": { "type": "string", "enum": ["IMPLEMENT", "ITERATE"] },
+    "agentVersion": { "type": "string", "minLength": 1 },
+    "startedAt": { "type": "string", "minLength": 1 },
+    "endedAt": { "type": ["string", "null"] },
+    "durationSeconds": { "type": ["number", "null"], "minimum": 0 },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "startedAt", "endedAt", "durationSeconds", "status", "gateResult"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "startedAt": { "type": ["string", "null"] },
+          "endedAt": { "type": ["string", "null"] },
+          "durationSeconds": { "type": ["number", "null"], "minimum": 0 },
+          "status": { "type": "string", "enum": ["pending", "running", "complete", "blocked", "skipped"] },
+          "gateResult": { "type": "string", "enum": ["not-run", "pass", "block"] },
+          "blockReason": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "stage", "result", "detail"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "stage": { "type": "string", "minLength": 1 },
+          "result": { "type": "string", "enum": ["pass", "block", "not-run"] },
+          "detail": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "stage", "message"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "stage": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "finalStatus": {
+      "type": "string",
+      "enum": ["completed", "awaiting-approval", "blocked", "failed", "in-progress"]
+    },
+    "summary": { "type": ["string", "null"] },
+    "tokenUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["promptTokens", "completionTokens", "totalTokens", "estimatedCostUSD", "note"],
+      "properties": {
+        "promptTokens": { "type": ["integer", "null"], "minimum": 0 },
+        "completionTokens": { "type": ["integer", "null"], "minimum": 0 },
+        "totalTokens": { "type": ["integer", "null"], "minimum": 0 },
+        "estimatedCostUSD": { "type": ["number", "null"], "minimum": 0 },
+        "note": { "type": "string" }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storyRef", "entryPoint", "diffBaseBranch"],
+      "properties": {
+        "storyRef": { "type": ["string", "null"] },
+        "entryPoint": { "type": ["string", "null"] },
+        "diffBaseBranch": { "type": ["string", "null"] }
+      }
+    },
+    "improvementNotes": {
+      "type": "array",
+      "description": "Automatically generated observations to help developers improve the agent prompt, gates, or skill contracts.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "note"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": ["timing", "gate-failure", "correction-attempt", "block", "scope-change", "general"]
+          },
+          "note": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

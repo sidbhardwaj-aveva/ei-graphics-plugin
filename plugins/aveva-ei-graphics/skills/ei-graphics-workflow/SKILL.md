@@ -520,6 +520,44 @@ The contract is validated against `workflow-result.schema.json` and persisted as
 
 A run may not return while its state is `in-progress`; the terminal status must be explicit.
 
+## Step 6 — Write the session log
+
+After returning the result contract, write a session log so developers can review timing, gate
+failures, and token spend across runs. The log is local-only (`.ei-session-logs/` is gitignored)
+and is never required to unblock a run — skip this step silently if the script errors rather than
+failing the contract.
+
+```powershell
+& "$workflow/New-EiSessionLog.ps1" -StateDir '<state-dir>' -WorkspaceRoot '<repo>' `
+    -AgentVersion '1.0.0' -EntryPoint '<ado-url|ado-id|manual>' -Json
+```
+
+Supply `-PromptTokens`, `-CompletionTokens`, and `-EstimatedCostUSD` when the agent execution
+context makes them available. When they are not available, omit them; the log records a note
+explaining they are missing.
+
+Logs land at `.ei-session-logs/<storyId>/<timestamp>-<sessionId-prefix>.json`. Each log carries:
+
+| Field | Content |
+|---|---|
+| `sessionId` | GUID for this run |
+| `durationSeconds` | Total elapsed time |
+| `stages[].durationSeconds` | Per-stage timing breakdown |
+| `gates` | Gate IDs, stages, and pass/block results |
+| `blocks` | Block codes, stages, and messages |
+| `tokenUsage` | Token counts and estimated cost |
+| `improvementNotes` | Auto-generated observations (slow stages, gate failures, correction attempts) |
+
+To generate a cross-session improvement report:
+
+```powershell
+& "$workflow/Read-EiSessionLogs.ps1" -WorkspaceRoot '<repo>' -Json
+```
+
+Add `-StoryId '<id>'` to scope the report to a single story, or `-Last N` to limit to the N most
+recent sessions. The `Details.Report` field contains a Markdown table ready to paste into a
+retrospective or issue.
+
 ## Out of scope for the MVP
 
 Broad RAG, automatic vocabulary mining, multiple domain packs, multiple repositories, unbounded

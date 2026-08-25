@@ -1,6 +1,7 @@
 testResults.xml
 coverage.xml
 .copilottracking/
+.ei-session-logs/
 .specify/feature.json
 .vscode/
 azdo-settings.json

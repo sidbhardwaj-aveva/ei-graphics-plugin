@@ -43,6 +43,18 @@ Describe 'Invoke-EiAdoCliIntake' -Tag 'Unit' {
         $result.reason | Should -Be 'missing-work-item-id-in-url'
     }
 
+    It 'resolves work item id from a boards URL with workitem query parameter' {
+        $mock = '{ "fields": { "System.Title": "Stop termination labels overlapping" } }'
+        $boardsUrl = 'https://dev.azure.com/AVEVA-VSTS/Dabacon%20Products/_boards/board/t/Engineering%20and%20Schematics%20-%20EI%20Graphics/Stories?workitem=3408091'
+        $output = & $script:ScriptPath -WorkItemUrl $boardsUrl -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.status | Should -Be 'retrieved'
+        $result.workItemContext.workItemId | Should -Be '3408091'
+        $result.workItemContext.organization | Should -Be 'AVEVA-VSTS'
+        $result.workItemContext.project | Should -Be 'Dabacon Products'
+    }
+
     It 'resolves the work item id from a pasted markdown link whose href is not an ADO url' {
         $mock = @'
 {
