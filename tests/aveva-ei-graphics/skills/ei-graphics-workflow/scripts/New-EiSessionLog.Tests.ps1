@@ -23,6 +23,9 @@ Covers:
  16. Start-marker improvement note is present for interrupted sessions.
  17. Writing final log with same SessionId overwrites the start marker.
  18. Overwritten log carries the terminal status, not 'in-progress'.
+ 19. Duration is not inflated when createdAt is stored as a DateTime object (locale-drift regression).
+ 20. Gate detail is null (not empty string) when blockReason is null.
+ 21. Mid-run log written after stage completion reflects that stage's actual status (not pending).
 #>
 
 Describe 'New-EiSessionLog' -Tag 'Unit' {
@@ -275,19 +278,87 @@ Describe 'New-EiSessionLog' -Tag 'Unit' {
         $stateDir  = script:MakeMinimalState -WorkspaceRoot $TestDrive
         $logDir    = Join-Path $TestDrive 'test-logs'
         $sid       = [System.Guid]::NewGuid().ToString()
-        # Write start marker
         & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -SessionId $sid -FinalStatus in-progress -Json | Out-Null
 
-        # Patch state to a terminal status so the second call doesn't see in-progress
         $stateFile = Join-Path $stateDir 'workflow-state.json'
         $state = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
         $state.status = 'blocked'
         $state | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $stateFile -Encoding UTF8
 
-        # Write final log — reads 'blocked' from state, no in-progress override
         $r2  = & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -SessionId $sid -Json | ConvertFrom-Json
         $log = Get-Content -LiteralPath $r2.Details.LogFile -Raw | ConvertFrom-Json
         $log.finalStatus | Should -Be 'blocked'
         @($log.improvementNotes | Where-Object { $_.note -like '*interrupted*' }).Count | Should -Be 0
+    }
+
+    # ── 19: DateTime locale-drift regression ─────────────────────────────────
+    It 'duration is not inflated when createdAt is stored as a DateTime object (locale-drift)' {
+        $stateDir  = script:MakeMinimalState -WorkspaceRoot $TestDrive
+        $stateFile = Join-Path $stateDir 'workflow-state.json'
+        $state     = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
+
+        # Simulate ConvertFrom-Json returning a DateTime (not a string) for createdAt,
+        # 35 seconds before now, so the expected duration is ~35 seconds.
+        $refTime = (Get-Date).ToUniversalTime()
+        $state.createdAt = $refTime.AddSeconds(-35)   # DateTime object — the problematic case
+        $state.updatedAt = $refTime
+        $state | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $stateFile -Encoding UTF8
+
+        $logDir = Join-Path $TestDrive 'test-logs'
+        $result = & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -Json | ConvertFrom-Json
+        $log    = Get-Content -LiteralPath $result.Details.LogFile -Raw | ConvertFrom-Json
+        # Duration must be close to 35s — not hundreds of minutes from a timezone offset
+        $log.durationSeconds | Should -BeGreaterOrEqual 30
+        $log.durationSeconds | Should -BeLessOrEqual 120
+    }
+
+    # ── 20: Gate detail is null not empty string ──────────────────────────────
+    It 'gate detail is null when blockReason property exists but is null' {
+        $stateDir = script:MakeMinimalState -WorkspaceRoot $TestDrive
+        $logDir   = Join-Path $TestDrive 'test-logs'
+        $result   = & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -Json | ConvertFrom-Json
+        $log      = Get-Content -LiteralPath $result.Details.LogFile -Raw | ConvertFrom-Json
+        # All gates in a fresh workflow-state have null blockReason; detail must be null not ""
+        foreach ($g in @($log.gates)) {
+            if ($g.result -ne 'block') {
+                $g.detail | Should -Be $null
+            }
+        }
+    }
+
+    # ── 21: Mid-run log reflects actual stage progress ────────────────────────
+    It 'mid-run log written after a stage completes shows that stage as complete, not pending' {
+        $stateDir  = script:MakeMinimalState -WorkspaceRoot $TestDrive
+        $logDir    = Join-Path $TestDrive 'test-logs'
+        $sid       = [System.Guid]::NewGuid().ToString()
+
+        # Step 0: write start marker
+        & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -SessionId $sid -FinalStatus in-progress -Json | Out-Null
+        $startLog = Get-Content -LiteralPath (Join-Path $logDir "$sid.json") -Raw | ConvertFrom-Json
+
+        # Find the first still-pending stage (MakeMinimalState already completes preflight + state-init)
+        $pendingEntry = @($startLog.stages) | Where-Object { $_.status -eq 'pending' } | Select-Object -First 1
+        $pendingEntry | Should -Not -Be $null
+        $pendingStageId = $pendingEntry.id
+
+        # Simulate that stage completing: patch the state file directly
+        $stateFile = Join-Path $stateDir 'workflow-state.json'
+        $state = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
+        $targetStage = @($state.stages) | Where-Object { $_.id -eq $pendingStageId }
+        $targetStage[0].status      = 'complete'
+        $targetStage[0].gateResult  = 'pass'
+        $targetStage[0].startedAt   = (Get-Date).ToUniversalTime().ToString('o')
+        $targetStage[0].completedAt = (Get-Date).ToUniversalTime().ToString('o')
+        $state | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $stateFile -Encoding UTF8
+
+        # Mid-run log: same session ID, still in-progress
+        & $script:ScriptPath -StateDir $stateDir -LogDir $logDir -SessionId $sid -FinalStatus in-progress -Json | Out-Null
+        $midLog = Get-Content -LiteralPath (Join-Path $logDir "$sid.json") -Raw | ConvertFrom-Json
+
+        $updatedEntry = @($midLog.stages) | Where-Object { $_.id -eq $pendingStageId }
+        $updatedEntry[0].status     | Should -Be 'complete'
+        $updatedEntry[0].gateResult | Should -Be 'pass'
+        # Exactly one file (same session ID overwrites; no second file created)
+        @(Get-ChildItem -LiteralPath $logDir -Filter '*.json' -File).Count | Should -Be 1
     }
 }

@@ -27,8 +27,8 @@ metadata:
 Take an EI Graphics story from Azure DevOps to a reviewed pull request without ever silently
 expanding scope, skipping a gate, or trusting a writer stage.
 
-This skill is the lifecycle owner. `ei-graphics.agent.md` is a thin conversational entry point that
-collects input, loads this skill, and reports the returned contract. Leaf skills own *how* a stage
+This skill is the lifecycle owner. `ei-graphics.agent.md` collects the work item or PR reference,
+loads this skill, and reports back to the user. Leaf skills own *how* a stage
 is performed; this skill owns *when*, *in what order*, *with what evidence*, and *when to block*.
 
 ```text
@@ -610,31 +610,41 @@ A run may not return while its state is `in-progress`; the terminal status must 
 
 ## Step 6 — Write the session log
 
-After returning the result contract, write a session log so developers can review timing, gate
-failures, and token spend across runs. The log is local-only (`.ei-session-logs/` is gitignored)
-and is never required to unblock a run — skip this step silently if the script errors rather than
-failing the contract.
+Write the session log at **every terminal exit point** — completed, blocked, failed, and
+awaiting-approval. Never write it only at Step 6; if the run is blocked mid-workflow and the agent
+exits without reaching this step, the log will still show all stages as `pending` (the start
+marker from Step 0) and will not reflect the actual progress made.
+
+The pattern is: **always pair `New-EiWorkflowResult.ps1` with `New-EiSessionLog.ps1`**.
 
 ```powershell
-& "$workflow/New-EiSessionLog.ps1" -StateDir '<state-dir>' -SessionId $sessionId `
+# ── After every Set-EiWorkflowStage.ps1 -Action complete call ───────────────
+# (keeps the log current so interruptions capture real progress)
+& "$workflow/New-EiSessionLog.ps1" -StateDir $stateDir -SessionId $sessionId -Json
+
+# ── Also at every BLOCK exit, paired with New-EiWorkflowResult.ps1 ──────────
+& "$workflow/New-EiWorkflowResult.ps1" -StateDir $stateDir -Status blocked `
+    -Summary '<outcome>' -NextAction '<next step>' -Json
+& "$workflow/New-EiSessionLog.ps1" -StateDir $stateDir -SessionId $sessionId `
     -WorkspaceRoot '<repo>' -AgentVersion '1.0.0' -EntryPoint '<ado-url|ado-id|manual>' -Json
 ```
 
-Passing the same `$sessionId` that was used in Step 0 overwrites the start marker with the final
-log. If this step is skipped (e.g. because of an unexpected abort), the start marker remains on
-disk with `finalStatus = in-progress` so the run is still counted in the improvement report.
+Because the log filename is `<sessionId>.json`, each call **overwrites** the previous one.
+The last written log always reflects the furthest the run reached. If the session is interrupted
+without reaching any of these calls, the start marker from Step 0 remains (all stages `pending`),
+which flags the run as interrupted in the improvement report.
 
-Supply `-PromptTokens`, `-CompletionTokens`, and `-EstimatedCostUSD` when the agent execution
-context makes them available. When they are not available, omit them; the log records a note
-explaining they are missing.
+Supply `-PromptTokens`, `-CompletionTokens`, and `-EstimatedCostUSD` on the final call when the
+agent execution context makes them available.
 
-Logs land at `.ei-session-logs/<storyId>/<timestamp>-<sessionId-prefix>.json`. Each log carries:
+Logs land at `.ei-session-logs/<storyId>/<sessionId>.json`. Each log carries:
 
 | Field | Content |
 |---|---|
 | `sessionId` | GUID for this run |
 | `durationSeconds` | Total elapsed time |
-| `stages[].durationSeconds` | Per-stage timing breakdown |
+| `stages[].status` / `stages[].gateResult` | Per-stage completion status at time of writing |
+| `stages[].durationSeconds` | Per-stage timing (populated when `startedAt` and `completedAt` are set) |
 | `gates` | Gate IDs, stages, and pass/block results |
 | `blocks` | Block codes, stages, and messages |
 | `tokenUsage` | Token counts and estimated cost |

@@ -105,6 +105,15 @@ catch {
     Exit-EiResult -Result $result -Json:$Json
 }
 
+# ConvertFrom-Json silently converts ISO 8601 strings to DateTime objects on some PS versions.
+# Normalise any timestamp to a UTC ISO 8601 string to avoid locale-format drift in duration math.
+function script:AsIsoUtc ([object]$Value) {
+    if ($null -eq $Value) { return $null }
+    if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('o') }
+    try { return ([DateTimeOffset]::Parse([string]$Value)).UtcDateTime.ToString('o') }
+    catch { return [string]$Value }
+}
+
 # ── Resolve log directory ────────────────────────────────────────────────────
 if ([string]::IsNullOrWhiteSpace($LogDir)) {
     $storyId = [string]$state.storyId   # explicit cast before Join-Path avoids command-mode ambiguity
@@ -120,14 +129,15 @@ $effectiveStatus = if ([string]::IsNullOrWhiteSpace($FinalStatus)) { [string]$st
 $isInterrupted   = $effectiveStatus -eq 'in-progress'
 
 # ── Compute overall timing ───────────────────────────────────────────────────
-$startedAt = [string]$state.createdAt
+$startedAt = script:AsIsoUtc $state.createdAt
 # When in-progress use current time as endedAt so the log records how far the run got
-$endedAt   = if ($isInterrupted) { (Get-Date).ToUniversalTime().ToString('o') } else { [string]$state.updatedAt }
+$endedAt   = if ($isInterrupted) { (Get-Date).ToUniversalTime().ToString('o') } else { script:AsIsoUtc $state.updatedAt }
 
 $durationSeconds = $null
 try {
-    $start = [datetime]::Parse($startedAt)
-    $end   = [datetime]::Parse($endedAt)
+    # DateTimeOffset.Parse handles timezone info in both forms; TotalSeconds is always wall-clock delta
+    $start = [DateTimeOffset]::Parse($startedAt)
+    $end   = [DateTimeOffset]::Parse($endedAt)
     $durationSeconds = [math]::Round(($end - $start).TotalSeconds, 2)
 }
 catch { }
@@ -137,8 +147,8 @@ $stageEntries = @(foreach ($stage in @($state.stages)) {
     $stageDurationSeconds = $null
     try {
         if ($stage.startedAt -and $stage.completedAt) {
-            $s = [datetime]::Parse([string]$stage.startedAt)
-            $e = [datetime]::Parse([string]$stage.completedAt)
+            $s = [DateTimeOffset]::Parse((script:AsIsoUtc $stage.startedAt))
+            $e = [DateTimeOffset]::Parse((script:AsIsoUtc $stage.completedAt))
             $stageDurationSeconds = [math]::Round(($e - $s).TotalSeconds, 2)
         }
     }
@@ -147,8 +157,8 @@ $stageEntries = @(foreach ($stage in @($state.stages)) {
     [ordered]@{
         id              = [string]$stage.id
         name            = [string]$stage.name
-        startedAt       = $stage.startedAt
-        endedAt         = $stage.completedAt
+        startedAt       = script:AsIsoUtc $stage.startedAt
+        endedAt         = script:AsIsoUtc $stage.completedAt
         durationSeconds = $stageDurationSeconds
         status          = [string]$stage.status
         gateResult      = [string]$stage.gateResult
@@ -163,7 +173,8 @@ $gateEntries = @(foreach ($stage in @($state.stages)) {
         id     = [string]$stage.gate
         stage  = [string]$stage.id
         result = [string]$stage.gateResult
-        detail = if ($stage.PSObject.Properties['blockReason']) { [string]$stage.blockReason } else { $null }
+        # null when blockReason is absent or null; [string]$null gives "" so check explicitly
+        detail = if ($stage.PSObject.Properties['blockReason'] -and $null -ne $stage.blockReason) { [string]$stage.blockReason } else { $null }
     }
 })
 
