@@ -55,6 +55,9 @@
 | T-035 | Prioritize adapted-agent rollout phases | P1 | Done | Engineering + QA | T-034 | Prioritized first rollout on core workflow support contracts (ADO ingest, diagnosis-to-spec, EI code review) |
 | T-036 | Author EI-specific contracts for first adapted agent set | P1 | Done | Engineering | T-035 | Authored first EI contract files: ei-ado-ingest, ei-bug-diagnosis-to-spec, ei-code-review |
 | T-046 | Add human-readable output formatter to workflow | P1 | Done | Engineering | T-032,T-062 | Added `Format-EiWorkflowSummary.ps1`; updated `ei-graphics.agent.md` to use formatter; 13 focused tests; full suite 222/222 passing |
+| T-047 | Add scope-candidate lifecycle stage and New-EiScopeCandidate.ps1 | P0 | Done | Engineering | T-046 | New `scope-candidate` stage inserted between `domain-context` and `proposed-scope` in `lifecycle-implement.json`; `New-EiScopeCandidate.ps1` auto-generates `candidate.json` from sealed ADO and domain-context artifacts; `candidate.schema.json` added; artifact-registry.json updated |
+| T-048 | Add fast-fail candidate gate to Validate-EiWorkflowPrerequisites.ps1 | P0 | Done | Engineering | T-047 | Added `-StateDir` parameter; Phase B+ check for `EIWF-CANDIDATE-MISSING` / `EIWF-CANDIDATE-INVALID` |
+| T-049 | Add Pester tests for New-EiScopeCandidate.ps1 and updated prerequisites | P0 | Done | Engineering | T-047,T-048 | New-EiScopeCandidate.Tests.ps1 (15 tests); Validate-EiWorkflowPrerequisites.Tests.ps1 extended with 6 candidate gate tests; ImplementLifecycleToApprovedScope.Tests.ps1 updated to run scope-candidate stage |
 
 ## Immediate next actions
 

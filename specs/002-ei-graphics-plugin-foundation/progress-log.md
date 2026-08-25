@@ -548,3 +548,32 @@
   (not the code), validation lists completed checks, domain area populated from domain-context
   artifact, -Technical reveals diagnostic detail, missing state directory returns an error.
 - Full test suite: 222 tests, 0 failures. Spec-sync gate: PASS.
+
+## Tranche T-047 / T-048 / T-049 — scope-candidate stage + fast-fail prerequisite + tests
+
+- Root cause of 21-minute stall in story 3408091: `candidate.json` was absent when the workflow
+  advanced to `proposed-scope`, and the agent had to stop and wait for a manually-supplied file.
+  No fast-fail or auto-generation existed.
+
+- Added `scope-candidate` lifecycle stage between `domain-context` and `proposed-scope` in
+  `lifecycle-implement.json`. Registered `candidate` artifact in `artifact-registry.json` with a
+  new `candidate.schema.json`.
+
+- Created `plugins/aveva-ei-graphics/skills/ei-scope-resolver/scripts/New-EiScopeCandidate.ps1`:
+  deterministic generator that reads sealed `ado.json` and `domain-context.json` and writes a
+  candidate.json evidence document. Evidence comes from story text, domain-skill key files, and
+  a filename-term repository search. Key files that exist in the repository are promoted to
+  `proposedFiles`; repository search hits appear in evidence only (model reviews before promoting).
+  Conservative confidence baseline: 0.5 (with key files), 0.3 (story only).
+
+- Updated `Validate-EiWorkflowPrerequisites.ps1`: added `-StateDir` parameter. Phase B+ check
+  emits `EIWF-CANDIDATE-MISSING` when `candidate.json` is absent from StateDir, and
+  `EIWF-CANDIDATE-INVALID` when it is present but malformed.
+
+- Added `tests/aveva-ei-graphics/skills/ei-scope-resolver/scripts/New-EiScopeCandidate.Tests.ps1`
+  (15 tests) and extended `Validate-EiWorkflowPrerequisites.Tests.ps1` with 6 candidate gate tests.
+  Updated `ImplementLifecycleToApprovedScope.Tests.ps1` to run the `scope-candidate` stage using
+  `New-EiScopeCandidate.ps1` rather than a hand-crafted fixture file.
+
+- Updated `ei-scope-resolver/SKILL.md` and `ei-graphics-workflow/SKILL.md` to document the new
+  stage, script, and evidence generation rules.

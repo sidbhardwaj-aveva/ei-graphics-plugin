@@ -137,6 +137,10 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
                 -CliWorkItemJson ($script:WorkItemCableJson -replace '"id": 123456', '"id": 900001' -replace '123456', '900001') `
                 -Json | Out-Null
             & $script:ContextPath -StateDir $script:ApprovalStateDir -Json | Out-Null
+            # scope-candidate: write the known-good fixture and advance the stage.
+            Copy-Item -LiteralPath $script:CandidatePath -Destination (Join-Path $script:ApprovalStateDir 'candidate.json') -Force
+            & $script:StagePath -StateDir $script:ApprovalStateDir -StageId 'scope-candidate' -Action start    -Json | Out-Null
+            & $script:StagePath -StateDir $script:ApprovalStateDir -StageId 'scope-candidate' -Action complete -GateResult pass -Json | Out-Null
             & $script:ResolverPath `
                 -StoryInputPath (Join-Path $script:ApprovalStateDir 'ado.json') `
                 -CandidatePath $script:CandidatePath `

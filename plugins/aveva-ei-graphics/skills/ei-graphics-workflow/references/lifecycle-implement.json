@@ -40,6 +40,15 @@
       "implementedInPhase": "C"
     },
     {
+      "id": "scope-candidate",
+      "name": "Scope candidate evidence generation",
+      "owner": "ei-scope-resolver",
+      "artifact": "candidate",
+      "writesFiles": false,
+      "gate": "artifact-present",
+      "implementedInPhase": "C"
+    },
+    {
       "id": "proposed-scope",
       "name": "Conservative proposed scope resolution",
       "owner": "ei-scope-resolver",

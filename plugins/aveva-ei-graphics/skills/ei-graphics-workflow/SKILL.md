@@ -133,8 +133,8 @@ The ordered stage list is data, not prose: `references/lifecycle-implement.json`
 ### IMPLEMENT
 
 ```text
-preflight -> state-init -> ado-intake -> domain-context -> proposed-scope -> scope-analysis
--> scope-approval (HUMAN) -> specification -> plan -> tasks -> implementation
+preflight -> state-init -> ado-intake -> domain-context -> scope-candidate -> proposed-scope
+-> scope-analysis -> scope-approval (HUMAN) -> specification -> plan -> tasks -> implementation
 -> targeted-tests -> regression-tests -> scope-validation -> invariant-validation
 -> code-review -> audit -> commit -> pr
 ```
@@ -166,6 +166,39 @@ Any stage with `"writesFiles": true` in the lifecycle definition — including `
 the next stage starts. SpecKit writers have been observed creating files outside the requested task
 scope, so prompt instructions are not the safety boundary; the validator is.
 
+### Stage: `scope-candidate`
+
+`ei-scope-resolver` owns this stage. It generates `candidate.json` — the evidence document that
+seeds the scope resolver. The script does not manage stage transitions; the workflow marks the
+stage started and complete around the call.
+
+```powershell
+& "$eiSkills/ei-scope-resolver/scripts/New-EiScopeCandidate.ps1" `
+    -AdoPath           '<state-dir>/ado.json' `
+    -DomainContextPath '<state-dir>/domain-context.json' `
+    -RepositoryRoot    '<repo>' -StateDir '<state-dir>' -Json
+
+& "$workflow/Validate-EiWorkflowPrerequisites.ps1" -RepositoryRoot '<repo>' -Phase B `
+    -StateDir '<state-dir>' -NoDefaultSearchRoots -Json
+```
+
+After the script exits 0, call:
+- `Set-EiWorkflowStage.ps1 -Action start -StageId scope-candidate`
+- `Set-EiWorkflowStage.ps1 -Action complete -GateResult pass -StageId scope-candidate`
+
+**After generation, the model MUST review `candidate.json`** before running `New-EiProposedScope.ps1`.
+Adjust evidence entries, confidence, and proposedFiles as needed. The generated confidence is
+deliberately conservative (0.5 at most) so the model cannot rubber-stamp the candidate.
+
+If the prerequisite check with `-Phase B -StateDir` returns `EIWF-CANDIDATE-MISSING` or
+`EIWF-CANDIDATE-INVALID`, re-run `New-EiScopeCandidate.ps1` or correct the candidate manually.
+
+| Gate outcome | Action |
+|---|---|
+| `Valid` and candidate.json present | Complete the stage |
+| `EISC-*` error | BLOCK; check inputs and re-run |
+| `EIWF-CANDIDATE-MISSING` or `EIWF-CANDIDATE-INVALID` from prerequisites | BLOCK; regenerate or fix the candidate before continuing |
+
 ### Stage: `proposed-scope`
 
 `ei-scope-resolver` owns this stage. It writes the `proposed-scope` artifact itself, so this
@@ -173,7 +206,7 @@ lifecycle does **not** call `Write-EiWorkflowArtifact.ps1` separately for it.
 
 ```powershell
 & "$eiSkills/ei-scope-resolver/scripts/New-EiProposedScope.ps1" `
-    -StoryInputPath '<story.json>' -CandidatePath '<candidate.json>' `
+    -StoryInputPath '<story.json>' -CandidatePath '<state-dir>/candidate.json' `
     -DomainContextPath '<domain-context.json>' -RepositoryRoot '<repo>' -StateDir '<state-dir>' -Json
 
 & "$eiSkills/ei-scope-resolver/scripts/Test-EiProposedScope.ps1" -StateDir '<state-dir>' -Json

@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics scope candidate",
+  "description": "Evidence-linked scope candidate consumed by ei-scope-resolver at the scope-candidate stage. The candidate is a starting point: the model reviews and may adjust it before running New-EiProposedScope.ps1. status and generatedAt are not candidate fields; they are written by the scope resolver.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["confidence", "rationale", "evidence"],
+  "properties": {
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Scalar 0..1 expressing how confident the candidate generator is that the evidence is correct and complete. 0.5 is the default for auto-generated candidates."
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Why this is believed to be the smallest defensible scope. Must explain the reasoning, not just list the files."
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every piece of evidence that supports a proposed file, module or test. Every proposedFile must cite at least one evidence id.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["id", "kind", "value"],
+        "properties": {
+          "id":   { "type": "string", "minLength": 1, "description": "Unique identifier within this candidate (e.g. E1, E2)." },
+          "kind": { "type": "string", "minLength": 1, "description": "Nature of the evidence: 'story', 'path', 'domain-skill-key-file', 'vocabulary', etc." },
+          "value": { "type": "string", "minLength": 1, "description": "The evidence value: story text, a file path, a vocabulary term, etc." },
+          "note": { "type": ["string", "null"], "description": "Optional free-text note explaining why this evidence was included." }
+        }
+      }
+    },
+    "proposedFiles": {
+      "type": "array",
+      "description": "Files proposed for inclusion in the scope. Every entry must cite at least one evidence id from the evidence array.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["path", "evidence"],
+        "properties": {
+          "path":         { "type": "string", "minLength": 1, "description": "Repository-relative path using forward slashes." },
+          "changeIntent": { "type": "string", "description": "Intended change: 'modify', 'add', 'delete'." },
+          "symbols":      { "type": "array", "items": { "type": "string" }, "description": "Specific symbols within the file that are in scope." },
+          "evidence":     { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Evidence ids from the evidence array that support this file." },
+          "confidence":   { "type": "number", "minimum": 0, "maximum": 1, "description": "Per-file confidence, may differ from the top-level candidate confidence." }
+        }
+      }
+    },
+    "proposedModules": {
+      "type": "array",
+      "description": "Projects or assemblies that contain the proposed files.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["name"],
+        "properties": {
+          "name":        { "type": "string", "minLength": 1 },
+          "projectPath": { "type": ["string", "null"] },
+          "evidence":    { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "relatedTests": {
+      "type": "array",
+      "description": "Tests that verify the behaviour being changed.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["target"],
+        "properties": {
+          "target":   { "type": "string", "minLength": 1 },
+          "kind":     { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "protectedAreas": {
+      "type": "array",
+      "description": "Path prefixes that must not be touched. The scope resolver enforces this.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["path", "reason"],
+        "properties": {
+          "path":   { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "External code areas that the change touches but does not own.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["name"],
+        "properties": {
+          "name":       { "type": "string", "minLength": 1 },
+          "kind":       { "type": "string" },
+          "resolution": { "type": "string" },
+          "detail":     { "type": ["string", "null"] }
+        }
+      }
+    },
+    "excluded": {
+      "type": "array",
+      "description": "Files or areas that were considered but deliberately excluded from scope.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["target", "reason"],
+        "properties": {
+          "target": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "risks":       { "type": "array", "description": "Risks associated with this scope." },
+    "unresolved":  { "type": "array", "description": "Open questions that must be answered before scope can be resolved." }
+  }
+}

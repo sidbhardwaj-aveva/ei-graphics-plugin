@@ -95,6 +95,12 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
         $topKeys = @($domainCtxArtifact.PSObject.Properties.Name)
         $topKeys | ForEach-Object { $_ | Should -Not -BeLike '*.cs' }
 
+        # scope-candidate: write the known-good fixture and advance the stage before proposed-scope.
+        Copy-Item -LiteralPath $script:CandidatePath -Destination (Join-Path $stateDir 'candidate.json') -Force
+        & $script:StagePath -StateDir $stateDir -StageId 'scope-candidate' -Action start    -Json | Out-Null
+        & $script:StagePath -StateDir $stateDir -StageId 'scope-candidate' -Action complete -GateResult pass -Json | Out-Null
+        $LASTEXITCODE | Should -Be 0
+
         # proposed-scope — the domain-context.json (now enriched) is passed as context.
         $scope = & $script:ResolverPath `
             -StoryInputPath (Join-Path $stateDir 'ado.json') `
@@ -138,7 +144,7 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
 
         # All stages from ado-intake through scope-approval must be complete with a passing gate.
         $state = Get-Content -LiteralPath (Join-Path $stateDir 'workflow-state.json') -Raw | ConvertFrom-Json
-        foreach ($stageId in @('ado-intake', 'domain-context', 'proposed-scope', 'scope-analysis', 'scope-approval')) {
+        foreach ($stageId in @('ado-intake', 'domain-context', 'scope-candidate', 'proposed-scope', 'scope-analysis', 'scope-approval')) {
             $stage = @($state.stages) | Where-Object { $_.id -eq $stageId } | Select-Object -First 1
             $stage.status | Should -Be 'complete' -Because "stage '$stageId' must be complete on the real lifecycle"
             $stage.gateResult | Should -Be 'pass' -Because "stage '$stageId' must have a passing gate"

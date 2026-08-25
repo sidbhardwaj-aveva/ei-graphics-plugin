@@ -43,6 +43,16 @@
       "versioned": false
     },
     {
+      "name": "candidate",
+      "file": "candidate.json",
+      "owner": "ei-scope-resolver",
+      "writtenByStage": "scope-candidate",
+      "schema": "candidate.schema.json",
+      "implementedInPhase": "C",
+      "status": "active",
+      "versioned": false
+    },
+    {
       "name": "proposed-scope",
       "file": "proposed-scope.json",
       "owner": "ei-scope-resolver",

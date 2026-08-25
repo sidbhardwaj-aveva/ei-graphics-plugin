@@ -21,13 +21,16 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
         $script:PrereqPath = Join-Path $pluginSkills 'ei-graphics-workflow' 'scripts' 'Validate-EiWorkflowPrerequisites.ps1'
         $script:IntakeStagePath = Join-Path $pluginSkills 'ei-azure-devops-cli-intake' 'scripts' 'Invoke-EiAdoIntakeStage.ps1'
         $script:ContextStagePath = Join-Path $pluginSkills 'ei-vocabulary-navigator' 'scripts' 'Invoke-EiDomainContextStage.ps1'
+        $script:CandidateGenPath = Join-Path $pluginSkills 'ei-scope-resolver' 'scripts' 'New-EiScopeCandidate.ps1'
         $script:ResolverPath = Join-Path $pluginSkills 'ei-scope-resolver' 'scripts' 'New-EiProposedScope.ps1'
         $script:AnalysisPath = Join-Path $pluginSkills 'ei-scope-validator' 'scripts' 'Invoke-EiScopeAnalysis.ps1'
         $script:ApprovalPath = Join-Path $pluginSkills 'ei-graphics-workflow' 'scripts' 'Resolve-EiScopeApproval.ps1'
 
         $script:RepoRoot = $repoRoot
         $script:WorkItemJson = Get-Content -LiteralPath (Join-Path $repoRoot 'tests' 'aveva-ei-graphics' 'skills' 'ei-azure-devops-cli-intake' 'fixtures' 'work-item-123456.json') -Raw
-        $script:CandidatePath = Join-Path $PSScriptRoot '..' 'fixtures' 'candidate-scope-123456.json'
+        # Known-good fixture candidate — used to feed New-EiProposedScope.ps1 with deterministic evidence
+        # after the scope-candidate stage has run. This isolates lifecycle wiring from auto-generation quality.
+        $script:FixtureCandidatePath = Join-Path $PSScriptRoot '..' 'fixtures' 'candidate-scope-123456.json'
     }
 
     It 'carries a story from ADO intake through to a sealed approved scope' {
@@ -64,10 +67,29 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
         $LASTEXITCODE | Should -Be 0
         $context.Details.GateResult | Should -Be 'pass'
 
+        # scope-candidate -- New-EiScopeCandidate.ps1 writes candidate.json; the caller advances the stage.
+        # After generation, the fixture candidate replaces the generated one so that New-EiProposedScope.ps1
+        # receives deterministic evidence. This verifies the stage wiring without coupling the integration
+        # test to the quality of the auto-generator (covered separately in New-EiScopeCandidate.Tests.ps1).
+        $candidateResult = & $script:CandidateGenPath `
+            -AdoPath (Join-Path $stateDir 'ado.json') `
+            -DomainContextPath (Join-Path $stateDir 'domain-context.json') `
+            -RepositoryRoot $workspace -StateDir $stateDir -Json | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $candidateResult.Status | Should -Be 'Valid'
+        Test-Path -LiteralPath (Join-Path $stateDir 'candidate.json') | Should -BeTrue
+
+        # Overwrite with the known-good fixture so proposed-scope produces a deterministic resolved scope.
+        Copy-Item -LiteralPath $script:FixtureCandidatePath -Destination (Join-Path $stateDir 'candidate.json') -Force
+
+        & $script:StagePath -StateDir $stateDir -StageId 'scope-candidate' -Action start    -Json | Out-Null
+        & $script:StagePath -StateDir $stateDir -StageId 'scope-candidate' -Action complete -GateResult pass -Json | Out-Null
+        $LASTEXITCODE | Should -Be 0
+
         # proposed-scope -- fed by the two artifacts the Phase C stages just sealed, so the wiring
-        # between intake, domain context and scope resolution is exercised rather than simulated.
+        # between intake, domain context, candidate generation, and scope resolution is exercised rather than simulated.
         $scope = & $script:ResolverPath -StoryInputPath (Join-Path $stateDir 'ado.json') `
-            -CandidatePath $script:CandidatePath `
+            -CandidatePath (Join-Path $stateDir 'candidate.json') `
             -DomainContextPath (Join-Path $stateDir 'domain-context.json') `
             -RepositoryRoot $workspace -StateDir $stateDir -Json | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
@@ -109,7 +131,7 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
         $final.Details.ApprovedScopeHash | Should -Not -BeNullOrEmpty
 
         $state = Get-Content -LiteralPath (Join-Path $stateDir 'workflow-state.json') -Raw | ConvertFrom-Json
-        $walked = @('ado-intake', 'domain-context', 'proposed-scope', 'scope-analysis', 'scope-approval')
+        $walked = @('ado-intake', 'domain-context', 'scope-candidate', 'proposed-scope', 'scope-analysis', 'scope-approval')
         foreach ($stageId in $walked) {
             $stage = @($state.stages) | Where-Object { $_.id -eq $stageId } | Select-Object -First 1
             $stage.status | Should -Be 'complete' -Because "stage '$stageId' must have completed on the real lifecycle"

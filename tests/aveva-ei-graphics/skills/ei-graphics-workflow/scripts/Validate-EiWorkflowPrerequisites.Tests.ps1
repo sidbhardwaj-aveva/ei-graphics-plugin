@@ -57,4 +57,86 @@ Describe 'Validate-EiWorkflowPrerequisites' -Tag 'Unit' {
         $LASTEXITCODE | Should -Be 1
         ($output | ConvertFrom-Json).Errors -join "`n" | Should -BeLike '*EIWF-GIT-NO-REPO*'
     }
+
+    Context 'candidate.json gate (Phase B+ with StateDir)' {
+        It 'fails with EIWF-CANDIDATE-MISSING when candidate.json is absent from StateDir' {
+            $stateDir = Join-Path $TestDrive 'state'
+            New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+
+            $output = & $script:ScriptPath -RepositoryRoot $script:RepoRoot -Phase B `
+                -NoDefaultSearchRoots -StateDir $stateDir -Json
+            $LASTEXITCODE | Should -Be 1
+            ($output | ConvertFrom-Json).Errors -join "`n" | Should -BeLike '*EIWF-CANDIDATE-MISSING*'
+        }
+
+        It 'fails with EIWF-CANDIDATE-INVALID when candidate.json is not valid JSON' {
+            $stateDir = Join-Path $TestDrive 'state-bad-json'
+            New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $stateDir 'candidate.json') -Value 'not-json-{' -Encoding utf8
+
+            $output = & $script:ScriptPath -RepositoryRoot $script:RepoRoot -Phase B `
+                -NoDefaultSearchRoots -StateDir $stateDir -Json
+            $LASTEXITCODE | Should -Be 1
+            ($output | ConvertFrom-Json).Errors -join "`n" | Should -BeLike '*EIWF-CANDIDATE-INVALID*'
+        }
+
+        It 'fails with EIWF-CANDIDATE-INVALID when candidate.json is missing required fields' {
+            $stateDir = Join-Path $TestDrive 'state-bad-fields'
+            New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $stateDir 'candidate.json') `
+                -Value '{ "confidence": 0.5 }' -Encoding utf8
+
+            $output = & $script:ScriptPath -RepositoryRoot $script:RepoRoot -Phase B `
+                -NoDefaultSearchRoots -StateDir $stateDir -Json
+            $LASTEXITCODE | Should -Be 1
+            ($output | ConvertFrom-Json).Errors -join "`n" | Should -BeLike '*EIWF-CANDIDATE-INVALID*'
+        }
+
+        It 'passes at Phase B when a structurally valid candidate.json is present' {
+            $stateDir = Join-Path $TestDrive 'state-valid'
+            New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+            $validCandidate = @{
+                confidence = 0.5
+                rationale  = 'Auto-generated from story text.'
+                evidence   = @(
+                    @{ id = 'E1'; kind = 'story'; value = 'labels overlap'; note = $null }
+                )
+                proposedFiles   = @()
+                proposedModules = @()
+                relatedTests    = @()
+                protectedAreas  = @()
+                dependencies    = @()
+                excluded        = @()
+                risks           = @()
+                unresolved      = @()
+            }
+            Set-Content -LiteralPath (Join-Path $stateDir 'candidate.json') `
+                -Value ($validCandidate | ConvertTo-Json -Depth 10) -Encoding utf8
+
+            $output = & $script:ScriptPath -RepositoryRoot $script:RepoRoot -Phase B `
+                -NoDefaultSearchRoots -StateDir $stateDir -Json
+            $LASTEXITCODE | Should -Be 0
+            ($output | ConvertFrom-Json).Status | Should -Be 'Valid'
+        }
+
+        It 'skips the candidate check at Phase A even when StateDir is provided' {
+            $stateDir = Join-Path $TestDrive 'state-phase-a'
+            New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+            # No candidate.json written — should not matter at Phase A.
+
+            $output = & $script:ScriptPath -RepositoryRoot $script:RepoRoot -Phase A `
+                -NoDefaultSearchRoots -StateDir $stateDir -Json
+            $LASTEXITCODE | Should -Be 0
+            ($output | ConvertFrom-Json).Status | Should -Be 'Valid'
+        }
+
+        It 'skips the candidate check when StateDir is not provided even at Phase B' {
+            $output = & $script:ScriptPath -RepositoryRoot $script:RepoRoot -Phase B `
+                -NoDefaultSearchRoots -Json
+            # The test is valid if exit code 0: the candidate check is off when no StateDir.
+            # (There may be a PS-version or git warning, but no CANDIDATE error.)
+            $errors = ($output | ConvertFrom-Json).Errors
+            @($errors | Where-Object { $_ -like '*EIWF-CANDIDATE*' }).Count | Should -Be 0
+        }
+    }
 }

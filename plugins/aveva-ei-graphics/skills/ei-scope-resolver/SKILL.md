@@ -119,10 +119,41 @@ Work in this order and stop as soon as you are guessing.
 
 | Script | Purpose |
 |---|---|
+| `scripts/New-EiScopeCandidate.ps1` | Generate an initial candidate.json from ADO intake and domain-context artifacts (scope-candidate stage) |
 | `scripts/New-EiProposedScope.ps1` | Apply policy to a candidate scope and emit the `proposed-scope` artifact |
 | `scripts/Test-EiProposedScope.ps1` | Deterministic gate for the `proposed-scope` stage |
 | `scripts/helpers/EiScopeResolver.ps1` | Shared helpers (dot-sourced, not executed) |
 | `references/scope-policy.json` | Limits and rule severities |
+
+### Generate a scope candidate (scope-candidate stage)
+
+`New-EiScopeCandidate.ps1` runs before `New-EiProposedScope.ps1`. It reads the sealed `ado` and
+`domain-context` artifacts and writes `candidate.json` — the evidence document that the model
+reviews before the scope resolver runs.
+
+```powershell
+./scripts/New-EiScopeCandidate.ps1 `
+  -AdoPath           .copilottracking/ei-graphics/123456/ado.json `
+  -DomainContextPath .copilottracking/ei-graphics/123456/domain-context.json `
+  -RepositoryRoot    . `
+  -StateDir          .copilottracking/ei-graphics/123456 `
+  -Json
+```
+
+The script exits **0** and writes `candidate.json` when it can build at least one evidence entry.
+It exits **1** when a required input is absent or malformed.
+
+Evidence is sourced automatically from:
+1. Story title and description text (`kind: "story"`).
+2. Key Files from matched domain skills (`kind: "domain-skill-key-file"`). Key files are evidence
+   only — they are NOT automatically added to `proposedFiles` unless they physically exist in the
+   repository.
+3. Source files whose filenames match terms from the story title (`kind: "path"`). Repository hits
+   appear in evidence only; the model promotes them to `proposedFiles` after review.
+
+The model MUST review the generated candidate before running `New-EiProposedScope.ps1`. Adjust
+evidence, confidence, and proposedFiles as needed. The generator sets a conservative baseline
+confidence (0.5 with key files, 0.3 without) precisely so the model does not rubber-stamp it.
 
 ### Produce a scope
 

@@ -16,6 +16,7 @@ PSCustomObject with Status, Errors, Warnings and Details.
 param(
     [string]$RepositoryRoot = (Get-Location).Path,
     [ValidateSet('A', 'B', 'C', 'D', 'E')][string]$Phase = 'A',
+    [string]$StateDir = '',
     [string]$RequiredCapabilitiesPath = '',
     [string[]]$PluginSearchRoot = @(),
     [switch]$NoDefaultSearchRoots,
@@ -165,9 +166,41 @@ foreach ($later in $missingLater) {
     $result = Add-EiWarning -Result $result -Message "Capability not resolved yet: $later."
 }
 
-$result = Set-EiDetail -Result $result -Name 'Phase' -Value $Phase
-$result = Set-EiDetail -Result $result -Name 'Found' -Value @($found)
-$result = Set-EiDetail -Result $result -Name 'MissingRequired' -Value @($missingRequired)
-$result = Set-EiDetail -Result $result -Name 'MissingLaterPhase' -Value @($missingLater)
+$result = Set-EiDetail -Result $result -Name 'Phase'              -Value $Phase
+$result = Set-EiDetail -Result $result -Name 'Found'              -Value @($found)
+$result = Set-EiDetail -Result $result -Name 'MissingRequired'    -Value @($missingRequired)
+$result = Set-EiDetail -Result $result -Name 'MissingLaterPhase'  -Value @($missingLater)
+
+# ── Candidate check: required before proposed-scope (Phase B+) ────────────────
+# When a StateDir is provided the candidate artifact must exist and be structurally valid before
+# the workflow may advance to the proposed-scope stage. Surfacing this here (rather than inside
+# New-EiProposedScope.ps1 alone) allows the orchestrator to fail fast with a clear action message.
+if ($Phase -ge 'B' -and -not [string]::IsNullOrWhiteSpace($StateDir)) {
+    $candidatePath = Join-Path $StateDir 'candidate.json'
+    if (-not (Test-Path -LiteralPath $candidatePath)) {
+        $result = Add-EiError -Result $result -Code 'EIWF-CANDIDATE-MISSING' `
+            -Message "candidate.json was not found at '$candidatePath'. Run New-EiScopeCandidate.ps1 to generate it before starting the proposed-scope stage."
+    }
+    else {
+        try {
+            $c = Get-Content -LiteralPath $candidatePath -Raw | ConvertFrom-Json
+            $hasMissing = [string]::IsNullOrWhiteSpace([string]($c.rationale)) -or
+                          $null -eq $c.confidence -or
+                          $null -eq $c.evidence -or
+                          @($c.evidence).Count -eq 0
+            if ($hasMissing) {
+                $result = Add-EiError -Result $result -Code 'EIWF-CANDIDATE-INVALID' `
+                    -Message "candidate.json at '$candidatePath' is missing required fields (confidence, rationale, evidence). Regenerate it with New-EiScopeCandidate.ps1."
+            }
+            else {
+                $result = Set-EiDetail -Result $result -Name 'CandidatePath' -Value $candidatePath
+            }
+        }
+        catch {
+            $result = Add-EiError -Result $result -Code 'EIWF-CANDIDATE-INVALID' `
+                -Message "candidate.json at '$candidatePath' is not valid JSON: $($_.Exception.Message)"
+        }
+    }
+}
 
 Exit-EiResult -Result $result -Json:$Json
