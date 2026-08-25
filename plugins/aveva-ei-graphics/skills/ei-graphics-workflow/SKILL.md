@@ -186,6 +186,27 @@ Any stage with `"writesFiles": true` in the lifecycle definition — including `
 the next stage starts. SpecKit writers have been observed creating files outside the requested task
 scope, so prompt instructions are not the safety boundary; the validator is.
 
+### Stage: `ado-intake`
+
+`ei-azure-devops-cli-intake` owns this stage. Call **`Invoke-EiAdoIntakeStage.ps1`** — not
+`Invoke-EiAdoCliIntake.ps1` (that is the retrieval helper, not the lifecycle stage runner) and not
+`Invoke-EiAdoIntake.ps1` (that script does not exist).
+
+```powershell
+& "$eiSkills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoIntakeStage.ps1" `
+    -StateDir '<state-dir>' `
+    -Json
+```
+
+The script marks the stage `running`, calls `Invoke-EiAdoCliIntake.ps1` internally, writes the
+`ado` artifact, evaluates the `artifact-present` gate, and marks the stage `complete` or `blocked`.
+Do not call `Set-EiWorkflowStage.ps1 -Action start` separately; the script manages that.
+
+| Gate outcome | Action |
+|---|---|
+| `status: retrieved`, artifact present | Stage complete; advance to `domain-context` |
+| Any other `status` | Stage blocked with the intake's own reason; surface to user |
+
 ### Stage: `domain-context`
 
 `ei-vocabulary-navigator` owns this stage. It is an **agent-driven stage with a mandatory

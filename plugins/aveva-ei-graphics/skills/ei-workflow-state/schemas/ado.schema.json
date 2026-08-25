@@ -43,6 +43,19 @@
         "authSource": { "type": "string", "minLength": 1 }
       }
     },
-    "retrievedAt": { "type": "string", "minLength": 1 }
+    "retrievedAt": { "type": "string", "minLength": 1 },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "localPath", "fileName"],
+        "properties": {
+          "url":       { "type": "string", "minLength": 1 },
+          "localPath": { "type": "string", "minLength": 1 },
+          "fileName":  { "type": "string", "minLength": 1 }
+        }
+      }
+    }
   }
 }

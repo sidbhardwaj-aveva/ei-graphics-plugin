@@ -28,6 +28,18 @@ function Get-PlainText {
     return [regex]::Replace($decoded, '\s+', ' ').Trim()
 }
 
+function Get-AttachmentUrls {
+    param([string]$Html)
+    if ([string]::IsNullOrWhiteSpace($Html)) { return @() }
+    $found = [System.Collections.Generic.List[string]]::new()
+    $imgMatches = [regex]::Matches($Html, '<img\s[^>]*src\s*=\s*"(?<url>[^"]+)"', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    foreach ($m in $imgMatches) {
+        $url = $m.Groups['url'].Value
+        if ($url -match '(?i)(dev\.azure\.com|visualstudio\.com)') { $found.Add($url) }
+    }
+    return $found.ToArray()
+}
+
 function Get-FieldValue {
     param(
         [object]$FieldBag,
@@ -458,6 +470,18 @@ $parts = @(@(
     (Get-PlainText -Text (Get-FieldValue -FieldBag $fields -Name 'System.ReproSteps'))
 ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
+# Collect image attachment URLs from all HTML fields; deduplicate by URL.
+$seenUrls = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$attachmentUrls = @(
+    @(
+        (Get-FieldValue -FieldBag $fields -Name 'System.Description'),
+        (Get-FieldValue -FieldBag $fields -Name 'Microsoft.VSTS.TCM.ReproSteps'),
+        (Get-FieldValue -FieldBag $fields -Name 'System.ReproSteps')
+    ) | ForEach-Object { Get-AttachmentUrls -Html $_ } |
+        Where-Object { $seenUrls.Add($_) } |
+        ForEach-Object { [PSCustomObject]@{ url = $_ } }
+)
+
 if (@($parts).Count -eq 0) {
     $failed = [PSCustomObject]@{
         status = 'failed'
@@ -487,6 +511,7 @@ $result = [PSCustomObject]@{
         authSource = $authSource
     }
     descriptionText = ($parts -join ' ')
+    attachmentUrls  = $attachmentUrls
 }
 
 if ($Json) {

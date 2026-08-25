@@ -103,6 +103,38 @@ if ($null -eq $intake -or $intake.status -ne 'retrieved') {
 }
 
 $context = $intake.workItemContext
+
+# Download embedded images so the agent can inspect them. Non-fatal: failures produce warnings only.
+$attachments = @()
+if (@($intake.attachmentUrls).Count -gt 0) {
+    $attachmentsDir = Join-Path $StateDir 'attachments'
+    $null = New-Item -ItemType Directory -Path $attachmentsDir -Force -ErrorAction SilentlyContinue
+    $tokenRaw = az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 2>$null
+    $token = if ($null -ne $tokenRaw) { try { ($tokenRaw | ConvertFrom-Json).accessToken } catch { $null } } else { $null }
+    $idx = 0
+    foreach ($att in @($intake.attachmentUrls)) {
+        $idx++
+        $fileNameMatch = [regex]::Match($att.url, '[?&]fileName=([^&]+)')
+        $baseName = if ($fileNameMatch.Success) { [System.Uri]::UnescapeDataString($fileNameMatch.Groups[1].Value) } else { "image-$idx.png" }
+        $localFileName = "$idx-$baseName"
+        $localPath = Join-Path $attachmentsDir $localFileName
+        $downloaded = $false
+        if (-not [string]::IsNullOrWhiteSpace($token)) {
+            try {
+                Invoke-WebRequest -Uri $att.url -Headers @{ Authorization = "Bearer $token" } -OutFile $localPath -UseBasicParsing -ErrorAction Stop
+                $downloaded = $true
+            }
+            catch { $result = Add-EiWarning -Result $result -Message "Could not download attachment $($att.url): $_" }
+        }
+        else {
+            $result = Add-EiWarning -Result $result -Message 'No Azure DevOps bearer token available; attachments were not downloaded.'
+        }
+        if ($downloaded) {
+            $attachments += [ordered]@{ url = $att.url; localPath = $localPath; fileName = $localFileName }
+        }
+    }
+}
+
 $artifact = [ordered]@{
     schemaVersion = $script:EiStateSchemaVersion
     source        = 'ei-azure-devops-cli-intake'
@@ -122,6 +154,7 @@ $artifact = [ordered]@{
         authSource = $context.authSource
     }
     retrievedAt   = Get-EiUtcTimestamp
+    attachments   = $attachments
 }
 
 $written = & $writePath -StateDir $StateDir -Name 'ado' -Content ($artifact | ConvertTo-Json -Depth 10) -Json | ConvertFrom-Json
