@@ -1,11 +1,20 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Create or update a session log for a completed EI Graphics workflow run.
+Create or update a session log for an EI Graphics workflow run (including interrupted runs).
 
 .DESCRIPTION
-Writes a structured JSON session log to `.ei-session-logs/<storyId>/<timestamp>-<sessionId>.json`
-at the workspace root. Each log captures:
+Writes a structured JSON session log to `.ei-session-logs/<storyId>/<sessionId>.json`.
+Because the filename is stable (based on SessionId), calling the script twice with the same
+-SessionId always overwrites the same file. Use this for a two-call interrupt-resilient pattern:
+
+  1. At workflow init (Step 0):  call with -FinalStatus in-progress to write a start marker.
+  2. At workflow exit (Step 6):  call again with the same -SessionId to write the final log.
+
+If the session is interrupted between these two calls the start marker remains and its
+`finalStatus` of `in-progress` flags the run as interrupted in the report.
+
+Each log captures:
   - Session timing (total and per-stage breakdown)
   - Workflow inputs (story ID, path, entry point, diff base branch)
   - Gate results and block codes from the completed workflow
@@ -39,6 +48,11 @@ Number of completion tokens consumed. Optional; leave unset if unavailable.
 .PARAMETER EstimatedCostUSD
 Estimated USD cost for this session. Optional; leave unset if unavailable.
 
+.PARAMETER FinalStatus
+Override the final status recorded in the log. When omitted the status is taken from
+workflow-state.json. Pass 'in-progress' to write a start marker at workflow initialisation;
+the same -SessionId call at exit will overwrite it with the real outcome.
+
 .PARAMETER LogDir
 Override the default .ei-session-logs root. Primarily for testing.
 
@@ -57,6 +71,8 @@ param(
     [Nullable[int]]$PromptTokens = $null,
     [Nullable[int]]$CompletionTokens = $null,
     [Nullable[double]]$EstimatedCostUSD = $null,
+    [ValidateSet('', 'completed', 'awaiting-approval', 'blocked', 'failed', 'in-progress')]
+    [string]$FinalStatus = '',
     [string]$LogDir = '',
     [switch]$Json
 )
@@ -98,9 +114,14 @@ if (-not (Test-Path -LiteralPath $LogDir -PathType Container)) {
     $null = New-Item -ItemType Directory -Path $LogDir -Force
 }
 
+# ── Resolve effective final status ──────────────────────────────────────────
+$effectiveStatus = if ([string]::IsNullOrWhiteSpace($FinalStatus)) { [string]$state.status } else { $FinalStatus }
+$isInterrupted   = $effectiveStatus -eq 'in-progress'
+
 # ── Compute overall timing ───────────────────────────────────────────────────
 $startedAt = [string]$state.createdAt
-$endedAt   = [string]$state.updatedAt
+# When in-progress use current time as endedAt so the log records how far the run got
+$endedAt   = if ($isInterrupted) { (Get-Date).ToUniversalTime().ToString('o') } else { [string]$state.updatedAt }
 
 $durationSeconds = $null
 try {
@@ -205,6 +226,14 @@ if ($state.PSObject.Properties['correctionAttempts'] -and [int]$state.correction
     })
 }
 
+# Flag interrupted sessions
+if ($isInterrupted) {
+    $improvementNotes.Add([ordered]@{
+        category = 'general'
+        note     = 'Session was in-progress when the log was written — the run may have been interrupted. Check whether a final log was later written with the same session ID.'
+    })
+}
+
 # Flag blocks
 foreach ($b in $blockEntries) {
     $improvementNotes.Add([ordered]@{
@@ -240,7 +269,7 @@ $log = [ordered]@{
     stages         = $stageEntries
     gates          = $gateEntries
     blocks         = $blockEntries
-    finalStatus    = [string]$state.status
+    finalStatus    = $effectiveStatus
     summary        = $null
     tokenUsage     = $tokenUsage
     inputs         = [ordered]@{
@@ -279,10 +308,9 @@ if (Test-Path -LiteralPath $schemaPath -PathType Leaf) {
     catch { }
 }
 
-# ── Write the log file ───────────────────────────────────────────────────────
-$timestamp  = (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')
-$fileName   = "$timestamp-$($SessionId.Substring(0, 8)).json"
-$logFile    = Join-Path $LogDir $fileName
+# ── Write the log file (stable filename = always overwrites same session) ────
+$fileName = "$SessionId.json"
+$logFile  = Join-Path $LogDir $fileName
 
 $log | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $logFile -Encoding UTF8
 

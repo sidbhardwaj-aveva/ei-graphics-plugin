@@ -69,6 +69,26 @@ Rules of thumb:
 | Retry ceiling and escalation | Run an unbounded autonomous repair loop |
 | The result contract returned to the agent | Duplicate R&D or Core capabilities |
 
+## Step 0 — Establish session ID and write start marker
+
+Generate a session ID before calling `Initialize-EiWorkflowState.ps1`. Write a start-marker log
+immediately after initialisation so that an interrupted session still leaves a record.
+
+```powershell
+$sessionId = [System.Guid]::NewGuid().ToString()
+
+& "$stateSkill/Initialize-EiWorkflowState.ps1" -StoryId '<story-id>' -WorkspaceRoot '<repo>' -Json
+$stateDir = '<resolved state dir>'
+
+# Start marker — written immediately; overwritten at Step 6 with the real outcome.
+& "$workflow/New-EiSessionLog.ps1" -StateDir $stateDir -SessionId $sessionId `
+    -FinalStatus in-progress -EntryPoint '<ado-url|ado-id|manual>' -Json
+```
+
+Because the log filename is `<sessionId>.json`, every subsequent call with the same `-SessionId`
+overwrites this file. If the run is interrupted after this point the marker remains with
+`finalStatus = in-progress`, which the report tool flags as a potentially interrupted session.
+
 ## Path resolution (run once)
 
 Every script resolves its own dependencies through `$PSScriptRoot`, so the working directory is
@@ -165,6 +185,53 @@ Any stage with `"writesFiles": true` in the lifecycle definition — including `
 `plan`, `tasks`, and `implementation` — must be followed by an independent scope validation before
 the next stage starts. SpecKit writers have been observed creating files outside the requested task
 scope, so prompt instructions are not the safety boundary; the validator is.
+
+### Stage: `domain-context`
+
+`ei-vocabulary-navigator` owns this stage. It is an **agent-driven stage with a mandatory
+human checkpoint**: the stage script blocks unless `-HumanConfirmed` is passed.
+
+**What the agent must do before calling the script:**
+
+1. Read the sealed `ado.json` artifact (title, description, acceptance criteria, parent feature,
+   any accessible images).
+2. Reason about the story and build a plain-language understanding (see `ei-graphics.agent.md`
+   for the required format — `What is this about?`, `What needs to change?`, `Expected outcome`,
+   `Relevant domain`, `Why I selected this domain`, and image observations).
+3. Select one or more domain IDs from `ei-vocabulary-navigator/references/domain-skill-registry.json`.
+   Only registered IDs are valid; the script blocks on an unregistered ID
+   (`EIVN-DOMAIN-NOT-REGISTERED`). An empty selection is valid when agent and user agree no
+   domain applies.
+4. Present the understanding and selection to the user and ask: _"Is this understanding and domain
+   correct?"_ with options to confirm, change domain, correct understanding, or provide context.
+5. If the user requests a change, validate the new ID exists in the registry; iterate until the
+   user confirms.
+
+**Only after explicit user confirmation**, run:
+
+```powershell
+& "$eiSkills/ei-vocabulary-navigator/scripts/Invoke-EiDomainContextStage.ps1" `
+    -StateDir '<state-dir>' `
+    -SelectedDomainIds @('<confirmed-id>') `
+    -HumanConfirmed `
+    -Json
+
+& "$stateSkill/Set-EiWorkflowStage.ps1" -StateDir '<state-dir>' -StageId 'domain-context' `
+    -Action complete -GateResult pass -Json
+```
+
+The script starts and completes the stage internally. Do not call
+`Set-EiWorkflowStage.ps1 -Action start` separately; the script manages that.
+Pass an empty array (`-SelectedDomainIds @()`) with `-HumanConfirmed` when no domain applies.
+
+| Gate outcome | Action |
+|---|---|
+| `Valid`, `GateResult: pass` | Stage is already complete; advance to `scope-candidate` |
+| `EIVN-DOMAIN-NOT-CONFIRMED` | Agent called the script without `-HumanConfirmed`; never bypass — ask the user |
+| `EIVN-DOMAIN-NOT-REGISTERED` | Selected ID not in registry; re-present options and ask user to confirm a registered ID |
+| `EIVN-REGISTRY-MISSING` or `EIVN-REGISTRY-INVALID` | BLOCK; the registry file is missing or corrupt |
+| `EIVN-SKILL-UNREADABLE` | BLOCK; the confirmed domain's SKILL.md cannot be read |
+| `EIVN-ARTIFACT-UNWRITABLE` or `EIVN-ARTIFACT-ABSENT` | BLOCK; the artifact could not be persisted or read back |
 
 ### Stage: `scope-candidate`
 
@@ -528,9 +595,13 @@ and is never required to unblock a run — skip this step silently if the script
 failing the contract.
 
 ```powershell
-& "$workflow/New-EiSessionLog.ps1" -StateDir '<state-dir>' -WorkspaceRoot '<repo>' `
-    -AgentVersion '1.0.0' -EntryPoint '<ado-url|ado-id|manual>' -Json
+& "$workflow/New-EiSessionLog.ps1" -StateDir '<state-dir>' -SessionId $sessionId `
+    -WorkspaceRoot '<repo>' -AgentVersion '1.0.0' -EntryPoint '<ado-url|ado-id|manual>' -Json
 ```
+
+Passing the same `$sessionId` that was used in Step 0 overwrites the start marker with the final
+log. If this step is skipped (e.g. because of an unexpected abort), the start marker remains on
+disk with `finalStatus = in-progress` so the run is still counted in the improvement report.
 
 Supply `-PromptTokens`, `-CompletionTokens`, and `-EstimatedCostUSD` when the agent execution
 context makes them available. When they are not available, omit them; the log records a note

@@ -42,6 +42,15 @@
           "keyFilesNote": { "type": "string", "minLength": 1 }
         }
       }
+    },
+    "humanConfirmation": {
+      "type": "object",
+      "description": "Records that the agent's domain selection was confirmed by a human before the stage completed.",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["confirmed"] }
+      }
     }
   }
 }

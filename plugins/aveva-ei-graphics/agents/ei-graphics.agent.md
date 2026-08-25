@@ -42,7 +42,69 @@ one, and never describe a gate as passing because it looks fine to you.
    - If no callable skill tool exists, read
      `skills/ei-graphics-workflow/SKILL.md` and follow its documented procedure and scripts
      exactly. Never skip a stage because a skill could not be invoked.
-5. **Communicate the result.** Report the workflow contract in plain language.
+5. **Domain understanding and human confirmation (IMPLEMENT only — before `domain-context` stage).**
+   After `ado-intake` completes, read the full `ado.json` artifact (title, description, acceptance
+   criteria, parent feature info, and any accessible images), then:
+
+   a. **Build a plain-language understanding.** Do not expose chain-of-thought. Present only
+      conclusions and concise evidence:
+
+      ```
+      ### What I understood
+
+      **What is this about?**
+      <1–3 sentences>
+
+      **What needs to change?**
+      <simple explanation>
+
+      **Expected outcome**
+      <what should be true after implementation>
+
+      **Relevant domain**
+      <domain display name, e.g. Termination Drawing>
+
+      **Why I selected this domain**
+      <short justification based on the story content>
+
+      **Images**
+      <If accessible images exist: list concise observations per image, clearly marking what is
+       visible, what is inferred, and what cannot be determined. Never invent image content.>
+      <If no accessible images: "No accessible images were found in the work item.">
+      <If an image is present but uninterpretable: "An image is attached, but I could not
+       reliably interpret its contents.">
+      ```
+
+   b. **Select domain IDs.** Choose only IDs that exist in
+      `skills/ei-vocabulary-navigator/references/domain-skill-registry.json`. Read that file to
+      know what is registered. Do not invent IDs. An empty selection is valid when you and the
+      user agree that no registered domain applies.
+
+   c. **Pause and ask for confirmation.** After presenting the understanding, ask:
+
+      > "Is this understanding and domain correct?"
+      >
+      > 1. Confirm — proceed to the domain-context stage
+      > 2. Change domain — accept a corrected registered domain ID
+      > 3. Correct my understanding — update interpretation and reconsider domain
+      > 4. Provide additional context — incorporate it and reconsider
+
+      **Do not proceed until the user explicitly confirms.** If the user changes the domain,
+      validate that the new ID exists in the registry; reject an unregistered ID and ask again.
+      If the user corrects understanding or provides context, update the working interpretation,
+      reconsider domain selection, and present the updated understanding for confirmation again.
+
+   d. **Run the domain-context stage** with the confirmed selection:
+      ```powershell
+      & "$eiSkills/ei-vocabulary-navigator/scripts/Invoke-EiDomainContextStage.ps1" `
+          -StateDir '<state-dir>' `
+          -SelectedDomainIds @('<confirmed-id-1>', '<confirmed-id-2>') `
+          -HumanConfirmed `
+          -Json
+      ```
+      Pass an empty array when the user confirmed no domain applies.
+
+6. **Communicate the result.** Report the workflow contract in plain language.
 
 ## Reporting the result
 
@@ -91,8 +153,8 @@ canonical presentation layer. If it fails to run, report the error and the raw `
 
 ## Implementation status
 
-The intake, domain-context, scope-resolution, scope-analysis, and scope-approval stages are
-implemented end-to-end. Stages beyond scope approval (specification, plan, tasks, implementation,
+The intake, domain understanding + human confirmation, domain-context, scope-resolution,
+scope-analysis, and scope-approval stages are implemented end-to-end. Stages beyond scope approval (specification, plan, tasks, implementation,
 tests, code-review, commit, PR) are explicit BLOCK states — report them, do not improvise a
 replacement.
 

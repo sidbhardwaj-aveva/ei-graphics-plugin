@@ -1,32 +1,11 @@
 {
   "schemaVersion": "1.0.0",
-  "description": "Maps story detection signals to domain-specific skill SKILL.md files. A domain entry is matched when any of its detectionTerms appears in the story title or description (case-insensitive substring match). Matched domain skills are loaded and their Key Files injected into the domain-context artifact as candidate evidence for the scope-resolver. Key files are never automatic scope: the scope-resolver must independently find repository evidence before including any of them.",
+  "description": "Registry of available domain-specific skills for EI Graphics. The agent selects domain IDs from this registry based on semantic understanding of the ADO story, then obtains human confirmation before writing the domain-context artifact. The registry is the authoritative list of valid domain IDs; the agent may only select IDs present here.",
   "domains": [
     {
       "id": "termination-drawing",
       "displayName": "Termination Drawing",
-      "skillPath": "skills/termination-drawing/SKILL.md",
-      "detectionTerms": [
-        "TerminationDrawing",
-        "termination drawing",
-        "termination-drawing",
-        "TerminationDrawingGenerationWorkflow",
-        "TerminationDrawingModelBuilder",
-        "TerminationDrawingInserter",
-        "EquipmentInserter",
-        "CoreConnectorManager",
-        "CableShapeManager",
-        "WireConnectorInserter",
-        "LoopWireConnectorInserter",
-        "LinkConnectorInserter",
-        "insertedTags",
-        "BackLayerShape",
-        "IsShapeFoundOnDrawing",
-        "LOC level",
-        "Level of Connectivity",
-        "CanvasDrawings",
-        "UpdateDrawing"
-      ]
+      "skillPath": "skills/termination-drawing/SKILL.md"
     }
   ]
 }

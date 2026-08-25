@@ -1,17 +1,19 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Run the `domain-context` lifecycle stage: detect relevant domain SKILL.md files for the story.
+Run the `domain-context` lifecycle stage: inject domain SKILL.md context for the story.
 
 .DESCRIPTION
-Reads the sealed ADO artifact and checks its story text against every entry in the domain skill
-registry (`references/domain-skill-registry.json`). A domain is matched when any of its
-detectionTerms appears in the story text (case-insensitive substring match). Each matched domain
-contributes a `domainSkills` entry that carries the domain's Key Files as candidate evidence for
-the scope resolver. Key files are never automatic scope.
+Accepts a human-confirmed list of domain IDs (selected by the agent after presenting its
+understanding of the story to the user). For each selected ID, looks up the domain in
+`references/domain-skill-registry.json`, loads the corresponding SKILL.md via
+Read-EiDomainSkillContext.ps1, and writes the domain-context artifact.
 
-No domain match is not a gate failure. The stage always completes unless the ADO artifact is
-absent or the artifact write fails.
+The stage blocks unless -HumanConfirmed is set. This enforces that the agent received explicit
+user confirmation of the domain selection before the workflow advances to scope-candidate.
+
+An empty -SelectedDomainIds list is allowed when the agent and user agree that no registered
+domain applies: the artifact is written with an empty domainSkills array.
 
 .OUTPUTS
 PSCustomObject with Status, Errors, Warnings and Details (Details.Payload holds the artifact).
@@ -20,8 +22,10 @@ PSCustomObject with Status, Errors, Warnings and Details (Details.Payload holds 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$StateDir,
+    [string[]]$SelectedDomainIds = @(),
     [string]$RegistryPath = '',
     [string]$StageId = 'domain-context',
+    [switch]$HumanConfirmed,
     [switch]$Json
 )
 
@@ -78,10 +82,10 @@ if ($statePayload.Status -ne 'Valid') {
 $storyId = $statePayload.Details.Payload.storyId
 $result = Set-EiDetail -Result $result -Name 'StoryId' -Value $storyId
 
-# The story text is read from the sealed ado artifact so detection is always against the real story.
+# The ado artifact must exist before this stage may run; its content is not used for detection.
 $adoArtifact = & $readPath -StateDir $StateDir -Name 'ado' -Json | ConvertFrom-Json
 if ($adoArtifact.Status -ne 'Valid') {
-    $result = Add-EiError -Result $result -Code 'EIVN-ADO-UNREADABLE' -Message "The ado artifact could not be read, so there is no story to detect domains against: $(@($adoArtifact.Errors) -join '; ')"
+    $result = Add-EiError -Result $result -Code 'EIVN-ADO-UNREADABLE' -Message "The ado artifact could not be read, so there is no story to attach domain context to: $(@($adoArtifact.Errors) -join '; ')"
     Exit-EiResult -Result $result -Json:$Json
 }
 
@@ -91,65 +95,89 @@ if ($started.Status -ne 'Valid') {
     Exit-EiResult -Result $result -Json:$Json
 }
 
-# ── Domain skill detection ────────────────────────────────────────────────────
-# Match story text against registered domain SKILL.md detection terms. No match is not a failure.
-$domainSkills = [System.Collections.Generic.List[object]]::new()
-$storySummary     = [string]$adoArtifact.Details.Payload.summary
-$storyDescription = [string]$adoArtifact.Details.Payload.description
-$storySearchText  = (($storySummary + ' ' + $storyDescription).Trim())
+# ── Require human confirmation ────────────────────────────────────────────────
+# The agent must present its story understanding and domain selection to the user and receive
+# explicit confirmation before this stage may write the domain-context artifact.
+if (-not $HumanConfirmed) {
+    $result = Block-EiDomainContextStage -Result $result `
+        -Code 'EIVN-DOMAIN-NOT-CONFIRMED' `
+        -Message 'Domain selection requires explicit human confirmation before the stage may proceed.' `
+        -Remediation 'Present the agent understanding and domain selection to the user, then re-run with -HumanConfirmed after they confirm.'
+    Exit-EiResult -Result $result -Json:$Json
+}
 
-if (Test-Path -LiteralPath $RegistryPath) {
+# ── Load registry and resolve selected domain IDs ─────────────────────────────
+$domainSkills = [System.Collections.Generic.List[object]]::new()
+$normalizedIds = @($SelectedDomainIds | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$result = Set-EiDetail -Result $result -Name 'SelectedDomainIds' -Value $normalizedIds
+
+if ($normalizedIds.Count -gt 0) {
+    if (-not (Test-Path -LiteralPath $RegistryPath)) {
+        $result = Block-EiDomainContextStage -Result $result `
+            -Code 'EIVN-REGISTRY-MISSING' `
+            -Message "Domain skill registry was not found at '$RegistryPath'." `
+            -Remediation 'Ensure the registry file exists and re-run.'
+        Exit-EiResult -Result $result -Json:$Json
+    }
+
+    $registry = $null
     try {
         $registry = Get-Content -LiteralPath $RegistryPath -Raw | ConvertFrom-Json
-        $pluginRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' '..' '..')).Path
-
-        foreach ($domain in @($registry.domains)) {
-            $matched = $false
-            foreach ($term in @($domain.detectionTerms)) {
-                if ($storySearchText.IndexOf([string]$term, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
-                    $matched = $true
-                    break
-                }
-            }
-            if (-not $matched) { continue }
-
-            $domainSkillPathRaw = [string]$domain.skillPath
-            $skillAbsPath = if ([System.IO.Path]::IsPathRooted($domainSkillPathRaw)) {
-                $domainSkillPathRaw
-            } else {
-                Join-Path $pluginRoot $domainSkillPathRaw
-            }
-            try {
-                $ctx = & $domainSkillReaderPath `
-                    -SkillPath $skillAbsPath `
-                    -DomainId ([string]$domain.id) `
-                    -DisplayName ([string]$domain.displayName)
-                $domainSkills.Add($ctx)
-            }
-            catch {
-                $result = Add-EiWarning -Result $result `
-                    -Message "Could not load domain skill '$($domain.id)' from '$skillAbsPath': $($_.Exception.Message)"
-            }
-        }
     }
     catch {
-        $result = Add-EiWarning -Result $result `
-            -Message "Domain skill registry could not be parsed from '$RegistryPath': $($_.Exception.Message)"
+        $result = Block-EiDomainContextStage -Result $result `
+            -Code 'EIVN-REGISTRY-INVALID' `
+            -Message "Domain skill registry at '$RegistryPath' is not valid JSON: $($_.Exception.Message)" `
+            -Remediation 'Fix the registry JSON and re-run.'
+        Exit-EiResult -Result $result -Json:$Json
     }
-}
-else {
-    $result = Add-EiWarning -Result $result `
-        -Message "Domain skill registry was not found at '$RegistryPath'; no domain skill context will be injected."
+
+    $pluginRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' '..' '..')).Path
+
+    foreach ($selectedId in $normalizedIds) {
+        $domain = @($registry.domains) | Where-Object { [string]$_.id -eq $selectedId } | Select-Object -First 1
+        if ($null -eq $domain) {
+            $registeredIds = @($registry.domains | ForEach-Object { $_.id }) -join ', '
+            $result = Block-EiDomainContextStage -Result $result `
+                -Code 'EIVN-DOMAIN-NOT-REGISTERED' `
+                -Message "Domain '$selectedId' is not registered in the domain skill registry. Registered IDs: $registeredIds." `
+                -Remediation "Select only domain IDs that exist in the registry and re-run."
+            Exit-EiResult -Result $result -Json:$Json
+        }
+
+        $domainSkillPathRaw = [string]$domain.skillPath
+        $skillAbsPath = if ([System.IO.Path]::IsPathRooted($domainSkillPathRaw)) {
+            $domainSkillPathRaw
+        } else {
+            Join-Path $pluginRoot $domainSkillPathRaw
+        }
+
+        try {
+            $ctx = & $domainSkillReaderPath `
+                -SkillPath $skillAbsPath `
+                -DomainId ([string]$domain.id) `
+                -DisplayName ([string]$domain.displayName)
+            $domainSkills.Add($ctx)
+        }
+        catch {
+            $result = Block-EiDomainContextStage -Result $result `
+                -Code 'EIVN-SKILL-UNREADABLE' `
+                -Message "Could not load domain skill '$selectedId' from '$skillAbsPath': $($_.Exception.Message)" `
+                -Remediation "Fix or restore the domain skill SKILL.md at '$skillAbsPath' and re-run."
+            Exit-EiResult -Result $result -Json:$Json
+        }
+    }
 }
 
 $result = Set-EiDetail -Result $result -Name 'DetectedDomains' -Value @($domainSkills | ForEach-Object { $_.domainId })
 
 $artifact = [ordered]@{
-    schemaVersion = $script:EiStateSchemaVersion
-    source        = 'ei-domain-skill-registry'
-    storyId       = $storyId
-    generatedAt   = Get-EiUtcTimestamp
-    domainSkills  = @($domainSkills)
+    schemaVersion     = $script:EiStateSchemaVersion
+    source            = 'ei-domain-skill-registry'
+    storyId           = $storyId
+    generatedAt       = Get-EiUtcTimestamp
+    domainSkills      = @($domainSkills)
+    humanConfirmation = [ordered]@{ status = 'confirmed' }
 }
 
 $written = & $writePath -StateDir $StateDir -Name 'domain-context' -Content ($artifact | ConvertTo-Json -Depth 10) -Json | ConvertFrom-Json
@@ -175,10 +203,11 @@ if ($completed.Status -ne 'Valid') {
     Exit-EiResult -Result $result -Json:$Json
 }
 
-$result = Set-EiDetail -Result $result -Name 'StageStatus' -Value 'complete'
-$result = Set-EiDetail -Result $result -Name 'GateResult' -Value 'pass'
-$result = Set-EiDetail -Result $result -Name 'WorkflowStatus' -Value $completed.Details.WorkflowStatus
-$result = Set-EiDetail -Result $result -Name 'Path' -Value $written.Details.Path
-$result = Set-EiDetail -Result $result -Name 'Payload' -Value $readBack.Details.Payload
+$result = Set-EiDetail -Result $result -Name 'StageStatus'     -Value 'complete'
+$result = Set-EiDetail -Result $result -Name 'GateResult'      -Value 'pass'
+$result = Set-EiDetail -Result $result -Name 'WorkflowStatus'  -Value $completed.Details.WorkflowStatus
+$result = Set-EiDetail -Result $result -Name 'HumanConfirmed'  -Value $true
+$result = Set-EiDetail -Result $result -Name 'Path'            -Value $written.Details.Path
+$result = Set-EiDetail -Result $result -Name 'Payload'         -Value $readBack.Details.Payload
 
 Exit-EiResult -Result $result -Json:$Json

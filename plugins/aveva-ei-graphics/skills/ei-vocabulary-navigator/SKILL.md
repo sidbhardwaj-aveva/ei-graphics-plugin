@@ -42,21 +42,27 @@ Return JSON with:
 
 ## Lifecycle stage
 
-`scripts/Invoke-EiDomainContextStage.ps1` runs the `domain-context` stage of the IMPLEMENT lifecycle. Every
-lookup is delegated to `Invoke-EiVocabularyNavigator.ps1`; the stage only decides which candidate terms
-survive.
+`scripts/Invoke-EiDomainContextStage.ps1` runs the `domain-context` stage of the IMPLEMENT lifecycle.
 
-- The caller proposes candidate terms; `references/domain-pack-policy.json` disposes of them. A term
-  survives only if the story text mentions it, the navigator matched at least one URI, and its
-  confidence clears the floor.
-- The navigator is called with the term alone, never with the story text. Passing the story as context
-  makes every candidate match the union of everything the story mentions, which would hand the scope
-  resolver a far wider domain than the terms it was given.
-- Terms that do not survive are recorded in `unresolvedTerms`, and ambiguous terms in `ambiguities`, so
-  the narrowing stays auditable rather than silent.
-- Writes the `domain-context` artifact (`schemas/domain-context.schema.json`, owned by `ei-workflow-state`)
-  and blocks the stage when too little resolves, rather than emitting a thin context.
+The stage accepts a human-confirmed list of domain IDs selected by the agent. The agent reads the
+complete ADO work item (title, description, acceptance criteria, parent feature, and any accessible
+images), reasons about what the story is about, selects one or more domain IDs from
+`references/domain-skill-registry.json`, presents a plain-language understanding to the user, and
+obtains explicit confirmation before the stage runs.
+
+- `-SelectedDomainIds` receives the agent-chosen domain ID(s) from the registry.
+- `-HumanConfirmed` must be set; the stage blocks without it.
+- For each confirmed ID the stage calls `Read-EiDomainSkillContext.ps1`, which parses the
+  corresponding SKILL.md and extracts the `summary` and Key Files table.
+- Writes the `domain-context` artifact (`schemas/domain-context.schema.json`, owned by
+  `ei-workflow-state`). The artifact includes `humanConfirmation: { "status": "confirmed" }`.
+- An empty `SelectedDomainIds` with `-HumanConfirmed` is valid: the artifact is written with an
+  empty `domainSkills` array when the agent and user agree that no registered domain applies.
+- A domain ID that is not present in the registry is a blocking error (`EIVN-DOMAIN-NOT-REGISTERED`).
 
 ## Implementation status
 
-Initial ontology-backed dataset lives in `data/vocabulary-map.json`, with deterministic lookup implemented in `scripts/Invoke-EiVocabularyNavigator.ps1` and the lifecycle stage in `scripts/Invoke-EiDomainContextStage.ps1`.
+Lifecycle stage implemented in `scripts/Invoke-EiDomainContextStage.ps1` with agent-driven
+selection and human-in-the-loop confirmation. Initial ontology-backed dataset for term resolution
+lives in `data/vocabulary-map.json`, with deterministic lookup in
+`scripts/Invoke-EiVocabularyNavigator.ps1` (used independently by the bug-reproducer skill).
