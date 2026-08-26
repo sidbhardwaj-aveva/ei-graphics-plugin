@@ -30,9 +30,38 @@ Describe 'Invoke-EiAdoCliIntake' -Tag 'Unit' {
         $result = $output | ConvertFrom-Json
         $result.status | Should -Be 'retrieved'
         $result.workItemContext.workItemId | Should -Be '4913134'
-        $result.workItemContext.organization | Should -Be 'ei-org'
-        $result.workItemContext.project | Should -Be 'ei-project'
         $result.workItemContext.authSource | Should -Be 'cli-mock-json'
+    }
+
+    It 'records the fixed organization and project rather than the ones named in the url' {
+        $mock = '{ "fields": { "System.Title": "Symbol extents boundary" } }'
+
+        $output = & $script:ScriptPath -WorkItemUrl 'https://dev.azure.com/ei-org/ei-project/_workitems/edit/4913134' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.workItemContext.organization | Should -Be 'AVEVA-VSTS'
+        $result.workItemContext.project | Should -Be 'Dabacon Products'
+    }
+
+    It 'does not read a reserved url segment such as _workitems as the project' {
+        $mock = '{ "fields": { "System.Title": "Symbol extents boundary" } }'
+
+        $output = & $script:ScriptPath -WorkItemUrl 'https://dev.azure.com/AVEVA-VSTS/_workitems/edit/4983245' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.workItemContext.workItemId | Should -Be '4983245'
+        $result.workItemContext.project | Should -Be 'Dabacon Products'
+    }
+
+    It 'resolves the id from a markdown link surrounded by prose' {
+        $mock = '{ "fields": { "System.Title": "Missing headers and terminals" } }'
+        $pasted = 'Please pick up [Bug 4983245 SR350 - EPT Termination Drawing Missing Headers and Terminals in Old Workflow](https://dev.azure.com/AVEVA-VSTS/Dabacon%20Products/_workitems/edit/4983245) next.'
+
+        $output = & $script:ScriptPath -WorkItemUrl $pasted -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.workItemContext.workItemId | Should -Be '4983245'
+        $result.workItemContext.workItemUrl | Should -Be 'https://dev.azure.com/AVEVA-VSTS/Dabacon%20Products/_workitems/edit/4983245'
     }
 
     It 'returns failed when URL does not contain work item id' {
@@ -91,8 +120,7 @@ Describe 'Invoke-EiAdoCliIntake' -Tag 'Unit' {
         $LASTEXITCODE | Should -Be 0
         $result = $output | ConvertFrom-Json
         $result.workItemContext.workItemId | Should -Be '4965976'
-        $result.workItemContext.organization | Should -Be 'ei-org'
-        $result.workItemContext.project | Should -Be 'ei-project'
+        $result.workItemContext.workItemUrl | Should -Be 'https://dev.azure.com/ei-org/ei-project/_workitems/edit/4965976'
     }
 
     It 'returns failed when a pasted reference carries no work item id' {
@@ -101,5 +129,13 @@ Describe 'Invoke-EiAdoCliIntake' -Tag 'Unit' {
         $result = $output | ConvertFrom-Json
         $result.status | Should -Be 'failed'
         $result.reason | Should -Be 'missing-work-item-id-in-reference'
+    }
+
+    It 'returns failed for a bare url that is neither an ADO address nor carries a label' {
+        $output = & $script:ScriptPath -WorkItemUrl 'https://example.com/not-an-ado-url' -Json
+        $LASTEXITCODE | Should -Be 1
+        $result = $output | ConvertFrom-Json
+        $result.status | Should -Be 'failed'
+        $result.reason | Should -Be 'unsupported-work-item-url-host'
     }
 }

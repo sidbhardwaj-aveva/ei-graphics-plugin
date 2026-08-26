@@ -105,9 +105,13 @@ same rules apply on every run.
 
 | Action | Allowed from | Enforced rules |
 |---|---|---|
-| `start` | `pending` | Workflow is `in-progress`; every earlier stage is `complete` or `skipped` |
+| `start` | `pending`, `running` | Workflow is `in-progress`; every earlier stage is `complete` or `skipped` |
 | `complete` | `running` | A gated stage must supply `-GateResult pass`; a required artifact must read back schema-valid |
 | `block` | `pending`, `running` | `-BlockCode` and `-BlockMessage` are mandatory; workflow status becomes `blocked` |
+
+`start` is idempotent: an interrupted run may re-enter a stage that is already `running`, which
+keeps the original `startedAt`, returns `Details.Resumed = true` with a warning, and skips no gate
+or ordering rule. Failing that re-entry would strand the run, because state is never hand-edited.
 
 A gate result is never assumed, `-GateResult block` cannot complete a stage, a complete stage cannot
 be restarted or re-completed, and a blocked run advances nothing until the owning checkpoint clears

@@ -78,8 +78,8 @@ switch ($Action) {
             Exit-EiResult -Result $result -Json:$Json
         }
 
-        if ($stage.status -ne 'pending') {
-            $result = Add-EiError -Result $result -Code 'EIWF-TRANSITION-INVALID' -Message "Stage '$StageId' is '$($stage.status)'; only a pending stage can be started."
+        if ($stage.status -notin @('pending', 'running')) {
+            $result = Add-EiError -Result $result -Code 'EIWF-TRANSITION-INVALID' -Message "Stage '$StageId' is '$($stage.status)'; only a pending or running stage can be started."
             Exit-EiResult -Result $result -Json:$Json
         }
 
@@ -90,10 +90,20 @@ switch ($Action) {
             }
         }
 
+        # Starting a stage that is already running is re-entry after an interruption, so the first attempt's
+        # startedAt stands and no gate is skipped; failing here would strand the run, since state is never hand-edited.
+        $resumed = $stage.status -eq 'running'
+        if ($resumed) {
+            $result = Add-EiWarning -Result $result -Message "Stage '$StageId' was already running; re-entered without resetting startedAt."
+        }
+        else {
+            $stage.startedAt = $timestamp
+        }
+
         $stage.status = 'running'
-        $stage.startedAt = $timestamp
         $stage.blockReason = $null
         $state.stage = $StageId
+        $result = Set-EiDetail -Result $result -Name 'Resumed' -Value $resumed
     }
 
     'complete' {

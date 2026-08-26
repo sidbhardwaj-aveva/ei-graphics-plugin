@@ -31,27 +31,44 @@ At least one of `workItemUrl` or `workItemId` is required.
 
 ### Accepted reference forms
 
+Parsing is owned by `scripts/helpers/EiWorkItemReference.ps1` and is deterministic: the same pasted
+text always yields the same id. The agent must paste the reference through verbatim and must never
+read the id off the link itself.
+
 | Form | Behaviour |
 |---|---|
-| `https://dev.azure.com/<org>/<project>/_workitems/edit/<id>` | Org, project and id come from the URL |
-| `https://dev.azure.com/<org>/<project>/_boards/board/...?workitem=<id>` | Org, project and id come from the URL; boards view link |
+| `https://dev.azure.com/<org>/<project>/_workitems/edit/<id>` | The id comes from the URL |
+| `https://dev.azure.com/<org>/_workitems/edit/<id>` | Short link with no project segment; the id comes from the URL |
+| `https://dev.azure.com/<org>/<project>/_boards/board/...?workitem=<id>` | Boards view link; the id comes from the query |
 | `[Bug 4965976 SR205 - ...](https://dev.azure.com/.../edit/4965976)` | The href is used; the label is ignored |
-| `[Bug 4965976 SR205 - ...](vscode-file://.../workbench.html)` | The href is not an ADO address, so the id comes from the label; org and project are resolved via the fallback chain below |
+| `Please fix [Bug 4965976 - ...](<ado-url>) today` | The link is found inside surrounding prose |
+| `[Bug 4965976 SR205 - ...](vscode-file://.../workbench.html)` | The href is not an ADO address, so the id comes from the label |
 | `Bug 4965976 SR205 - ...` | Same as above, without a link |
-| `4983245` (bare id) | Org and project are resolved via the fallback chain below |
+| `4983245` (bare id) | Used directly |
 
-The id is taken from a work item type prefix (`Bug`, `User Story`, `Task`, `Feature`, ...), a `#`
-prefix, or a standalone 3+ digit token. Identifiers glued to letters such as `SR205` are never read
-as a work item id. A reference that carries no id fails with `missing-work-item-id-in-reference`.
+The id is taken from an explicit numeric `-WorkItemId`, then from the ADO URL, then from a work item
+type prefix (`Bug`, `User Story`, `Task`, `Feature`, ...), a `#` prefix, or a standalone 3+ digit
+token in the label. Identifiers glued to letters such as `SR205` are never read as a work item id.
 
-### Org and project resolution order
+| Failure reason | Cause |
+|---|---|
+| `missing-work-item-url-or-id` | Nothing was supplied (status `blocked`) |
+| `missing-work-item-id-in-url` | An ADO URL was supplied but carries no work item id |
+| `missing-work-item-id-in-reference` | A reference was supplied but no id could be read from it |
+| `unsupported-work-item-url-host` | A bare non-ADO URL with no label to fall back to |
 
-When org or project cannot be extracted from the URL, the script resolves them in this order and
-stops at the first tier that yields a non-empty value:
+### Org and project are fixed
+
+Every EI Graphics story lives in the same place, so the pasted link never decides where the work
+item is read from. Org and project resolve in this order and stop at the first non-empty tier:
 
 1. Explicit `-Organization` / `-Project` parameters.
 2. Environment variables `AZDO_ORG` / `AZDO_PROJECT`.
-3. Hardcoded AVEVA defaults: `organization=AVEVA-VSTS`, `project=Dabacon Products`.
+3. Fixed AVEVA defaults: `organization=AVEVA-VSTS`, `project=Dabacon Products`.
+
+Org and project embedded in the URL are deliberately **not** a tier. A link that names a different
+project is recorded under the defaults rather than under whatever the link happened to say, so two
+runs of the same story can never disagree about where it came from.
 
 ## Output contract
 
@@ -90,4 +107,6 @@ believe afterwards.
 ## Implementation status
 
 Deterministic slice implemented in `scripts/Invoke-EiAdoCliIntake.ps1`; lifecycle stage implemented in
-`scripts/Invoke-EiAdoIntakeStage.ps1`.
+`scripts/Invoke-EiAdoIntakeStage.ps1`. Reference parsing and the fixed org/project live in
+`scripts/helpers/EiWorkItemReference.ps1`, which `ei-graphics-workflow`'s `Start-EiWorkflowRun.ps1`
+dot-sources so the run and the intake never disagree about which work item was pasted.

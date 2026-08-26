@@ -60,8 +60,8 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
 
             $artifact = Get-Content -LiteralPath (Join-Path $script:StateDir 'ado.json') -Raw | ConvertFrom-Json
             $artifact.source | Should -Be 'ei-azure-devops-cli-intake'
-            $artifact.workItem.organization | Should -Be 'example'
-            $artifact.workItem.project | Should -Be 'MyProject'
+            $artifact.workItem.organization | Should -Be 'AVEVA-VSTS'
+            $artifact.workItem.project | Should -Be 'Dabacon Products'
             $artifact.retrieval.status | Should -Be 'retrieved'
             $artifact.description | Should -BeLike '*terminal arrangement labels share a point*'
         }
@@ -113,7 +113,7 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
             $result.Details.ReferenceSource | Should -Be 'workflow-state.storyRef'
             $result.Details.StageStatus | Should -Be 'complete'
             $result.Details.Payload.workItem.id | Should -Be '123456'
-            $result.Details.Payload.workItem.organization | Should -Be 'example'
+            $result.Details.Payload.workItem.organization | Should -Be 'AVEVA-VSTS'
         }
 
         It 'falls back to the storyId when workflow state carries no storyRef' {
@@ -125,6 +125,7 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
             $LASTEXITCODE | Should -Be 0
             $result.Details.ReferenceSource | Should -Be 'workflow-state.storyId'
             $result.Details.Payload.workItem.id | Should -Be '123456'
+            $result.Details.Payload.workItem.organization | Should -Be 'example'
         }
 
         It 'prefers an explicit reference over the one held in state' {
@@ -137,7 +138,7 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
 
             $LASTEXITCODE | Should -Be 0
             $result.Details.ReferenceSource | Should -Be 'parameter'
-            $result.Details.Payload.workItem.organization | Should -Be 'example'
+            $result.Details.Payload.workItem.url | Should -Be $script:WorkItemUrl
         }
     }
 }

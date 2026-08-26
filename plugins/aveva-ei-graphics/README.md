@@ -30,7 +30,7 @@ The lifecycle itself is owned by the `ei-graphics-workflow` skill, not by additi
 | `ei-scope-resolver` | Conservative ProposedScope resolution and the artifact-integrity gate over it |
 | `ei-scope-validator` | `scope-analysis` approval-readiness gate, `scope-validation` drift gate, and scope-change requests |
 | `ei-bug-reproducer` | Build reproduction guidance, affected-area hypotheses, and related test context from ADO bugs and repo evidence |
-| `ei-azure-devops-cli-intake` | Resolve Azure DevOps work item URL/ID context and retrieve normalized intake content via CLI |
+| `ei-azure-devops-cli-intake` | Resolve a pasted Azure DevOps work item reference to a work item id and retrieve normalized intake content via CLI; organization and project are fixed to `AVEVA-VSTS` / `Dabacon Products` |
 | `ei-vocabulary-navigator` | Resolve EI domain terms into URIs, models, repositories, services, and command paths |
 | `ei-layer-guard` | Detect cross-layer references and architecture violations before PR creation |
 | `ei-test-scaffolder` | Scaffold MSTest verification slices aligned to EI conventions |

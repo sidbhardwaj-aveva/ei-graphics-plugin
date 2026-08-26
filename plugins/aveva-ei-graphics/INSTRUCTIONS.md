@@ -18,28 +18,40 @@ user -> ei-graphics.agent.md -> ei-graphics-workflow -> skills -> gates
 - The `aveva-rnd` and `aveva-core` plugins installed — the workflow reuses their skills and
   fails closed if either is missing
 
-### Preflight
+### Starting a run
 
-Run before starting a story to confirm the environment and every declared dependency resolve.
+One call initialises state, writes the session start marker, preflights every declared dependency,
+and records the `preflight` (and, on `IMPLEMENT`, `state-init`) stages. Do not run those scripts
+individually — each separate invocation is a separate approval prompt in an agent host.
 
 ```powershell
-& './plugins/aveva-ei-graphics/skills/ei-graphics-workflow/scripts/Validate-EiWorkflowPrerequisites.ps1' `
-    -RepositoryRoot (Get-Location) `
+& './plugins/aveva-ei-graphics/skills/ei-graphics-workflow/scripts/Start-EiWorkflowRun.ps1' `
+    -StoryId '123456' `
+    -WorkflowPath IMPLEMENT `
+    -StoryRef 'https://dev.azure.com/.../_workitems/edit/123456' `
+    -WorkspaceRoot (Get-Location) `
     -Phase A `
     -Json
 ```
 
 | Parameter | Purpose |
 |-----------|---------|
-| `RepositoryRoot` | Repository to validate; git work-tree checks run against it |
+| `StoryId` | Story the run is for; also names the state directory |
+| `WorkflowPath` | `IMPLEMENT` or `ITERATE` |
+| `WorkspaceRoot` | Repository to validate; git work-tree checks run against it |
 | `Phase` | `A`–`E`. Later phases require more capabilities and enforce more checks |
+| `SessionId` | Pin the session id so the final log overwrites the start marker |
 | `PluginSearchRoot` | Extra plugin install roots for non-standard host layouts |
 | `NoDefaultSearchRoots` | Restrict discovery to the roots you pass |
+| `Force` | Archive an existing run and start over |
 | `Json` | Emit the structured validation result |
 
+`Details.NextStage` is the stage to run next. Re-running the bootstrap is safe: stages already
+`complete` are left untouched.
+
 Default search roots are the dev checkout `plugins/`, `~/.copilot/installed-plugins/*`, and
-`~/.vscode/agent-plugins/*/*/*/plugins`. A missing required plugin returns
-`EIWF-DEPENDENCY-MISSING` with a marketplace install instruction.
+`~/.vscode/agent-plugins/*/*/*/plugins`. A missing required plugin fails the `prerequisites` gate,
+records `preflight` as blocked, and returns a marketplace install instruction.
 
 ### Workflow state
 
@@ -49,15 +61,13 @@ a commit or PR. `ei-workflow-state` owns it.
 ```powershell
 $stateScripts = './plugins/aveva-ei-graphics/skills/ei-workflow-state/scripts'
 
-# Start or resume a run
-& "$stateScripts/Initialize-EiWorkflowState.ps1" -StoryId '123456' -WorkflowPath IMPLEMENT -Json
-
 # Confirm the run is usable before continuing
 & "$stateScripts/Validate-EiWorkflowState.ps1" -StateDir '.copilottracking/ei-graphics/123456' -Json
 ```
 
-Re-running `Initialize-EiWorkflowState.ps1` resumes rather than overwrites. Use `-Force` only to
-archive unusable state; it writes a timestamped `.bak.json` first.
+`Start-EiWorkflowRun.ps1` calls `Initialize-EiWorkflowState.ps1` for you; call it directly only when
+diagnosing state on its own. It resumes rather than overwrites. Use `-Force` only to archive
+unusable state; it writes a timestamped `.bak.json` first.
 
 ### Result contract
 

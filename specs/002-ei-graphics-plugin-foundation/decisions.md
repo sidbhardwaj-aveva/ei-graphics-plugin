@@ -116,3 +116,13 @@
   - The current workflow runtime and gate model need stabilization before introducing additional adapted agent surfaces.
   - Sequencing reduces concurrent change risk and keeps deterministic validation signals clear.
   - This preserves the no-copy policy while still enabling structured reuse once the baseline is stable.
+
+## D-014: Make `start` idempotent for a stage that is already running
+
+- Status: Accepted
+- Date: 2026-08-25
+- Decision: `Set-EiWorkflowStage.ps1 -Action start` accepts a stage in `running` as well as `pending`. Re-entry keeps the original `startedAt`, returns `Details.Resumed = true` with a warning, and still enforces the `in-progress` workflow status and the earlier-stage ordering rule. `complete`, `skipped` and `blocked` stages remain non-startable.
+- Rationale:
+  - An interrupted or resumed run legitimately re-enters the stage it was already executing; the previous `pending`-only rule failed those calls with `EIWF-TRANSITION-INVALID`.
+  - Because `workflow-state.json` is never hand-edited, that failure had no remediation path and stranded the run.
+  - Re-entry bypasses no gate, no artifact check and no ordering rule, so idempotence costs no safety.

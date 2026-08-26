@@ -93,6 +93,24 @@ Describe 'Set-EiWorkflowStage' -Tag 'Unit' {
             ($output | ConvertFrom-Json).Details.Artifact | Should -Be 'workflow-state'
         }
 
+        It 'treats starting an already running stage as re-entry and keeps the original startedAt' {
+            & $script:ScriptPath -StateDir $script:StateDir -StageId 'preflight' -Action start -Json | Out-Null
+            $startedAt = (Get-Content -LiteralPath $script:StatePath -Raw | ConvertFrom-Json).stages[0].startedAt
+
+            $output = & $script:ScriptPath -StateDir $script:StateDir -StageId 'preflight' -Action start -Json
+            $LASTEXITCODE | Should -Be 0
+
+            $result = $output | ConvertFrom-Json
+            $result.Status | Should -Be 'Valid'
+            $result.Details.Resumed | Should -BeTrue
+            $result.Details.StageStatus | Should -Be 'running'
+            $result.Warnings.Count | Should -Be 1
+
+            $state = Get-Content -LiteralPath $script:StatePath -Raw | ConvertFrom-Json
+            $state.stages[0].startedAt | Should -Be $startedAt
+            $state.stage | Should -Be 'preflight'
+        }
+
         It 'leaves the state usable for the Phase A validator after a transition' {
             & $script:ScriptPath -StateDir $script:StateDir -StageId 'preflight' -Action start -Json | Out-Null
             & $script:ScriptPath -StateDir $script:StateDir -StageId 'preflight' -Action complete -GateResult pass -Json | Out-Null

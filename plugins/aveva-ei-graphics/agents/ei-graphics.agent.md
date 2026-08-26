@@ -54,7 +54,9 @@ do next, but still skip internal step names.
      title as plain text — the intake resolves the id from the label when the link is not an ADO
      address, or
    - An existing branch or pull request that has review feedback or CI failures.
-   Ask once, clearly, if none is supplied.
+   Ask once, clearly, if none is supplied. Pass whatever the user pasted through **verbatim**;
+   the id is resolved by script. Never read the work item id off the link yourself, and never
+   supply an organization or project — those are fixed.
 3. **Determine the path.**
    - `IMPLEMENT` — a story that has not been implemented yet.
    - `ITERATE` — an existing PR or branch that needs correction.

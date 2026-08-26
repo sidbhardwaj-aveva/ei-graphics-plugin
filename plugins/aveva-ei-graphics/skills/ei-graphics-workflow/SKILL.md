@@ -69,25 +69,16 @@ Rules of thumb:
 | Retry ceiling and escalation | Run an unbounded autonomous repair loop |
 | The result contract returned to the agent | Duplicate R&D or Core capabilities |
 
-## Step 0 — Establish session ID and write start marker
+## Step 0 — Determine the path
 
-Generate a session ID before calling `Initialize-EiWorkflowState.ps1`. Write a start-marker log
-immediately after initialisation so that an interrupted session still leaves a record.
+| Input | Path |
+|---|---|
+| ADO story URL or id with no existing state | `IMPLEMENT` |
+| Existing branch/PR with review feedback or CI failures | `ITERATE` |
+| Existing state for the story and the user asks to continue | Resume the recorded path |
 
-```powershell
-$sessionId = [System.Guid]::NewGuid().ToString()
-
-& "$stateSkill/Initialize-EiWorkflowState.ps1" -StoryId '<story-id>' -WorkspaceRoot '<repo>' -Json
-$stateDir = '<resolved state dir>'
-
-# Start marker — written immediately; overwritten at Step 6 with the real outcome.
-& "$workflow/New-EiSessionLog.ps1" -StateDir $stateDir -SessionId $sessionId `
-    -FinalStatus in-progress -EntryPoint '<ado-url|ado-id|manual>' -Json
-```
-
-Because the log filename is `<sessionId>.json`, every subsequent call with the same `-SessionId`
-overwrites this file. If the run is interrupted after this point the marker remains with
-`finalStatus = in-progress`, which the report tool flags as a potentially interrupted session.
+`IMPLEMENT` and `ITERATE` are distinct lifecycles sharing one sealed `ApprovedScope`. `ITERATE`
+never restarts intake and never re-derives scope.
 
 ## Path resolution (run once)
 
@@ -106,43 +97,72 @@ If the host exposes a callable `skill` tool, invoke the named skill. If it does 
 skill's `SKILL.md` and execute its documented scripts exactly. Never silently omit a stage because
 a skill could not be invoked — that is a BLOCK.
 
-## Step 1 — Prerequisite and dependency preflight
+## Step 1 — Bootstrap the run in one call
+
+Startup is a single invocation. Do not run the underlying scripts individually.
 
 ```powershell
-& "$workflow/Validate-EiWorkflowPrerequisites.ps1" -RepositoryRoot '<repo>' -Phase A -Json
+& "$workflow/Start-EiWorkflowRun.ps1" -StoryId '<story-id>' -WorkflowPath IMPLEMENT `
+    -StoryRef '<url>' -WorkspaceRoot '<repo>' -Phase A -EntryPoint '<ado-url|ado-id|manual>' -Json
 ```
 
-Checks PowerShell 7+, git availability and work tree, the local EI skills, and the cross-plugin
-capabilities declared in `references/required-capabilities.json`. Add `-PluginSearchRoot` for a
-non-standard install location, or `-NoDefaultSearchRoots` to restrict discovery to the roots you
-pass. A missing required plugin returns `EIWF-DEPENDENCY-MISSING` with, for example:
+Pass the user's reference through verbatim — a pasted markdown link is fine. Leave `-StoryId` empty
+when `-StoryRef` carries it; the id is resolved deterministically by the intake skill's reference
+helper, and `storyRef` is normalised to a bare URL. Never read the id off the link yourself.
 
-> `aveva-rnd is not installed. Install it from the marketplace and retry.`
+Every startup step used to be its own script call, and in an agent host each call is a separate
+approval prompt paid before the run does any story work. `Start-EiWorkflowRun.ps1` performs the
+whole sequence in one process and returns one result contract.
+
+## Step 2 — What the bootstrap performs
+
+In order, and still through the owning script in each case:
+
+| # | Action | Owner |
+|---|---|---|
+| 1 | Initialise or resume `<repo>/.copilottracking/ei-graphics/<story-id>/` | `Initialize-EiWorkflowState.ps1` |
+| 2 | Write the `finalStatus = in-progress` start marker | `New-EiSessionLog.ps1` |
+| 3 | Evaluate the `prerequisites` gate | `Validate-EiWorkflowPrerequisites.ps1` |
+| 4 | Record `preflight` as started and complete with `gateResult = pass` | `Set-EiWorkflowStage.ps1` |
+| 5 | On `IMPLEMENT` only, record `state-init` the same way | `Set-EiWorkflowStage.ps1` |
+
+Consolidation is not permission to skip. `workflow-state.json` is still mutated only through
+`Set-EiWorkflowStage.ps1`, and running a validation script is still not the same thing as recording
+its stage — the bootstrap does both, which is exactly the gap that used to leave `ado-intake`
+refusing to start behind a `pending` `preflight`.
+
+`ITERATE`'s second stage is `state-recovery`, which also recovers branch and PR evidence. That is
+more than the bootstrap performed, so it is left `pending` for `ei-workflow-state` to run.
+
+Useful parameters: `-Phase` selects how far ahead capabilities are checked (default `A`);
+`-PluginSearchRoot` and `-NoDefaultSearchRoots` control plugin discovery; `-SessionId` pins the
+session for the Step 6 log; `-Force` archives an existing run and starts over.
+
+## Step 3 — Read the bootstrap result before advancing
 
 `Status: Invalid` is a hard stop. Do not continue and do not substitute a local reimplementation.
 
-## Step 2 — Determine the path
-
-| Input | Path |
+| Detail | Meaning |
 |---|---|
-| ADO story URL or id with no existing state | `IMPLEMENT` |
-| Existing branch/PR with review feedback or CI failures | `ITERATE` |
-| Existing state for the story and the user asks to continue | Resume the recorded path |
+| `StateDir` | Pass to every later stage |
+| `SessionId` | Reuse verbatim at Step 6 |
+| `Resumed` | `true` means an interrupted run is continuing |
+| `StagesCompleted` | Stages the bootstrap recorded |
+| `NextStage` | The stage Step 4 must start |
+| `Prerequisites` | `Found`, `MissingRequired`, `MissingLaterPhase` |
 
-`IMPLEMENT` and `ITERATE` are distinct lifecycles sharing one sealed `ApprovedScope`. `ITERATE`
-never restarts intake and never re-derives scope.
+Later-phase capability gaps are warnings, not errors. A missing *required* plugin fails the
+`prerequisites` gate, records `preflight` as blocked with `EIWF-PREREQUISITES`, and surfaces
+`EIWF-BOOTSTRAP-PREFLIGHT` with, for example:
 
-## Step 3 — Initialise or resume state
+> `aveva-rnd is not installed. Install it from the marketplace and retry.`
 
-```powershell
-& "$stateSkill/Initialize-EiWorkflowState.ps1" -StoryId '<story-id>' -WorkflowPath IMPLEMENT -StoryRef '<url>' -WorkspaceRoot '<repo>' -Json
-```
+`EIWF-BOOTSTRAP-STATE` means state could not be initialised — `EIWF-PATH-MISMATCH` is the common
+cause, raised when the other lifecycle is requested against an active run. A failed session-log
+write is the one non-fatal step and appears as a warning.
 
-State lives in `<repo>/.copilottracking/ei-graphics/<story-id>/` and is owned by `ei-workflow-state`.
-The root parameter here is `-WorkspaceRoot` (alias `-RepositoryRoot`) and defaults to the current
-directory. `Details.Resumed = true` means an interrupted run continues from `Details.Stage`;
-re-running a completed stage is not allowed. Requesting the other path against an active run returns
-`EIWF-PATH-MISMATCH`.
+Re-running the bootstrap after an interruption is safe: stages already `complete` are left
+untouched, so `startedAt` is preserved and no gate is re-evaluated.
 
 ## Step 4 — Run stages in the recorded order
 
@@ -618,7 +638,10 @@ A run may not return while its state is `in-progress`; the terminal status must 
 Write the session log at **every terminal exit point** — completed, blocked, failed, and
 awaiting-approval. Never write it only at Step 6; if the run is blocked mid-workflow and the agent
 exits without reaching this step, the log will still show all stages as `pending` (the start
-marker from Step 0) and will not reflect the actual progress made.
+marker written by the Step 1 bootstrap) and will not reflect the actual progress made.
+
+Reuse the `SessionId` the bootstrap returned; a fresh GUID here would leave the start marker
+orphaned and the run would be reported as interrupted.
 
 The pattern is: **always pair `New-EiWorkflowResult.ps1` with `New-EiSessionLog.ps1`**.
 
@@ -636,7 +659,7 @@ The pattern is: **always pair `New-EiWorkflowResult.ps1` with `New-EiSessionLog.
 
 Because the log filename is `<sessionId>.json`, each call **overwrites** the previous one.
 The last written log always reflects the furthest the run reached. If the session is interrupted
-without reaching any of these calls, the start marker from Step 0 remains (all stages `pending`),
+without reaching any of these calls, the bootstrap's start marker remains (all stages `pending`),
 which flags the run as interrupted in the improvement report.
 
 Supply `-PromptTokens`, `-CompletionTokens`, and `-EstimatedCostUSD` on the final call when the

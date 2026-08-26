@@ -625,3 +625,36 @@
   only `start | complete | block`, `start` requires a `pending` stage and an `in-progress` workflow,
   and `state.blocks` is append-only while `workflow-state.json` records no per-stage attempt count —
   so repeated failures of the same stage are not observable after the fact.
+
+## Tranche T-052 — one-call workflow bootstrap
+
+- Problem: starting a run cost seven separate script invocations — `Initialize-EiWorkflowState.ps1`,
+  `New-EiSessionLog.ps1`, `Validate-EiWorkflowPrerequisites.ps1`, then `start` and `complete` on both
+  `preflight` and `state-init`. In an agent host each invocation is its own approval prompt, so the
+  user approved seven terminal commands before the run touched the story at all.
+- Fix: added `Start-EiWorkflowRun.ps1` to `ei-graphics-workflow/scripts/`. It runs the whole sequence
+  in one process and returns one contract with `StateDir`, `SessionId`, `Resumed`, `StagesCompleted`,
+  `NextStage` and the full `Prerequisites` detail.
+- Consolidation is not permission to skip. Every underlying script is still called and is still the
+  sole owner of its step; in particular `workflow-state.json` is still mutated only through
+  `Set-EiWorkflowStage.ps1`.
+- Fails closed. A failing `prerequisites` gate blocks `preflight` with `EIWF-PREREQUISITES` and
+  returns `EIWF-BOOTSTRAP-PREFLIGHT`, rather than leaving a run that looks startable. State that
+  cannot be initialised returns `EIWF-BOOTSTRAP-STATE`. Only the session-log write is non-fatal,
+  because a missing local log must never stop a run.
+- Idempotent. Stages already `complete` are skipped, so re-running after an interruption preserves
+  `startedAt` and does not re-evaluate a gate.
+- `-StateDir` is deliberately not forwarded to the preflight: from Phase B that makes it assert
+  `candidate.json`, which by definition does not exist at bootstrap time. That check belongs to the
+  later re-validation before `proposed-scope`.
+- `ITERATE` stops after `preflight`. Its second stage, `state-recovery`, also recovers branch and PR
+  evidence — more than the bootstrap performed — so it stays `pending` for `ei-workflow-state`.
+- Also closes the documentation gap behind T-051's stage-order block: `SKILL.md` told the agent to
+  run the preflight and init scripts but never to record the matching transitions, which is why
+  `ado-intake` refused to start behind a `pending` `preflight`.
+- Added `Start-EiWorkflowRun.Tests.ps1` (7 tests): single-call stage recording, start-marker
+  contents, idempotent re-run with preserved `startedAt`, later-phase gaps as warnings, fail-closed
+  block on a missing required capability, rejected story id, and the `ITERATE` stop point.
+- Documentation: `ei-graphics-workflow/SKILL.md` Steps 0–3 restructured around the single call
+  (Step 0 path choice, Step 1 bootstrap, Step 2 what it performs, Step 3 how to read the result),
+  and `INSTRUCTIONS.md` now documents `Start-EiWorkflowRun.ps1` in place of the individual scripts.
