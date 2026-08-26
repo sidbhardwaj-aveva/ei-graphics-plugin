@@ -264,11 +264,15 @@ human checkpoint**: the stage script blocks unless `-HumanConfirmed` is passed.
 
 **What the agent must do before calling the script:**
 
-1. Read the sealed `ado.json` artifact (title, description, acceptance criteria, parent feature,
-   any accessible images).
+1. Read the sealed `ado.json` artifact: `description` (title, description and acceptance criteria as
+   plain text), `comments` (the discussion thread in chronological order), and every image under
+   `attachments[].localPath`. Do not re-fetch the work item — everything is already sealed.
 2. Reason about the story and build a plain-language understanding (see `ei-graphics.agent.md`
    for the required format — `What is this about?`, `What needs to change?`, `Expected outcome`,
-   `Relevant domain`, `Why I selected this domain`, and image observations).
+   `Relevant domain`, `Why I selected this domain`, `Comments`, and image observations). Comments
+   are part of the understanding, not decoration: a later comment routinely narrows or contradicts
+   the written story, and `commentRetrieval.status` must be reported when the thread was not read
+   so an unread thread is never presented as an empty one.
 3. Select one or more domain IDs from `ei-vocabulary-navigator/references/domain-skill-registry.json`.
    Only registered IDs are valid; the script blocks on an unregistered ID
    (`EIVN-DOMAIN-NOT-REGISTERED`). An empty selection is valid when agent and user agree no

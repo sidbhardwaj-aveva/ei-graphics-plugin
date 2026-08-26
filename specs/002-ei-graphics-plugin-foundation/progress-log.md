@@ -783,3 +783,40 @@
   field attribution, unavailable, skipped, empty-but-retrieved) and 2 new stage tests (thread
   sealed into the artifact, warning plus `unavailable` when it cannot be read). Full suite: 323
   passed, 0 failed.
+
+
+## Tranche T-059 — the discussion reaches the human
+
+- The problem: T-058 delivered the thread into `ado.json` and into the agent's understanding
+  checkpoint, but `Format-EiWorkflowSummary.ps1` — the canonical presentation layer the agent is
+  required to present verbatim — never read `comments` or `commentRetrieval`. Its `## Understanding`
+  section prints only the description, truncated at 500 characters. The thread was therefore
+  explained once, at the domain-context checkpoint, and was invisible at the scope-approval pause,
+  which is the other moment a human actually decides something.
+- A `## Discussion` section now sits between Understanding and Relevant Area in every summary, so
+  the section order is Story → Understanding → Discussion → Relevant Area → Proposed Scope →
+  Validation → Next Step.
+- The section shows the five most recent comments, because a later comment routinely supersedes the
+  written story, and says how many were omitted. Each comment is truncated at 240 characters and
+  rendered as `- **Author** (YYYY-MM-DD) — text`.
+- The unread-versus-empty distinction now lives in the presentation layer as well as the artifact.
+  A `commentRetrieval.status` other than `retrieved` prints that the thread could not be read, with
+  the reason, and that any clarification posted in comments is not reflected in the summary —
+  instead of the "No comments on this work item." line, which is a different and much stronger
+  claim.
+- Optional properties are read through `PSObject.Properties[...]`, so an artifact sealed before
+  T-058 still formats under `Set-StrictMode -Version Latest` rather than throwing.
+- Building this exposed a real defect in T-058's determinism work. `Invoke-EiAdoIntakeStage.ps1`
+  re-parses the intake payload with `ConvertFrom-Json`, which re-hydrated the invariant ISO string
+  into a `DateTime`, and the subsequent `[string]` cast wrote `08/01/2026 10:00:00` into the sealed
+  artifact on an en-GB machine. T-058's raw-JSON test passed because it asserted on the intake
+  output, before that hop. `ConvertTo-EiIsoTimestamp` moved into
+  `ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1` and is now applied on both sides
+  of the boundary; the new stage test asserts against the raw artifact JSON, because re-parsing to
+  assert would re-hydrate the value and hide exactly this failure.
+- `ei-graphics-workflow/SKILL.md`'s `domain-context` step now names `comments` as required reading
+  alongside `description` and the downloaded images, and states that comments are part of the
+  understanding rather than decoration.
+- Tests: 4 new formatter tests (chronological thread with attribution, unread thread distinguished
+  from an empty one, empty retrieved thread, long thread capped at five with an omission count) and
+  1 new stage regression test for the invariant timestamp. Full suite: 328 passed, 0 failed.

@@ -37,6 +37,7 @@ $ErrorActionPreference = 'Stop'
 
 $stateScripts = Join-Path $PSScriptRoot '..' '..' 'ei-workflow-state' 'scripts'
 . (Join-Path $stateScripts 'helpers' 'EiWorkflowState.ps1')
+. (Join-Path $PSScriptRoot 'helpers' 'EiAdoTimestamp.ps1')
 
 $result = New-EiResult
 $result = Set-EiDetail -Result $result -Name 'StateDir' -Value $StateDir
@@ -145,11 +146,13 @@ if ($null -ne $intake.PSObject.Properties['commentRetrieval']) {
 
 $comments = @()
 if ($null -ne $intake.PSObject.Properties['comments']) {
+    # Reading the intake payload back re-hydrates the ISO string into a DateTime, so the timestamp is
+    # re-formatted rather than cast, or the sealed artifact would carry a culture-specific date.
     $comments = @(@($intake.comments) | ForEach-Object {
         [ordered]@{
             id          = [string]$_.id
             author      = [string]$_.author
-            createdDate = [string]$_.createdDate
+            createdDate = (ConvertTo-EiIsoTimestamp -Value $_.createdDate)
             text        = [string]$_.text
         }
     })

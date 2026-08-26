@@ -117,7 +117,10 @@ Retrieval is best-effort and never blocks the stage, but the outcome is always r
 
 `createdDate` is emitted as an invariant `yyyy-MM-ddTHH:mm:ssZ` string. `ConvertFrom-Json` turns an
 ISO-8601 string into a `DateTime`, and casting that back to a string renders it in the current
-culture, which would make the sealed artifact machine-dependent.
+culture, which would make the sealed artifact machine-dependent. Every hop that deserialises and
+re-serialises the payload must re-format rather than cast, so `scripts/helpers/EiAdoTimestamp.ps1`
+owns `ConvertTo-EiIsoTimestamp` and both `Invoke-EiAdoCliIntake.ps1` and `Invoke-EiAdoIntakeStage.ps1`
+use it.
 
 ## Rules
 

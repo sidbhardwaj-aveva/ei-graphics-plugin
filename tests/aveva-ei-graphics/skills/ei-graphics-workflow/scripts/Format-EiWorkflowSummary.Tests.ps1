@@ -80,6 +80,7 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
 
             $summary | Should -BeLike '*## Story*'
             $summary | Should -BeLike '*## Understanding*'
+            $summary | Should -BeLike '*## Discussion*'
             $summary | Should -BeLike '*## Relevant Area*'
             $summary | Should -BeLike '*## Proposed Scope*'
             $summary | Should -BeLike '*## Validation*'
@@ -96,6 +97,73 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
 
             $summary | Should -BeLike '*123456*'
             $summary | Should -BeLike '*Termination labels*'
+        }
+    }
+
+    # ── 1b: Discussion section ────────────────────────────────────────────────────
+    Context 'discussion section' {
+        BeforeAll {
+            function script:Get-EiDiscussionSection {
+                param([string]$Summary)
+                (($Summary -split '## Discussion', 2)[-1] -split '## Relevant Area', 2)[0]
+            }
+        }
+
+        It 'lists the thread chronologically with author attribution' {
+            $comments = '{ "comments": [ { "id": 9, "text": "<div>Only the left-hand strip is affected.</div>", "createdBy": { "displayName": "Bob" }, "createdDate": "2026-08-02T10:00:00Z" }, { "id": 4, "text": "<div>The description here is incorrect.</div>", "createdBy": { "displayName": "Ann" }, "createdDate": "2026-08-01T10:00:00Z" } ] }'
+            & $script:IntakePath -StateDir $script:StateDir `
+                -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/123456' `
+                -CliWorkItemJson $script:WorkItemCableJson -CliCommentsJson $comments -Json | Out-Null
+
+            $result = & $script:ScriptPath -StateDir $script:StateDir -Json | ConvertFrom-Json
+            $section = script:Get-EiDiscussionSection -Summary $result.Details.Summary
+
+            $section | Should -BeLike '*Ann*'
+            $section | Should -BeLike '*2026-08-01*'
+            $section | Should -BeLike '*The description here is incorrect.*'
+            $section | Should -BeLike '*Only the left-hand strip is affected.*'
+            $section.IndexOf('Ann') | Should -BeLessThan $section.IndexOf('Bob')
+        }
+
+        It 'distinguishes an unread thread from an empty one' {
+            & $script:IntakePath -StateDir $script:StateDir `
+                -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/123456' `
+                -CliWorkItemJson $script:WorkItemCableJson -CliCommentsJson 'not-json' -Json | Out-Null
+
+            $result = & $script:ScriptPath -StateDir $script:StateDir -Json | ConvertFrom-Json
+            $section = script:Get-EiDiscussionSection -Summary $result.Details.Summary
+
+            $section | Should -BeLike '*could not be read*'
+            $section | Should -Not -BeLike '*No comments on this work item*'
+        }
+
+        It 'reports an empty retrieved thread as having no comments' {
+            & $script:IntakePath -StateDir $script:StateDir `
+                -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/123456' `
+                -CliWorkItemJson $script:WorkItemCableJson -CliCommentsJson '{ "comments": [] }' -Json | Out-Null
+
+            $result = & $script:ScriptPath -StateDir $script:StateDir -Json | ConvertFrom-Json
+            $section = script:Get-EiDiscussionSection -Summary $result.Details.Summary
+
+            $section | Should -BeLike '*No comments on this work item*'
+        }
+
+        It 'caps a long thread at the five most recent and says how many were omitted' {
+            $items = 1..8 | ForEach-Object {
+                '{ "id": ' + $_ + ', "text": "<div>note ' + $_ + '</div>", "createdBy": { "displayName": "Ann" }, "createdDate": "2026-08-0' + $_ + 'T10:00:00Z" }'
+            }
+            $comments = '{ "comments": [ ' + ($items -join ', ') + ' ] }'
+
+            & $script:IntakePath -StateDir $script:StateDir `
+                -WorkItemUrl 'https://dev.azure.com/example/MyProject/_workitems/edit/123456' `
+                -CliWorkItemJson $script:WorkItemCableJson -CliCommentsJson $comments -Json | Out-Null
+
+            $result = & $script:ScriptPath -StateDir $script:StateDir -Json | ConvertFrom-Json
+            $section = script:Get-EiDiscussionSection -Summary $result.Details.Summary
+
+            $section | Should -BeLike '*5 most recent of 8 comments*'
+            $section | Should -BeLike '*note 8*'
+            $section | Should -Not -BeLike '*note 1*'
         }
     }
 

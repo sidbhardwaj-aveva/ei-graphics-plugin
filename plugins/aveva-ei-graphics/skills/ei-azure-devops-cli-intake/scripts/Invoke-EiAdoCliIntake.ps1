@@ -13,6 +13,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'helpers' 'EiWorkItemReference.ps1')
+. (Join-Path $PSScriptRoot 'helpers' 'EiAdoTimestamp.ps1')
 
 $WorkItemUrl = $WorkItemUrl.Trim()
 $WorkItemId = $WorkItemId.Trim()
@@ -134,26 +135,11 @@ function ConvertTo-NormalizedComment {
         [PSCustomObject]@{
             id          = [string](Get-RawProperty -Object $_ -Name 'id')
             author      = (Get-FieldValue -FieldBag (Get-RawProperty -Object $_ -Name 'createdBy') -Name 'displayName')
-            createdDate = (ConvertTo-IsoTimestamp -Value (Get-RawProperty -Object $_ -Name 'createdDate'))
+            createdDate = (ConvertTo-EiIsoTimestamp -Value (Get-RawProperty -Object $_ -Name 'createdDate'))
             text        = (Get-PlainText -Text $html)
             html        = $html
         }
     } | Sort-Object -Property @{ Expression = { [int64]($_.id -as [int64]) } }, id)
-}
-
-# ConvertFrom-Json turns an ISO-8601 string into a DateTime, and casting that back to string renders
-# it in the current culture. Formatting explicitly keeps the artifact identical on every machine.
-function ConvertTo-IsoTimestamp {
-    param([object]$Value)
-
-    if ($null -eq $Value) { return '' }
-    if ($Value -is [datetime]) {
-        return ([datetime]$Value).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ', [System.Globalization.CultureInfo]::InvariantCulture)
-    }
-    if ($Value -is [datetimeoffset]) {
-        return ([datetimeoffset]$Value).UtcDateTime.ToString('yyyy-MM-ddTHH:mm:ssZ', [System.Globalization.CultureInfo]::InvariantCulture)
-    }
-    return [string]$Value
 }
 
 function Get-AdoCliFailureReason {

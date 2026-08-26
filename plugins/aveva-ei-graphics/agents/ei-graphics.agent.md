@@ -178,6 +178,7 @@ Present `Details.Summary` to the user verbatim. It is already structured in plai
 ```
 ## Story
 ## Understanding
+## Discussion
 ## Relevant Area
 ## Proposed Scope
 ## Validation

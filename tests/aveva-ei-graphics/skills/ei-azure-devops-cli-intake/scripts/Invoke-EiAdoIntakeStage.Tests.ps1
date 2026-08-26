@@ -82,6 +82,18 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
             @($artifact.comments)[0].text | Should -Be 'Only the left-hand strip is affected.'
         }
 
+        It 'seals comment timestamps in invariant ISO form regardless of machine culture' {
+            $comments = '{ "comments": [ { "id": 4, "text": "<div>note</div>", "createdBy": { "displayName": "Ann" }, "createdDate": "2026-08-01T10:00:00Z" } ] }'
+
+            & $script:IntakeStagePath -StateDir $script:StateDir -WorkItemUrl $script:WorkItemUrl `
+                -CliWorkItemJson $script:WorkItemJson -CliCommentsJson $comments -Json | Out-Null
+
+            # Asserted against raw JSON: re-parsing would re-hydrate the value into a DateTime and
+            # hide a culture-formatted date that was actually written to disk.
+            $raw = Get-Content -LiteralPath (Join-Path $script:StateDir 'ado.json') -Raw
+            $raw | Should -Match '"createdDate":\s*"2026-08-01T10:00:00Z"'
+        }
+
         It 'warns and records unavailable when the thread could not be read' {
             $result = & $script:IntakeStagePath -StateDir $script:StateDir -WorkItemUrl $script:WorkItemUrl `
                 -CliWorkItemJson $script:WorkItemJson -CliCommentsJson 'not-json' -Json | ConvertFrom-Json

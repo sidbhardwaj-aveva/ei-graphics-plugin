@@ -8,7 +8,7 @@ Reads the workflow state and available artifacts from the given state directory 
 builds a structured markdown summary suitable for presenting to a team member.
 
 The summary follows this structure:
-  Story → Understanding → Relevant Area → Proposed Scope → Validation → Next Step
+  Story → Understanding → Discussion → Relevant Area → Proposed Scope → Validation → Next Step
 
 Internal implementation terminology (phase labels, artifact names, gate codes) is kept
 out of the primary output. Use -Technical to append a diagnostic section for debugging.
@@ -114,6 +114,64 @@ if ($null -ne $adoArtifact -and -not [string]::IsNullOrWhiteSpace([string]$adoAr
     [void]$sb.AppendLine($proposedScope.rationale)
 } else {
     [void]$sb.AppendLine('Story intake is pending.')
+}
+[void]$sb.AppendLine()
+
+# ── Section: Discussion ────────────────────────────────────────────────────────
+# A later comment routinely supersedes the written story, so the thread travels with every summary
+# rather than being read once at the domain checkpoint and dropped before the approval prompt.
+[void]$sb.AppendLine('## Discussion')
+if ($null -eq $adoArtifact) {
+    [void]$sb.AppendLine('Story intake is pending.')
+}
+else {
+    $commentStatus = 'skipped'
+    $commentReason = 'not-recorded'
+    if ($null -ne $adoArtifact.PSObject.Properties['commentRetrieval']) {
+        $commentStatus = [string]$adoArtifact.commentRetrieval.status
+        $commentReason = [string]$adoArtifact.commentRetrieval.reason
+    }
+
+    $comments = @()
+    if ($null -ne $adoArtifact.PSObject.Properties['comments']) {
+        $comments = @($adoArtifact.comments)
+    }
+
+    if ($commentStatus -ne 'retrieved') {
+        # An unread thread is not an empty one, and the difference decides whether the reader can
+        # trust this summary as the whole story.
+        [void]$sb.AppendLine("The discussion thread could not be read ($commentReason), so any clarification posted in comments is **not** reflected in this summary.")
+    }
+    elseif ($comments.Count -eq 0) {
+        [void]$sb.AppendLine('No comments on this work item.')
+    }
+    else {
+        $shown = if ($comments.Count -gt 5) { $comments[-5..-1] } else { $comments }
+        if ($comments.Count -gt $shown.Count) {
+            [void]$sb.AppendLine("Showing the $($shown.Count) most recent of $($comments.Count) comments.")
+            [void]$sb.AppendLine()
+        }
+        foreach ($comment in $shown) {
+            $author = [string]$comment.author
+            if ([string]::IsNullOrWhiteSpace($author)) { $author = 'Unknown' }
+
+            # Reading the artifact back turns the sealed ISO string into a DateTime, whose default
+            # string cast is culture-dependent; format explicitly rather than trusting the cast.
+            $rawDate = $comment.createdDate
+            $when = if ($rawDate -is [datetime]) {
+                ([datetime]$rawDate).ToUniversalTime().ToString('yyyy-MM-dd', [System.Globalization.CultureInfo]::InvariantCulture)
+            }
+            elseif ([string]$rawDate -match '^(\d{4}-\d{2}-\d{2})') { $Matches[1] }
+            else { '' }
+
+            $text = ([string]$comment.text).Trim()
+            if ($text.Length -gt 240) { $text = $text.Substring(0, 237) + '...' }
+            if ([string]::IsNullOrWhiteSpace($text)) { $text = '(no text)' }
+
+            $prefix = if ($when) { "**$author** ($when)" } else { "**$author**" }
+            [void]$sb.AppendLine("- $prefix — $text")
+        }
+    }
 }
 [void]$sb.AppendLine()
 
