@@ -60,6 +60,7 @@
 | T-049 | Add Pester tests for New-EiScopeCandidate.ps1 and updated prerequisites | P0 | Done | Engineering | T-047,T-048 | New-EiScopeCandidate.Tests.ps1 (15 tests); Validate-EiWorkflowPrerequisites.Tests.ps1 extended with 6 candidate gate tests; ImplementLifecycleToApprovedScope.Tests.ps1 updated to run scope-candidate stage |
 
 | T-050 | Add local session logging system | P1 | Done | Engineering | T-044,T-046 | Added `New-EiSessionLog.ps1`, `Read-EiSessionLogs.ps1`, `session-log.schema.json`; SKILL.md Step 6; `.ei-session-logs/` gitignored; 24 focused Pester tests |
+| T-053 | Make work item reference parsing deterministic and pin org/project | P0 | Done | Engineering | T-051,T-052 | Added `EiWorkItemReference.ps1` helper shared by `Invoke-EiAdoCliIntake.ps1` and `Start-EiWorkflowRun.ps1`; org/project fixed to `AVEVA-VSTS` / `Dabacon Products`; `-StoryId` derivable from a pasted link; 8 new tests; full suite 307/307 |
 
 ## Immediate next actions
 

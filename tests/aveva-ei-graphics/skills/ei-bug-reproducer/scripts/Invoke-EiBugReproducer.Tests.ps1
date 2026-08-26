@@ -64,8 +64,8 @@ Describe 'Invoke-EiBugReproducer' -Tag 'Unit' {
                 $result = $output | ConvertFrom-Json
                 $result.status | Should -Be 'ready'
                 $result.bugContext.bugId | Should -Be '4913134'
-                $result.bugContext.organization | Should -Be 'ei-org'
-                $result.bugContext.project | Should -Be 'ei-project'
+                $result.bugContext.organization | Should -Be 'AVEVA-VSTS'
+                $result.bugContext.project | Should -Be 'Dabacon Products'
                 $result.bugContext.workItemUrl | Should -Be 'https://dev.azure.com/ei-org/ei-project/_workitems/edit/4913134'
                 $result.bugContext.retrieval.authSource | Should -Be 'cli-mock-json'
             }

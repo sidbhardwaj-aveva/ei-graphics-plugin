@@ -658,3 +658,39 @@
 - Documentation: `ei-graphics-workflow/SKILL.md` Steps 0–3 restructured around the single call
   (Step 0 path choice, Step 1 bootstrap, Step 2 what it performs, Step 3 how to read the result),
   and `INSTRUCTIONS.md` now documents `Start-EiWorkflowRun.ps1` in place of the individual scripts.
+
+## Tranche T-053 — deterministic work item reference parsing, fixed org and project
+
+- Problem 1 — the agent read the id off the link. The real input is always a pasted markdown link
+  such as `[Bug 4983245 SR350 - <title>](https://dev.azure.com/AVEVA-VSTS/Dabacon%20Products/_workitems/edit/4983245)`,
+  but nothing turned that into `-StoryId`. The model did it, so the first deterministic value in the
+  whole run came out of a non-deterministic step.
+- Problem 2 — a short link corrupted the project. `Resolve-FromWorkItemUrl` took URL segment 1 as the
+  project unconditionally, so `https://dev.azure.com/AVEVA-VSTS/_workitems/edit/4983245` — the form
+  ADO emits when the project is omitted — sealed `project = "_workitems"` into `ado.json`.
+- Problem 3 — the link decided the org and project. They were resolved from the URL first and only
+  fell back to the AVEVA defaults, so the same story pasted from two different links could be
+  recorded two different ways.
+- Problem 4 — the markdown-link regex was anchored `^...$`, so a link with any prose around it was
+  discarded and the run silently fell back to reading an id out of the label.
+- Fix: added `ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1` as the single owner
+  of reference parsing (`Split-EiWorkItemReference`, `Get-EiWorkItemIdFromLabel`,
+  `Get-EiAdoUrlWorkItemId`, `Resolve-EiWorkItemReference`) and of the fixed org/project constants.
+  `Invoke-EiAdoCliIntake.ps1` now delegates to it instead of carrying its own four parsing
+  functions.
+- Org and project are fixed: `-Organization`/`-Project`, then `AZDO_ORG`/`AZDO_PROJECT`, then
+  `AVEVA-VSTS` / `Dabacon Products`. The URL is deliberately not a tier. Every EI Graphics story
+  lives in the same project, so a link can no longer move a run somewhere else or seal a reserved
+  `_`-prefixed segment as the project.
+- `Start-EiWorkflowRun.ps1` dot-sources the same helper, so `-StoryId` may now be left empty when
+  `-StoryRef` carries the link. The id is derived by script, and `storyRef` is normalised to a bare
+  URL so `Format-EiWorkflowSummary.ps1` never nests one markdown link inside another.
+- Failure reasons are unchanged in spirit and now documented as a table: `missing-work-item-url-or-id`
+  (blocked), `missing-work-item-id-in-url`, `missing-work-item-id-in-reference`,
+  `unsupported-work-item-url-host`. `invalid-work-item-id` and `missing-organization-or-project` were
+  removed from the intake because the resolver can no longer produce either.
+- Tests: 5 new intake tests (fixed org/project despite the URL, reserved `_workitems` segment, link
+  inside prose, non-ADO bare URL) and 3 new bootstrap tests (id derived from a pasted link as
+  `-StoryRef` and as `-StoryId`, non-numeric story id left alone). Existing intake, stage and bug
+  reproducer assertions updated to the pinned org/project. Full suite: 307 passed, 0 failed.
+
