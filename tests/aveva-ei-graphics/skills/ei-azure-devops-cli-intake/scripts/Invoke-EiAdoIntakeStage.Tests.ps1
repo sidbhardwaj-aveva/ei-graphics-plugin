@@ -5,6 +5,7 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
     BeforeAll {
         $repoRoot = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $stateScripts = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills' 'ei-workflow-state' 'scripts'
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
 
         $script:InitPath = Join-Path $stateScripts 'Initialize-EiWorkflowState.ps1'
         $script:StagePath = Join-Path $stateScripts 'Set-EiWorkflowStage.ps1'
@@ -32,6 +33,7 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
         # `ado-intake` sits behind preflight and state-init, and stage ordering is enforced, so the
         # harness advances those the same way the workflow would.
         function script:Complete-EiStagesBeforeIntake {
+            script:New-EiTestPreflightEvidence -StateDir $script:StateDir -StoryId '123456'
             foreach ($stageId in @('preflight', 'state-init')) {
                 & $script:StagePath -StateDir $script:StateDir -StageId $stageId -Action start -Json | Out-Null
                 & $script:StagePath -StateDir $script:StateDir -StageId $stageId -Action complete -GateResult pass -Json | Out-Null

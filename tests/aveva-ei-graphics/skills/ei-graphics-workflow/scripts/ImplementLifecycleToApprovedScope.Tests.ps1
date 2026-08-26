@@ -11,6 +11,7 @@
 # tag: it is hermetic, uses only checked-in fixtures and TestDrive, and makes no network call.
 Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'Integration' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
         $repoRoot = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $pluginSkills = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills'
         $stateScripts = Join-Path $pluginSkills 'ei-workflow-state' 'scripts'
@@ -42,9 +43,11 @@ Describe 'IMPLEMENT lifecycle from ADO intake to approved scope' -Tag 'Unit', 'I
         $LASTEXITCODE | Should -Be 0
         $stateDir = Join-Path $workspace '.copilottracking' 'ei-graphics' '123456'
 
-        # preflight -- the gate is the real prerequisite check, not an assertion.
+        # preflight -- the gate is the real prerequisite check, not an assertion, and its verdict is
+        # persisted because the stage will not complete without that evidence.
         $prereq = & $script:PrereqPath -RepositoryRoot $script:RepoRoot -Phase C -Json | ConvertFrom-Json
         $prereq.Status | Should -Be 'Valid'
+        script:New-EiTestPreflightEvidence -StateDir $stateDir -StoryId '123456' -Phase C
         & $script:StagePath -StateDir $stateDir -StageId 'preflight' -Action start -Json | Out-Null
         & $script:StagePath -StateDir $stateDir -StageId 'preflight' -Action complete -GateResult pass -Json | Out-Null
         $LASTEXITCODE | Should -Be 0

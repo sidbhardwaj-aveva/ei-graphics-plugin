@@ -23,6 +23,16 @@
       "versioned": false
     },
     {
+      "name": "prerequisites",
+      "file": "prerequisites.json",
+      "owner": "ei-graphics-workflow",
+      "writtenByStage": "preflight",
+      "schema": "prerequisites.schema.json",
+      "implementedInPhase": "A",
+      "status": "active",
+      "versioned": false
+    },
+    {
       "name": "ado",
       "file": "ado.json",
       "owner": "ei-azure-devops-cli-intake",

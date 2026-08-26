@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics preflight prerequisites evidence",
+  "description": "Evidence written by ei-graphics-workflow when the `prerequisites` gate is evaluated. The preflight gate is the one a stalled run is most tempted to complete by hand, so its verdict is persisted rather than merely asserted: Set-EiWorkflowStage.ps1 refuses to complete `preflight` unless this artifact is on disk, which means a claimed pass without a real evaluation cannot advance the run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "gate",
+    "stage",
+    "storyId",
+    "workflowPath",
+    "phase",
+    "generatedAt",
+    "verdict",
+    "pwshVersion",
+    "repositoryRoot",
+    "insideWorkTree",
+    "searchRoots",
+    "found",
+    "missingRequired",
+    "missingLaterPhase",
+    "errors",
+    "warnings"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "gate": { "type": "string", "enum": ["prerequisites"] },
+    "stage": { "type": "string", "enum": ["preflight"] },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "workflowPath": { "type": "string", "enum": ["IMPLEMENT", "ITERATE"] },
+    "phase": { "type": "string", "enum": ["A", "B", "C", "D", "E"] },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "verdict": { "type": "string", "enum": ["pass", "block"] },
+    "pwshVersion": { "type": "string", "minLength": 1 },
+    "repositoryRoot": { "type": "string", "minLength": 1 },
+    "insideWorkTree": {
+      "type": ["boolean", "null"],
+      "description": "Null when git itself was missing, so the work-tree question was never asked."
+    },
+    "searchRoots": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "The plugin roots that were searched, so a dependency reported missing can be traced to where it was looked for."
+    },
+    "found": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "missingRequired": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["plugin", "skill"],
+        "properties": {
+          "plugin": { "type": "string", "minLength": 1 },
+          "skill": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "missingLaterPhase": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Capabilities not needed until a later phase. These are warnings, never a block."
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

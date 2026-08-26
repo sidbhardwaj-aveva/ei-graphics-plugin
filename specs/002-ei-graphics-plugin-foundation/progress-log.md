@@ -694,3 +694,27 @@
   `-StoryRef` and as `-StoryId`, non-numeric story id left alone). Existing intake, stage and bug
   reproducer assertions updated to the pinned org/project. Full suite: 307 passed, 0 failed.
 
+
+## Tranche T-054 — the preflight gate leaves evidence
+
+- The problem: `Validate-EiWorkflowPrerequisites.ps1` computed a verdict that lived only in memory.
+  It surfaced in `Details.Prerequisites` and was never written anywhere, so the `gateResult: pass`
+  recorded against the `preflight` stage was the caller's word rather than a fact. A run stalled on
+  `EIWF-STAGE-ORDER` could be freed by hand-completing `preflight` for an evaluation that never ran.
+- The fix reuses the mechanism already in place instead of adding a second one. `preflight` now owns
+  a `prerequisites` artifact — `prerequisites.schema.json`, an entry in `artifact-registry.json`,
+  and `artifact: "prerequisites"` in both lifecycle files — so the existing artifact check in
+  `Set-EiWorkflowStage.ps1 -Action complete` refuses the stage without schema-valid evidence.
+- `Start-EiWorkflowRun.ps1` writes the file on both paths. A blocked gate is recorded too, with
+  `verdict: block`, so the reason a run stopped survives the process. If the gate passes but the
+  evidence cannot be written the run stops with `EIWF-BOOTSTRAP-EVIDENCE` rather than continuing
+  toward a stage it can no longer complete.
+- `Invoke-EiAdoIntakeStage.ps1` was surfacing raw `EIWF-STAGE-ORDER` text with no way out. It now
+  attaches `Details.Remediation` naming `Start-EiWorkflowRun.ps1` and states that hand-completing
+  `preflight` is not a substitute.
+- Existing state files that record `artifact: null` on `preflight` still validate: verified that
+  `Validate-EiWorkflowState.ps1` does not cross-check state stages against the lifecycle file.
+- Blast radius: every harness that hand-completed `preflight` was doing exactly what is now
+  forbidden. A shared `tests/aveva-ei-graphics/helpers/EiTestPreflight.ps1` writes the evidence, and
+  eight harnesses were migrated to it. 3 new bootstrap tests cover the pass verdict, the block
+  verdict, and the refusal of a hand-completed preflight. Full suite: 310 passed, 0 failed.

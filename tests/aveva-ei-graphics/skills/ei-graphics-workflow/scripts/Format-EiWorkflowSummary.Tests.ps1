@@ -17,6 +17,7 @@ Covers:
 
 Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
         $repoRoot      = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $pluginSkills  = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills'
         $stateScripts  = Join-Path $pluginSkills 'ei-workflow-state' 'scripts'
@@ -52,6 +53,7 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
             param([string]$StoryId, [string]$WorkspaceRoot)
             & $script:InitPath -StoryId $StoryId -WorkspaceRoot $WorkspaceRoot -Json | Out-Null
             $stateDir = Join-Path $WorkspaceRoot '.copilottracking' 'ei-graphics' $StoryId
+            script:New-EiTestPreflightEvidence -StateDir $stateDir -StoryId $StoryId
             foreach ($id in @('preflight', 'state-init')) {
                 & $script:StagePath -StateDir $stateDir -StageId $id -Action start -Json | Out-Null
                 & $script:StagePath -StateDir $stateDir -StageId $id -Action complete -GateResult pass -Json | Out-Null
@@ -229,6 +231,7 @@ Describe 'Format-EiWorkflowSummary' -Tag 'Unit' {
             # Use the termination-drawing work item which has detection terms.
             & $script:InitPath -StoryId '789012' -WorkspaceRoot $TestDrive -Json | Out-Null
             $tdStateDir = Join-Path $TestDrive '.copilottracking' 'ei-graphics' '789012'
+            script:New-EiTestPreflightEvidence -StateDir $tdStateDir -StoryId '789012'
             foreach ($id in @('preflight', 'state-init')) {
                 & $script:StagePath -StateDir $tdStateDir -StageId $id -Action start -Json | Out-Null
                 & $script:StagePath -StateDir $tdStateDir -StageId $id -Action complete -GateResult pass -Json | Out-Null

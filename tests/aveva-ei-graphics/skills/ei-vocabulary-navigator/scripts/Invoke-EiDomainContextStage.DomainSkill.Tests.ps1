@@ -20,6 +20,7 @@ Describe 'Domain-context stage — domain skill injection' -Tag 'Unit' {
         $vocabScripts  = Join-Path $pluginSkills 'ei-vocabulary-navigator' 'scripts'
         $helperScript  = Join-Path $vocabScripts 'helpers' 'Read-EiDomainSkillContext.ps1'
         $readerScript  = Join-Path $pluginSkills 'ei-vocabulary-navigator' 'scripts' 'helpers' 'Read-EiDomainSkillContext.ps1'
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
 
         $script:InitPath        = Join-Path $stateScripts 'Initialize-EiWorkflowState.ps1'
         $script:StagePath       = Join-Path $stateScripts 'Set-EiWorkflowStage.ps1'
@@ -53,6 +54,7 @@ Describe 'Domain-context stage — domain skill injection' -Tag 'Unit' {
 
         function script:Set-EiBaseState {
             param([string]$StateDir, [string]$WorkItemJson, [string]$WorkItemUrl)
+            script:New-EiTestPreflightEvidence -StateDir $StateDir
             foreach ($stageId in @('preflight', 'state-init')) {
                 & $script:StagePath -StateDir $StateDir -StageId $stageId -Action start -Json | Out-Null
                 & $script:StagePath -StateDir $StateDir -StageId $stageId -Action complete -GateResult pass -Json | Out-Null

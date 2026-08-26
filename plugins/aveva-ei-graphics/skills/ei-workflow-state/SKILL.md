@@ -26,6 +26,7 @@ This skill owns persistence only. It does not decide lifecycle order, and it nev
 .copilottracking/ei-graphics/<story-id>/
   workflow-state.json      # owned by this skill
   workflow-result.json     # owned by ei-graphics-workflow
+  prerequisites.json       # preflight gate evidence, owned by ei-graphics-workflow
   validation/              # per-stage validator evidence
 ```
 
@@ -44,6 +45,7 @@ no schema yet and cannot be written — writing them would create unvalidated st
 |---|---|---|---|
 | `workflow-state` | `workflow-state.json` | `ei-workflow-state` | active |
 | `workflow-result` | `workflow-result.json` | `ei-graphics-workflow` | active |
+| `prerequisites` | `prerequisites.json` | `ei-graphics-workflow` | active |
 | `ado` | `ado.json` | `ei-azure-devops-cli-intake` | active |
 | `domain-context` | `domain-context.json` | `ei-vocabulary-navigator` | active |
 | `proposed-scope` | `proposed-scope.json` | `ei-scope-resolver` | active |
@@ -97,11 +99,17 @@ Existing state is never overwritten without `-Force`, and `-Force` archives the 
 same rules apply on every run.
 
 ```powershell
-& "<skills>/ei-workflow-state/scripts/Set-EiWorkflowStage.ps1" -StateDir '<state-dir>' -StageId 'preflight' -Action start -Json
-& "<skills>/ei-workflow-state/scripts/Set-EiWorkflowStage.ps1" -StateDir '<state-dir>' -StageId 'preflight' -Action complete -GateResult pass -Json
-& "<skills>/ei-workflow-state/scripts/Set-EiWorkflowStage.ps1" -StateDir '<state-dir>' -StageId 'preflight' -Action block `
+& "<skills>/ei-workflow-state/scripts/Set-EiWorkflowStage.ps1" -StateDir '<state-dir>' -StageId '<stage-id>' -Action start -Json
+& "<skills>/ei-workflow-state/scripts/Set-EiWorkflowStage.ps1" -StateDir '<state-dir>' -StageId '<stage-id>' -Action complete -GateResult pass -Json
+& "<skills>/ei-workflow-state/scripts/Set-EiWorkflowStage.ps1" -StateDir '<state-dir>' -StageId '<stage-id>' -Action block `
     -BlockCode 'EIWF-DEPENDENCY-MISSING' -BlockMessage '<why>' -Remediation '<fix>' -Json
 ```
+
+`-GateResult pass` is a claim, not a proof — this script cannot re-run someone else's gate. What
+stops the claim standing alone is the artifact check: a stage that declares an artifact only
+completes once that file reads back schema-valid. `preflight` therefore cannot be hand-completed to
+free a run stuck on stage order, because its `prerequisites` artifact is written only by
+`Validate-EiWorkflowPrerequisites.ps1` by way of `Start-EiWorkflowRun.ps1`.
 
 | Action | Allowed from | Enforced rules |
 |---|---|---|

@@ -94,7 +94,15 @@ $result = Set-EiDetail -Result $result -Name 'ReferenceSource' -Value $reference
 
 $started = & $stagePath -StateDir $StateDir -StageId $StageId -Action start -Json | ConvertFrom-Json
 if ($started.Status -ne 'Valid') {
-    $result = Add-EiError -Result $result -Code 'EIAI-STAGE-NOT-STARTED' -Message "Stage '$StageId' could not be started: $(@($started.Errors) -join '; ')"
+    $startErrors = @($started.Errors) -join '; '
+    $result = Add-EiError -Result $result -Code 'EIAI-STAGE-NOT-STARTED' -Message "Stage '$StageId' could not be started: $startErrors"
+
+    # Stage order is the common cause and its message names the rule but not the way out, so the
+    # remediation is stated here rather than left to be guessed.
+    if ($startErrors -like '*EIWF-STAGE-ORDER*') {
+        $result = Set-EiDetail -Result $result -Name 'Remediation' -Value 'Run Start-EiWorkflowRun.ps1 for this story first; it evaluates the prerequisites gate and records preflight and state-init. Completing preflight by hand is not a substitute, because the stage now requires its prerequisites artifact.'
+    }
+
     Exit-EiResult -Result $result -Json:$Json
 }
 

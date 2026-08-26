@@ -103,6 +103,9 @@ believe afterwards.
   asserted from intent.
 - A retrieval that did not reach `retrieved` blocks the stage with the intake's own reason. A partial
   story is never sealed.
+- `EIAI-STAGE-NOT-STARTED` carrying `EIWF-STAGE-ORDER` means the run was never bootstrapped. The
+  answer is `Start-EiWorkflowRun.ps1`, reported in `Details.Remediation`; do not complete `preflight`
+  by hand, which the `prerequisites` artifact now prevents anyway.
 
 ## Implementation status
 

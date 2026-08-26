@@ -26,6 +26,7 @@ Covers:
 
 Describe 'Invoke-EiDomainContextStage — agent-driven selection' -Tag 'Unit' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
         $repoRoot     = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $pluginSkills = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills'
         $stateScripts = Join-Path $pluginSkills 'ei-workflow-state' 'scripts'
@@ -79,6 +80,7 @@ Use this skill for test domain work.
     BeforeEach {
         & $script:InitPath -StoryId '123456' -WorkspaceRoot $TestDrive -Json | Out-Null
         $script:StateDir = Join-Path $TestDrive '.copilottracking' 'ei-graphics' '123456'
+        script:New-EiTestPreflightEvidence -StateDir $script:StateDir -StoryId '123456'
         foreach ($stageId in @('preflight', 'state-init')) {
             & $script:StagePath -StateDir $script:StateDir -StageId $stageId -Action start -Json | Out-Null
             & $script:StagePath -StateDir $script:StateDir -StageId $stageId -Action complete -GateResult pass -Json | Out-Null

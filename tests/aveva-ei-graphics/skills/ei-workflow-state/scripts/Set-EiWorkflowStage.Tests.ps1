@@ -3,6 +3,7 @@
 
 Describe 'Set-EiWorkflowStage' -Tag 'Unit' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
         $repoRoot = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $skillScripts = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills' 'ei-workflow-state' 'scripts'
         $script:ScriptPath = Join-Path $skillScripts 'Set-EiWorkflowStage.ps1'
@@ -44,6 +45,10 @@ Describe 'Set-EiWorkflowStage' -Tag 'Unit' {
         & $script:InitPath -StoryId '123456' -WorkspaceRoot $TestDrive -Json | Out-Null
         $script:StateDir = Join-Path $TestDrive '.copilottracking' 'ei-graphics' '123456'
         $script:StatePath = Join-Path $script:StateDir 'workflow-state.json'
+
+        # `preflight` is this file's example stage for the generic transition rules, and it owns the
+        # `prerequisites` artifact, so the evidence a real bootstrap writes is supplied up front.
+        script:New-EiTestPreflightEvidence -StateDir $script:StateDir -StoryId '123456'
     }
 
     AfterEach {

@@ -3,6 +3,7 @@
 
 Describe 'Domain-context lifecycle stage' -Tag 'Unit' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
         $repoRoot = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $pluginSkills = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills'
         $stateScripts = Join-Path $pluginSkills 'ei-workflow-state' 'scripts'
@@ -28,6 +29,7 @@ Describe 'Domain-context lifecycle stage' -Tag 'Unit' {
         & $script:InitPath -StoryId '123456' -WorkspaceRoot $TestDrive -Json | Out-Null
         $script:StateDir = Join-Path $TestDrive '.copilottracking' 'ei-graphics' '123456'
 
+        script:New-EiTestPreflightEvidence -StateDir $script:StateDir -StoryId '123456'
         foreach ($stageId in @('preflight', 'state-init')) {
             & $script:StagePath -StateDir $script:StateDir -StageId $stageId -Action start -Json | Out-Null
             & $script:StagePath -StateDir $script:StateDir -StageId $stageId -Action complete -GateResult pass -Json | Out-Null
@@ -64,6 +66,7 @@ Describe 'Domain-context lifecycle stage' -Tag 'Unit' {
             $workItemJson = Get-Content -LiteralPath (Join-Path $PSScriptRoot '..' '..' 'ei-azure-devops-cli-intake' 'fixtures' 'work-item-789012.json') -Raw
             & $script:InitPath -StoryId '789012' -WorkspaceRoot $TestDrive -Json | Out-Null
             $stateDir = Join-Path $TestDrive '.copilottracking' 'ei-graphics' '789012'
+            script:New-EiTestPreflightEvidence -StateDir $stateDir -StoryId '789012'
             foreach ($stageId in @('preflight', 'state-init')) {
                 & $script:StagePath -StateDir $stateDir -StageId $stageId -Action start -Json | Out-Null
                 & $script:StagePath -StateDir $stateDir -StageId $stageId -Action complete -GateResult pass -Json | Out-Null

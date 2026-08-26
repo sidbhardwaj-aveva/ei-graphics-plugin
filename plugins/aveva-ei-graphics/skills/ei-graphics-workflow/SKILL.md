@@ -123,13 +123,20 @@ In order, and still through the owning script in each case:
 | 1 | Initialise or resume `<repo>/.copilottracking/ei-graphics/<story-id>/` | `Initialize-EiWorkflowState.ps1` |
 | 2 | Write the `finalStatus = in-progress` start marker | `New-EiSessionLog.ps1` |
 | 3 | Evaluate the `prerequisites` gate | `Validate-EiWorkflowPrerequisites.ps1` |
-| 4 | Record `preflight` as started and complete with `gateResult = pass` | `Set-EiWorkflowStage.ps1` |
-| 5 | On `IMPLEMENT` only, record `state-init` the same way | `Set-EiWorkflowStage.ps1` |
+| 4 | Persist the gate verdict as `prerequisites.json` | `Write-EiWorkflowArtifact.ps1` |
+| 5 | Record `preflight` as started and complete with `gateResult = pass` | `Set-EiWorkflowStage.ps1` |
+| 6 | On `IMPLEMENT` only, record `state-init` the same way | `Set-EiWorkflowStage.ps1` |
 
 Consolidation is not permission to skip. `workflow-state.json` is still mutated only through
 `Set-EiWorkflowStage.ps1`, and running a validation script is still not the same thing as recording
 its stage — the bootstrap does both, which is exactly the gap that used to leave `ado-intake`
 refusing to start behind a `pending` `preflight`.
+
+Step 4 is what makes the gate un-fakeable. `preflight` owns the `prerequisites` artifact, so
+`Set-EiWorkflowStage.ps1` will not complete the stage unless that evidence is on disk. A run stuck
+behind a `pending` `preflight` therefore cannot be freed by asserting `-GateResult pass` by hand;
+the only way past is to run this bootstrap. `EIWF-BOOTSTRAP-EVIDENCE` means the gate passed but its
+evidence could not be written, which is a hard stop for the same reason.
 
 `ITERATE`'s second stage is `state-recovery`, which also recovers branch and PR evidence. That is
 more than the bootstrap performed, so it is left `pending` for `ei-workflow-state` to run.
@@ -149,7 +156,7 @@ session for the Step 6 log; `-Force` archives an existing run and starts over.
 | `Resumed` | `true` means an interrupted run is continuing |
 | `StagesCompleted` | Stages the bootstrap recorded |
 | `NextStage` | The stage Step 4 must start |
-| `Prerequisites` | `Found`, `MissingRequired`, `MissingLaterPhase` |
+| `Prerequisites` | `Found`, `MissingRequired`, `MissingLaterPhase` — also persisted as `prerequisites.json` |
 
 Later-phase capability gaps are warnings, not errors. A missing *required* plugin fails the
 `prerequisites` gate, records `preflight` as blocked with `EIWF-PREREQUISITES`, and surfaces

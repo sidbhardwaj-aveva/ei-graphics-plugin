@@ -56,6 +56,7 @@ $stateScripts = Join-Path $PSScriptRoot '..' '..' 'ei-workflow-state' 'scripts'
 
 $initPath = Join-Path $stateScripts 'Initialize-EiWorkflowState.ps1'
 $stagePath = Join-Path $stateScripts 'Set-EiWorkflowStage.ps1'
+$writePath = Join-Path $stateScripts 'Write-EiWorkflowArtifact.ps1'
 $logPath = Join-Path $PSScriptRoot 'New-EiSessionLog.ps1'
 $prerequisitesPath = Join-Path $PSScriptRoot 'Validate-EiWorkflowPrerequisites.ps1'
 
@@ -152,6 +153,39 @@ $prerequisites = & $prerequisitesPath @prerequisiteArgs | ConvertFrom-Json
 foreach ($warning in @($prerequisites.Warnings)) { $result = Add-EiWarning -Result $result -Message $warning }
 $result = Set-EiDetail -Result $result -Name 'Prerequisites' -Value $prerequisites.Details
 
+# The gate verdict is persisted, not just asserted. `preflight` owns the `prerequisites` artifact,
+# so Set-EiWorkflowStage.ps1 refuses to complete the stage without this file — a run that stalls on
+# stage order cannot be freed by claiming `-GateResult pass` for an evaluation that never ran.
+$evidence = [ordered]@{
+    schemaVersion     = '1.0.0'
+    gate              = 'prerequisites'
+    stage             = 'preflight'
+    storyId           = $StoryId
+    workflowPath      = $WorkflowPath
+    phase             = $Phase
+    generatedAt       = Get-EiUtcTimestamp
+    verdict           = if ($prerequisites.Status -eq 'Valid') { 'pass' } else { 'block' }
+    pwshVersion       = $PSVersionTable.PSVersion.ToString()
+    repositoryRoot    = $WorkspaceRoot
+    insideWorkTree    = Get-EiOptionalDetail -Details $prerequisites.Details -Name 'InsideWorkTree'
+    searchRoots       = @(Get-EiOptionalDetail -Details $prerequisites.Details -Name 'SearchRoots')
+    found             = @(Get-EiOptionalDetail -Details $prerequisites.Details -Name 'Found')
+    missingRequired   = @(Get-EiOptionalDetail -Details $prerequisites.Details -Name 'MissingRequired')
+    missingLaterPhase = @(Get-EiOptionalDetail -Details $prerequisites.Details -Name 'MissingLaterPhase')
+    errors            = @($prerequisites.Errors)
+    warnings          = @($prerequisites.Warnings)
+}
+
+$evidenceError = $null
+try {
+    $written = & $writePath -StateDir $stateDir -Name 'prerequisites' `
+        -Content ($evidence | ConvertTo-Json -Depth 10) -Json | ConvertFrom-Json
+    if ($written.Status -ne 'Valid') { $evidenceError = @($written.Errors) -join '; ' }
+}
+catch {
+    $evidenceError = $_.Exception.Message
+}
+
 if ($prerequisites.Status -ne 'Valid') {
     $reason = @($prerequisites.Errors) -join '; '
 
@@ -165,7 +199,15 @@ if ($prerequisites.Status -ne 'Valid') {
     if ($blocked.Status -ne 'Valid') {
         $result = Add-EiWarning -Result $result -Message "The preflight stage could not be recorded as blocked: $(@($blocked.Errors) -join '; ')"
     }
+    if ($null -ne $evidenceError) {
+        $result = Add-EiWarning -Result $result -Message "The preflight evidence was not written: $evidenceError"
+    }
 
+    Exit-EiResult -Result $result -Json:$Json
+}
+
+if ($null -ne $evidenceError) {
+    $result = Add-EiError -Result $result -Code 'EIWF-BOOTSTRAP-EVIDENCE' -Message "The preflight gate passed but its evidence could not be written, so the stage cannot be completed: $evidenceError"
     Exit-EiResult -Result $result -Json:$Json
 }
 

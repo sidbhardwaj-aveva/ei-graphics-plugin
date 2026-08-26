@@ -30,6 +30,7 @@ Covers:
 
 Describe 'New-EiSessionLog' -Tag 'Unit' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
         $repoRoot        = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $script:ScriptPath = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills' 'ei-graphics-workflow' 'scripts' 'New-EiSessionLog.ps1'
         $script:InitPath   = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills' 'ei-workflow-state' 'scripts' 'Initialize-EiWorkflowState.ps1'
@@ -40,6 +41,7 @@ Describe 'New-EiSessionLog' -Tag 'Unit' {
             & $script:InitPath -StoryId $StoryId -WorkspaceRoot $WorkspaceRoot -Json | Out-Null
             $stateDir = Join-Path $WorkspaceRoot '.copilottracking' 'ei-graphics' $StoryId
             # Complete two early stages so state is not bare
+            script:New-EiTestPreflightEvidence -StateDir $stateDir -StoryId $StoryId
             foreach ($id in @('preflight', 'state-init')) {
                 & $script:StagePath -StateDir $stateDir -StageId $id -Action start  -Json | Out-Null
                 & $script:StagePath -StateDir $stateDir -StageId $id -Action complete -GateResult pass -Json | Out-Null

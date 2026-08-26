@@ -61,6 +61,7 @@
 
 | T-050 | Add local session logging system | P1 | Done | Engineering | T-044,T-046 | Added `New-EiSessionLog.ps1`, `Read-EiSessionLogs.ps1`, `session-log.schema.json`; SKILL.md Step 6; `.ei-session-logs/` gitignored; 24 focused Pester tests |
 | T-053 | Make work item reference parsing deterministic and pin org/project | P0 | Done | Engineering | T-051,T-052 | Added `EiWorkItemReference.ps1` helper shared by `Invoke-EiAdoCliIntake.ps1` and `Start-EiWorkflowRun.ps1`; org/project fixed to `AVEVA-VSTS` / `Dabacon Products`; `-StoryId` derivable from a pasted link; 8 new tests; full suite 307/307 |
+| T-054 | Persist the preflight gate verdict as an artifact | P0 | Done | Engineering | T-053 | New `prerequisites` artifact owned by the `preflight` stage closes the fail-open hand-completion path; `Start-EiWorkflowRun.ps1` writes pass and block verdicts; `EIWF-BOOTSTRAP-EVIDENCE` added; `EIAI-STAGE-NOT-STARTED` now carries `Details.Remediation`; shared test helper `EiTestPreflight.ps1`; full suite 310/310 |
 
 ## Immediate next actions
 

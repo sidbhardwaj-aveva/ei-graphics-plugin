@@ -19,6 +19,7 @@ This test makes no network calls and touches no shared state.
 
 Describe 'IMPLEMENT lifecycle with domain skill injection through to approved scope' -Tag 'Unit', 'Integration' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..' '..' '..' 'helpers' 'EiTestPreflight.ps1')
         $repoRoot     = Join-Path $PSScriptRoot '..' '..' '..' '..' '..'
         $pluginSkills = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills'
         $stateScripts = Join-Path $pluginSkills 'ei-workflow-state' 'scripts'
@@ -50,6 +51,7 @@ Describe 'IMPLEMENT lifecycle with domain skill injection through to approved sc
         # preflight
         $prereq = & $script:PrereqPath -RepositoryRoot $script:RepoRoot -Phase C -Json | ConvertFrom-Json
         $prereq.Status | Should -Be 'Valid'
+        script:New-EiTestPreflightEvidence -StateDir $stateDir -StoryId '789012' -Phase C
         & $script:StagePath -StateDir $stateDir -StageId 'preflight' -Action start -Json | Out-Null
         & $script:StagePath -StateDir $stateDir -StageId 'preflight' -Action complete -GateResult pass -Json | Out-Null
         $LASTEXITCODE | Should -Be 0

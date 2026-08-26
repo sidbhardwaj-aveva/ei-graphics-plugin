@@ -111,6 +111,59 @@ Describe 'Start-EiWorkflowRun' -Tag 'Unit' {
         }
     }
 
+    Context 'preflight gate evidence' {
+        BeforeEach {
+            $script:Workspace = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+            New-Item -ItemType Directory -Path $script:Workspace -Force | Out-Null
+        }
+
+        It 'persists the passing gate verdict as the prerequisites artifact' {
+            $result = & $script:ScriptPath -StoryId '4983245' -WorkspaceRoot $script:Workspace -NoDefaultSearchRoots -Json | ConvertFrom-Json
+            $result.Status | Should -Be 'Valid'
+
+            $evidencePath = Join-Path $result.Details.StateDir 'prerequisites.json'
+            Test-Path -LiteralPath $evidencePath | Should -BeTrue
+
+            $evidence = Get-Content -LiteralPath $evidencePath -Raw | ConvertFrom-Json
+            $evidence.gate | Should -Be 'prerequisites'
+            $evidence.stage | Should -Be 'preflight'
+            $evidence.verdict | Should -Be 'pass'
+            $evidence.storyId | Should -Be '4983245'
+            $evidence.workflowPath | Should -Be 'IMPLEMENT'
+            $evidence.phase | Should -Be 'A'
+            @($evidence.found).Count | Should -BeGreaterThan 0
+            @($evidence.errors).Count | Should -Be 0
+        }
+
+        It 'records a block verdict in the evidence when the gate fails' {
+            $result = & $script:ScriptPath -StoryId '4983245' -WorkspaceRoot $script:Workspace `
+                -Phase D -NoDefaultSearchRoots -Json | ConvertFrom-Json
+            $result.Status | Should -Be 'Invalid'
+
+            $evidence = Get-Content -LiteralPath (Join-Path $result.Details.StateDir 'prerequisites.json') -Raw | ConvertFrom-Json
+            $evidence.verdict | Should -Be 'block'
+            $evidence.phase | Should -Be 'D'
+            @($evidence.missingRequired).Count | Should -BeGreaterThan 0
+        }
+
+        It 'refuses a hand-completed preflight when no evidence was written' {
+            $stateScripts = Join-Path $script:RepoRoot 'plugins' 'aveva-ei-graphics' 'skills' 'ei-workflow-state' 'scripts'
+            $init = & (Join-Path $stateScripts 'Initialize-EiWorkflowState.ps1') -StoryId '4983245' `
+                -WorkflowPath IMPLEMENT -WorkspaceRoot $script:Workspace -Json | ConvertFrom-Json
+            $stagePath = Join-Path $stateScripts 'Set-EiWorkflowStage.ps1'
+
+            (& $stagePath -StateDir $init.Details.StateDir -StageId 'preflight' -Action start -Json | ConvertFrom-Json).Status |
+                Should -Be 'Valid'
+
+            $completed = & $stagePath -StateDir $init.Details.StateDir -StageId 'preflight' `
+                -Action complete -GateResult pass -Json | ConvertFrom-Json
+
+            $completed.Status | Should -Be 'Invalid'
+            ($completed.Errors -join "`n") | Should -BeLike '*EIWF-ARTIFACT-MISSING*'
+            ($completed.Errors -join "`n") | Should -BeLike '*prerequisites*'
+        }
+    }
+
     Context 'resolving the pasted work item reference' {
         BeforeEach {
             $script:Workspace = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))

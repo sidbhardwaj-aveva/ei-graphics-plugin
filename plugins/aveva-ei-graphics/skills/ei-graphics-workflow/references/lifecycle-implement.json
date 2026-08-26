@@ -7,7 +7,7 @@
       "id": "preflight",
       "name": "Prerequisite and dependency preflight",
       "owner": "ei-graphics-workflow",
-      "artifact": null,
+      "artifact": "prerequisites",
       "writesFiles": false,
       "gate": "prerequisites",
       "implementedInPhase": "A"
