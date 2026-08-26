@@ -138,4 +138,42 @@ Describe 'Invoke-EiAdoCliIntake' -Tag 'Unit' {
         $result.status | Should -Be 'failed'
         $result.reason | Should -Be 'unsupported-work-item-url-host'
     }
+
+    It 'includes acceptance criteria in the plain-text description' {
+        $mock = '{ "fields": { "System.Title": "Review of existing termination diagram settings", "System.Description": "<div>Parent context.</div>", "Microsoft.VSTS.Common.AcceptanceCriteria": "<div><p>Controlled via the tstrip header symbol</p></div>" } }'
+
+        $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        $result.descriptionText | Should -BeLike '*Parent context.*'
+        $result.descriptionText | Should -BeLike '*Controlled via the tstrip header symbol*'
+    }
+
+    It 'collects images embedded in acceptance criteria' {
+        $mock = '{ "fields": { "System.Title": "Termination diagram settings", "Microsoft.VSTS.Common.AcceptanceCriteria": "<div><img src=\"https://dev.azure.com/AVEVA-VSTS/3c9dc12c/_apis/wit/attachments/5da955e2?fileName=image.png\" alt=Image></div>" } }'
+
+        $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        @($result.attachmentUrls).Count | Should -Be 1
+        @($result.attachmentUrls)[0].url | Should -Be 'https://dev.azure.com/AVEVA-VSTS/3c9dc12c/_apis/wit/attachments/5da955e2?fileName=image.png'
+    }
+
+    It 'decodes html-encoded attachment urls so the download query survives' {
+        $mock = '{ "fields": { "System.Title": "Termination diagram settings", "Microsoft.VSTS.Common.AcceptanceCriteria": "<div><img src=\"https://dev.azure.com/AVEVA-VSTS/_apis/wit/attachments/5da955e2?fileName=image.png&amp;download=true\"></div>" } }'
+
+        $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        @($result.attachmentUrls)[0].url | Should -Be 'https://dev.azure.com/AVEVA-VSTS/_apis/wit/attachments/5da955e2?fileName=image.png&download=true'
+    }
+
+    It 'deduplicates an image that appears in more than one content field' {
+        $mock = '{ "fields": { "System.Title": "Termination diagram settings", "System.Description": "<img src=\"https://dev.azure.com/AVEVA-VSTS/_apis/wit/attachments/abc?fileName=image.png\">", "Microsoft.VSTS.Common.AcceptanceCriteria": "<img src=\"https://dev.azure.com/AVEVA-VSTS/_apis/wit/attachments/abc?fileName=image.png\">" } }'
+
+        $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        @($result.attachmentUrls).Count | Should -Be 1
+    }
 }

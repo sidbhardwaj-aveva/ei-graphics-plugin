@@ -44,6 +44,21 @@ to domain-context."
 **Errors and blocks** are the exception — surface the plain-language reason and what the user must
 do next, but still skip internal step names.
 
+## Running scripts
+
+Each terminal call costs the user an approval prompt, so make every one count.
+
+- Send each script call as **one single-line command using the absolute script path**. Never split a
+  call across lines with backticks, and never combine a variable assignment with the call in the
+  same submission — those forms frequently return no captured output, which turns one approval into
+  several for the same result.
+- The code blocks in this file and in `SKILL.md` are wrapped for readability. Flatten them and
+  substitute the resolved paths before running.
+- If a call returns nothing, redirect once to a file and read the file back. Do not re-run the
+  script hoping for different output.
+- Do not re-fetch work item data with ad-hoc `az` commands. Everything the story carries is already
+  in `ado.json` after intake.
+
 ## What you do
 
 1. **Understand the request.** Confirm the user wants EI Graphics 2D work. This workflow is for the
@@ -68,8 +83,10 @@ do next, but still skip internal step names.
      `skills/ei-graphics-workflow/SKILL.md` and follow its documented procedure and scripts
      exactly. Never skip a stage because a skill could not be invoked.
 5. **Domain understanding and human confirmation (IMPLEMENT only — before `domain-context` stage).**
-   After `ado-intake` completes, read the full `ado.json` artifact (title, description, acceptance
-   criteria, parent feature info, and any accessible images), then:
+   After `ado-intake` completes, read the full `ado.json` artifact — `description` already contains
+   the title, description and acceptance criteria as plain text, so do not fetch the work item
+   again — then view every image listed under `attachments[].localPath` before writing the
+   understanding. Then:
 
    a. **Build a plain-language understanding.** Do not expose chain-of-thought. Present only
       conclusions and concise evidence:

@@ -34,9 +34,10 @@ function Get-AttachmentUrls {
     param([string]$Html)
     if ([string]::IsNullOrWhiteSpace($Html)) { return @() }
     $found = [System.Collections.Generic.List[string]]::new()
-    $imgMatches = [regex]::Matches($Html, '<img\s[^>]*src\s*=\s*"(?<url>[^"]+)"', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    $imgMatches = [regex]::Matches($Html, '<img\s[^>]*src\s*=\s*(?:"(?<url>[^"]+)"|''(?<url>[^'']+)'')', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     foreach ($m in $imgMatches) {
-        $url = $m.Groups['url'].Value
+        # ADO stores the src HTML-encoded, so `&amp;` must be decoded or the download url loses its query.
+        $url = [System.Net.WebUtility]::HtmlDecode($m.Groups['url'].Value)
         if ($url -match '(?i)(dev\.azure\.com|visualstudio\.com)') { $found.Add($url) }
     }
     return $found.ToArray()
@@ -205,21 +206,27 @@ else {
 }
 
 $fields = $workItem.fields
-$parts = @(@(
-    (Get-PlainText -Text (Get-FieldValue -FieldBag $fields -Name 'System.Title')),
-    (Get-PlainText -Text (Get-FieldValue -FieldBag $fields -Name 'System.Description')),
-    (Get-PlainText -Text (Get-FieldValue -FieldBag $fields -Name 'Microsoft.VSTS.TCM.ReproSteps')),
-    (Get-PlainText -Text (Get-FieldValue -FieldBag $fields -Name 'System.ReproSteps'))
-) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
-# Collect image attachment URLs from all HTML fields; deduplicate by URL.
+# One ordered field list feeds both the plain-text story and the image scan, so a field can never be
+# read for its prose but skipped for its images. EI stories keep most of their content -- and their
+# screenshots -- in AcceptanceCriteria rather than Description.
+$contentFieldNames = @(
+    'System.Title',
+    'System.Description',
+    'Microsoft.VSTS.Common.AcceptanceCriteria',
+    'Microsoft.VSTS.TCM.ReproSteps',
+    'System.ReproSteps'
+)
+$contentFields = @($contentFieldNames | ForEach-Object { Get-FieldValue -FieldBag $fields -Name $_ })
+
+$parts = @($contentFields |
+    ForEach-Object { Get-PlainText -Text $_ } |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+
+# Collect image attachment URLs from the same HTML fields; deduplicate by URL.
 $seenUrls = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 $attachmentUrls = @(
-    @(
-        (Get-FieldValue -FieldBag $fields -Name 'System.Description'),
-        (Get-FieldValue -FieldBag $fields -Name 'Microsoft.VSTS.TCM.ReproSteps'),
-        (Get-FieldValue -FieldBag $fields -Name 'System.ReproSteps')
-    ) | ForEach-Object { Get-AttachmentUrls -Html $_ } |
+    $contentFields | ForEach-Object { Get-AttachmentUrls -Html $_ } |
         Where-Object { $seenUrls.Add($_) } |
         ForEach-Object { [PSCustomObject]@{ url = $_ } }
 )

@@ -78,13 +78,28 @@ Return JSON with:
 - `reason`
 - `workItemContext`
 - `descriptionText`
+- `attachmentUrls`: embedded image URLs found in the content fields
+
+### Content fields
+
+One ordered field list feeds both `descriptionText` and `attachmentUrls`, so a field can never be
+read for its prose but skipped for its images:
+
+`System.Title`, `System.Description`, `Microsoft.VSTS.Common.AcceptanceCriteria`,
+`Microsoft.VSTS.TCM.ReproSteps`, `System.ReproSteps`.
+
+Acceptance criteria is in that list because EI stories routinely keep the substance of the
+requirement — and their screenshots — there rather than in the description. Leaving it out made the
+agent re-fetch the work item by hand and report a story with images as having none.
 
 ## Rules
 
 1. Parse URL context deterministically before any network call.
 2. Never print tokens.
 3. Return explicit failure reasons for missing context, auth failures, and not-found cases.
-4. Return normalized plain-text description assembled from title, description, and repro fields.
+4. Return normalized plain-text description assembled from the content fields listed above.
+5. Decode HTML-encoded `src` values before returning them, so an `&amp;` in an attachment URL does
+   not truncate the download query.
 
 ## Lifecycle stage
 
@@ -99,6 +114,9 @@ believe afterwards.
   `Details.ReferenceSource` reports which of `parameter`, `workflow-state.storyRef` or
   `workflow-state.storyId` was used.
 - Writes the `ado` artifact (`schemas/ado.schema.json`, owned by `ei-workflow-state`).
+- Downloads every embedded image to `<StateDir>/attachments/` and records it under `attachments`
+  with its `localPath`, so the agent can view the picture instead of guessing at it. Download
+  failures are warnings, never a block.
 - Evaluates the `artifact-present` gate by reading the persisted artifact back; the gate is never
   asserted from intent.
 - A retrieval that did not reach `retrieved` blocks the stage with the intake's own reason. A partial

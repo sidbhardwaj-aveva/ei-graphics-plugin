@@ -718,3 +718,32 @@
   forbidden. A shared `tests/aveva-ei-graphics/helpers/EiTestPreflight.ps1` writes the evidence, and
   eight harnesses were migrated to it. 3 new bootstrap tests cover the pass verdict, the block
   verdict, and the refusal of a hand-completed preflight. Full suite: 310 passed, 0 failed.
+
+
+## Tranche T-057 — acceptance criteria and its images reach the run
+
+- The problem: `Invoke-EiAdoCliIntake.ps1` built `descriptionText` from title, description and the
+  two repro-steps fields, and scanned only description and repro steps for `<img>` tags.
+  `Microsoft.VSTS.Common.AcceptanceCriteria` was in neither list. On story 3774939 that field is
+  21,326 characters and carries the only screenshot, against a 486-character description, so the
+  run sealed a near-empty story and reported "No accessible images were found in the work item".
+- The knock-on cost was paid by the user. With the criteria missing from `ado.json`, the agent went
+  back to the CLI with ad-hoc `az boards work-item show` calls and HTML-stripping one-liners, and in
+  an agent host each attempt is a separate approval prompt.
+- The fix is one ordered content-field list — `System.Title`, `System.Description`,
+  `Microsoft.VSTS.Common.AcceptanceCriteria`, `Microsoft.VSTS.TCM.ReproSteps`, `System.ReproSteps` —
+  feeding both the plain text and the image scan. A field can no longer be read for its prose but
+  skipped for its images, which is the shape of the defect that was just fixed.
+- Attachment URLs are HTML-decoded before they are returned, so an `&amp;` in the query no longer
+  truncates the download, and `src` is matched with either quote style.
+- Verified by replaying the real 3774939 payload through the intake: `descriptionText` goes from
+  ~500 to 3,584 characters and one attachment URL is found.
+- Approval cost addressed on the other side too. `ei-graphics-workflow/SKILL.md` gained a
+  "One invocation, one line" rule and `ei-graphics.agent.md` a "Running scripts" section: each call
+  is sent as a single-line command using the absolute script path, never a backtick-continued list
+  and never a variable assignment plus the call in one submission, because those forms frequently
+  return no captured output and the retry costs another prompt. The agent is also told to view
+  `attachments[].localPath` and never to re-fetch the work item.
+- Tests: 4 new intake tests (acceptance criteria in the text, an image found in acceptance criteria,
+  an HTML-encoded URL decoded, an image repeated across fields deduplicated). Full suite: 314
+  passed, 0 failed.

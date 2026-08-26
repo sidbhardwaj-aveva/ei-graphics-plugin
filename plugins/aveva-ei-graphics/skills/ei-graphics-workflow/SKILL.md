@@ -91,6 +91,24 @@ $workflow   = "$eiSkills/ei-graphics-workflow/scripts"
 $stateSkill = "$eiSkills/ei-workflow-state/scripts"
 ```
 
+### One invocation, one line
+
+Every example below is wrapped with backticks for readability. Do not send it that way. In an agent
+terminal each attempt costs the user a separate approval prompt, and multi-line submissions — a
+variable assignment followed by the call, or a backtick-continued parameter list — frequently return
+no captured output, so the agent retries and the user is asked to approve again for no new
+information.
+
+Send each script call as **one single-line command using the absolute script path**:
+
+```powershell
+& "<plugins>/aveva-ei-graphics/skills/ei-graphics-workflow/scripts/Start-EiWorkflowRun.ps1" -StoryId '<id>' -WorkflowPath IMPLEMENT -StoryRef '<url>' -WorkspaceRoot '<repo>' -Phase A -EntryPoint '<entry>' -Json
+```
+
+Do not expand `$eiSkills`-style variables across separate terminal calls; substitute the resolved
+path into the command instead. If a call still returns nothing, redirect once to a file and read it
+back rather than re-running the script.
+
 ## Progressive-disclosure fallback
 
 If the host exposes a callable `skill` tool, invoke the named skill. If it does not, read that
