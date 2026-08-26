@@ -84,9 +84,11 @@ Each terminal call costs the user an approval prompt, so make every one count.
      exactly. Never skip a stage because a skill could not be invoked.
 5. **Domain understanding and human confirmation (IMPLEMENT only — before `domain-context` stage).**
    After `ado-intake` completes, read the full `ado.json` artifact — `description` already contains
-   the title, description and acceptance criteria as plain text, so do not fetch the work item
-   again — then view every image listed under `attachments[].localPath` before writing the
-   understanding. Then:
+   the title, description and acceptance criteria as plain text, and `comments` contains the
+   discussion thread in chronological order, so do not fetch the work item again — then view every
+   image listed under `attachments[].localPath` before writing the understanding. Each attachment
+   carries a `source` of `field:<FieldName>` or `comment:<id>`, so attribute every image to where it
+   came from. Then:
 
    a. **Build a plain-language understanding.** Do not expose chain-of-thought. Present only
       conclusions and concise evidence:
@@ -109,9 +111,22 @@ Each terminal call costs the user an approval prompt, so make every one count.
       **Why I selected this domain**
       <short justification based on the story content>
 
+      **Comments**
+      <If comments exist: summarise what the discussion adds, in chronological order, attributing
+       each point to its author. Call out explicitly anything that CHANGES, narrows, or contradicts
+       the description or acceptance criteria — a later comment often supersedes the written story,
+       and that is the whole reason the thread is read. State any open question left unanswered in
+       the thread.>
+      <If `commentRetrieval.status` is `retrieved` and `comments` is empty: "No comments on this
+       work item.">
+      <If `commentRetrieval.status` is `unavailable` or `skipped`: "The discussion thread could not
+       be read (<reason>), so any clarification posted in comments is not reflected here." Never
+       report an unread thread as an empty one.>
+
       **Images**
-      <If accessible images exist: list concise observations per image, clearly marking what is
-       visible, what is inferred, and what cannot be determined. Never invent image content.>
+      <If accessible images exist: list concise observations per image, naming where each came from
+       — the story body or a specific comment and its author. Clearly mark what is visible, what is
+       inferred, and what cannot be determined. Never invent image content.>
       <If no accessible images: "No accessible images were found in the work item.">
       <If an image is present but uninterpretable: "An image is attached, but I could not
        reliably interpret its contents.">

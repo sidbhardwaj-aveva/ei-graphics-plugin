@@ -26,6 +26,7 @@ Allow developers to provide a work item URL and automatically resolve organizati
 - `organization` (optional): Azure DevOps organization.
 - `project` (optional): Azure DevOps project.
 - `cliWorkItemJson` (optional): deterministic mock payload for tests.
+- `cliCommentsJson` (optional): deterministic mock comments payload for tests.
 
 At least one of `workItemUrl` or `workItemId` is required.
 
@@ -78,7 +79,9 @@ Return JSON with:
 - `reason`
 - `workItemContext`
 - `descriptionText`
-- `attachmentUrls`: embedded image URLs found in the content fields
+- `attachmentUrls`: embedded image URLs, each tagged with the `source` it was found in
+- `commentRetrieval`: `{ status, reason }` for the discussion thread
+- `comments`: the thread in chronological order as `{ id, author, createdDate, text }`
 
 ### Content fields
 
@@ -92,6 +95,30 @@ Acceptance criteria is in that list because EI stories routinely keep the substa
 requirement — and their screenshots — there rather than in the description. Leaving it out made the
 agent re-fetch the work item by hand and report a story with images as having none.
 
+### Comments
+
+`az boards work-item show` does not return the discussion thread at all, so comments are fetched
+separately via `az rest` against `_apis/wit/workItems/<id>/comments`. EI stories routinely carry
+corrections and clarifications there that supersede the written description, so a run that cannot
+see them is working from a stale story.
+
+Comments are scanned for images alongside the story fields, and every attachment records its
+`source` as `field:<FieldName>` or `comment:<id>` so a picture can be attributed to the person who
+posted it.
+
+Retrieval is best-effort and never blocks the stage, but the outcome is always reported so an
+**unread** thread is never mistaken for an **empty** one:
+
+| `commentRetrieval.status` | `reason` | Meaning |
+|---|---|---|
+| `retrieved` | `ado-cli` / `mock-json` | The thread was read; `comments` is authoritative |
+| `skipped` | `mock-run-without-comments` | A mock work item was supplied with no mock thread |
+| `unavailable` | `comments-request-failed` / `comments-invalid-json` / `mock-comments-invalid` | The thread could not be read; treat `comments` as unknown, not empty |
+
+`createdDate` is emitted as an invariant `yyyy-MM-ddTHH:mm:ssZ` string. `ConvertFrom-Json` turns an
+ISO-8601 string into a `DateTime`, and casting that back to a string renders it in the current
+culture, which would make the sealed artifact machine-dependent.
+
 ## Rules
 
 1. Parse URL context deterministically before any network call.
@@ -100,6 +127,7 @@ agent re-fetch the work item by hand and report a story with images as having no
 4. Return normalized plain-text description assembled from the content fields listed above.
 5. Decode HTML-encoded `src` values before returning them, so an `&amp;` in an attachment URL does
    not truncate the download query.
+6. Report the comment-retrieval outcome explicitly; never present an unread thread as an empty one.
 
 ## Lifecycle stage
 
@@ -115,8 +143,10 @@ believe afterwards.
   `workflow-state.storyId` was used.
 - Writes the `ado` artifact (`schemas/ado.schema.json`, owned by `ei-workflow-state`).
 - Downloads every embedded image to `<StateDir>/attachments/` and records it under `attachments`
-  with its `localPath`, so the agent can view the picture instead of guessing at it. Download
-  failures are warnings, never a block.
+  with its `localPath` and `source`, so the agent can view the picture and say which comment or
+  field it came from. Download failures are warnings, never a block.
+- Carries `comments` and `commentRetrieval` into the artifact, and raises a warning when the thread
+  was `unavailable`.
 - Evaluates the `artifact-present` gate by reading the persisted artifact back; the gate is never
   asserted from intent.
 - A retrieval that did not reach `retrieved` blocks the stage with the intake's own reason. A partial

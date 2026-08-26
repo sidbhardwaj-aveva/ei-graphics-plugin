@@ -176,4 +176,77 @@ Describe 'Invoke-EiAdoCliIntake' -Tag 'Unit' {
         $result = $output | ConvertFrom-Json
         @($result.attachmentUrls).Count | Should -Be 1
     }
+
+    It 'tags each attachment with the field it was found in' {
+        $mock = '{ "fields": { "System.Title": "Termination diagram settings", "Microsoft.VSTS.Common.AcceptanceCriteria": "<img src=\"https://dev.azure.com/AVEVA-VSTS/_apis/wit/attachments/abc?fileName=image.png\">" } }'
+
+        $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $mock -Json
+        $LASTEXITCODE | Should -Be 0
+        $result = $output | ConvertFrom-Json
+        @($result.attachmentUrls)[0].source | Should -Be 'field:Microsoft.VSTS.Common.AcceptanceCriteria'
+    }
+
+    Context 'work item comments' {
+        BeforeAll {
+            $script:WorkItemMock = '{ "fields": { "System.Title": "Review of existing termination diagram settings" } }'
+        }
+
+        It 'returns the thread in chronological order as plain text' {
+            $comments = '{ "comments": [ { "id": 7, "text": "<div>Use the TD settings dialog instead.</div>", "createdBy": { "displayName": "Bob" }, "createdDate": "2026-08-02T10:00:00Z" }, { "id": 3, "text": "<div>Which symbol controls the header?</div>", "createdBy": { "displayName": "Ann" }, "createdDate": "2026-08-01T10:00:00Z" } ] }'
+
+            $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $script:WorkItemMock -CliCommentsJson $comments -Json
+            $LASTEXITCODE | Should -Be 0
+            $result = $output | ConvertFrom-Json
+            $result.commentRetrieval.status | Should -Be 'retrieved'
+            @($result.comments).Count | Should -Be 2
+            @($result.comments)[0].id | Should -Be '3'
+            @($result.comments)[0].author | Should -Be 'Ann'
+            @($result.comments)[0].text | Should -Be 'Which symbol controls the header?'
+            @($result.comments)[1].id | Should -Be '7'
+        }
+
+        It 'emits createdDate as an invariant utc string rather than a culture-formatted date' {
+            $comments = '{ "comments": [ { "id": 3, "text": "<div>note</div>", "createdBy": { "displayName": "Ann" }, "createdDate": "2026-08-01T10:00:00Z" } ] }'
+
+            $raw = (& $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $script:WorkItemMock -CliCommentsJson $comments -Json) -join "`n"
+            $LASTEXITCODE | Should -Be 0
+            $raw | Should -Match '"createdDate":\s*"2026-08-01T10:00:00Z"'
+        }
+
+        It 'collects images embedded in a comment and attributes them to that comment' {
+            $comments = '{ "comments": [ { "id": 11, "text": "<div>See <img src=\"https://dev.azure.com/AVEVA-VSTS/_apis/wit/attachments/c2?fileName=shot.png\"></div>", "createdBy": { "displayName": "Bob" }, "createdDate": "2026-08-02T10:00:00Z" } ] }'
+
+            $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $script:WorkItemMock -CliCommentsJson $comments -Json
+            $LASTEXITCODE | Should -Be 0
+            $result = $output | ConvertFrom-Json
+            @($result.attachmentUrls).Count | Should -Be 1
+            @($result.attachmentUrls)[0].source | Should -Be 'comment:11'
+        }
+
+        It 'reports an unreadable thread as unavailable rather than empty' {
+            $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $script:WorkItemMock -CliCommentsJson 'not-json' -Json
+            $LASTEXITCODE | Should -Be 0
+            $result = $output | ConvertFrom-Json
+            $result.status | Should -Be 'retrieved'
+            $result.commentRetrieval.status | Should -Be 'unavailable'
+            $result.commentRetrieval.reason | Should -Be 'mock-comments-invalid'
+            @($result.comments).Count | Should -Be 0
+        }
+
+        It 'reports a thread that was never fetched as skipped' {
+            $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $script:WorkItemMock -Json
+            $LASTEXITCODE | Should -Be 0
+            $result = $output | ConvertFrom-Json
+            $result.commentRetrieval.status | Should -Be 'skipped'
+            $result.commentRetrieval.reason | Should -Be 'mock-run-without-comments'
+        }
+
+        It 'treats a thread with no comments as retrieved and empty' {
+            $output = & $script:ScriptPath -WorkItemId '3774939' -CliWorkItemJson $script:WorkItemMock -CliCommentsJson '{ "count": 0, "comments": [] }' -Json
+            $LASTEXITCODE | Should -Be 0
+            $result = $output | ConvertFrom-Json
+            $result.commentRetrieval.status | Should -Be 'retrieved'
+            @($result.comments).Count | Should -Be 0
+        }
+    }
 }

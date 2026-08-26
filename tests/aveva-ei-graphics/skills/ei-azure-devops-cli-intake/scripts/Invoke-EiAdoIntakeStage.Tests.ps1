@@ -68,6 +68,33 @@ Describe 'ADO intake lifecycle stage' -Tag 'Unit' {
             $artifact.description | Should -BeLike '*terminal arrangement labels share a point*'
         }
 
+        It 'seals the discussion thread into the ado artifact' {
+            $comments = '{ "comments": [ { "id": 4, "text": "<div>Only the left-hand strip is affected.</div>", "createdBy": { "displayName": "Ann" }, "createdDate": "2026-08-01T10:00:00Z" } ] }'
+
+            & $script:IntakeStagePath -StateDir $script:StateDir -WorkItemUrl $script:WorkItemUrl `
+                -CliWorkItemJson $script:WorkItemJson -CliCommentsJson $comments -Json | Out-Null
+
+            $LASTEXITCODE | Should -Be 0
+            $artifact = Get-Content -LiteralPath (Join-Path $script:StateDir 'ado.json') -Raw | ConvertFrom-Json
+            $artifact.commentRetrieval.status | Should -Be 'retrieved'
+            @($artifact.comments).Count | Should -Be 1
+            @($artifact.comments)[0].author | Should -Be 'Ann'
+            @($artifact.comments)[0].text | Should -Be 'Only the left-hand strip is affected.'
+        }
+
+        It 'warns and records unavailable when the thread could not be read' {
+            $result = & $script:IntakeStagePath -StateDir $script:StateDir -WorkItemUrl $script:WorkItemUrl `
+                -CliWorkItemJson $script:WorkItemJson -CliCommentsJson 'not-json' -Json | ConvertFrom-Json
+
+            $LASTEXITCODE | Should -Be 0
+            $result.Status | Should -Be 'Valid'
+            @($result.Warnings) -join ' ' | Should -BeLike '*comments could not be retrieved*'
+
+            $artifact = Get-Content -LiteralPath (Join-Path $script:StateDir 'ado.json') -Raw | ConvertFrom-Json
+            $artifact.commentRetrieval.status | Should -Be 'unavailable'
+            @($artifact.comments).Count | Should -Be 0
+        }
+
         It 'takes the story id from workflow state rather than the caller' {
             $result = & $script:IntakeStagePath -StateDir $script:StateDir -WorkItemUrl $script:WorkItemUrl `
                 -CliWorkItemJson $script:WorkItemJson -Json | ConvertFrom-Json

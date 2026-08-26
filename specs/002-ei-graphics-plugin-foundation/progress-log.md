@@ -747,3 +747,39 @@
 - Tests: 4 new intake tests (acceptance criteria in the text, an image found in acceptance criteria,
   an HTML-encoded URL decoded, an image repeated across fields deduplicated). Full suite: 314
   passed, 0 failed.
+
+
+## Tranche T-058 — the discussion thread reaches the run
+
+- The problem: `az boards work-item show` does not return work item comments at all, so nothing the
+  team posted after the story was written was ever visible to a run. This is not a marginal gap.
+  On bug 4965976 the first two comments are the author writing "The description and details for
+  this are incorrect" and then "I've updated the details to explain the problem correctly" — a run
+  reading only the fields would have faithfully implemented a story its own author had retracted.
+- `Invoke-EiAdoCliIntake.ps1` now fetches `_apis/wit/workItems/<id>/comments` through `az rest`
+  with `--resource 499b84ac-1321-427f-aa17-267ca6975798`, so the existing `az` session supplies the
+  token and no secret is read, held or printed by the script.
+- Comments are normalised to `{ id, author, createdDate, text }` and ordered by id, which makes the
+  thread chronological and the sealed artifact byte-identical across runs. `createdDate` is
+  formatted as an invariant `yyyy-MM-ddTHH:mm:ssZ` string: `ConvertFrom-Json` converts an ISO-8601
+  string into a `DateTime`, and casting that back to a string renders it in the current culture,
+  which would otherwise make the artifact machine-dependent.
+- Comment HTML is scanned for images on the same path as the story fields, and every attachment
+  now records a `source` of `field:<FieldName>` or `comment:<id>`. A picture can therefore be
+  attributed to the person who posted it instead of appearing as an unexplained screenshot.
+- Retrieval is best-effort and never blocks the stage, but the outcome is always reported, because
+  an unread thread and an empty thread are not the same claim:
+  `retrieved` | `skipped` (`mock-run-without-comments`) | `unavailable` (`comments-request-failed`,
+  `comments-invalid-json`, `mock-comments-invalid`). `Invoke-EiAdoIntakeStage.ps1` warns on
+  `unavailable` and seals the status either way.
+- `ado.schema.json` gained `comments`, `commentRetrieval` and `attachments[].source`. All three are
+  optional, so artifacts sealed before this tranche still validate.
+- `ei-graphics.agent.md` gained a **Comments** block in the understanding template. The agent must
+  summarise the thread chronologically with attribution, call out explicitly anything that changes,
+  narrows or contradicts the description or acceptance criteria, state unanswered questions, never
+  report an unread thread as an empty one, and name the field or comment each image came from.
+- Verified live: 4965976 returns 3 comments and 5 images, one of which came from a comment.
+- Tests: 7 new intake tests (chronological order, invariant timestamp, comment image attribution,
+  field attribution, unavailable, skipped, empty-but-retrieved) and 2 new stage tests (thread
+  sealed into the artifact, warning plus `unavailable` when it cannot be read). Full suite: 323
+  passed, 0 failed.

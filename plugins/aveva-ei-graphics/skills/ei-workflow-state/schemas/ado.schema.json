@@ -53,7 +53,33 @@
         "properties": {
           "url":       { "type": "string", "minLength": 1 },
           "localPath": { "type": "string", "minLength": 1 },
-          "fileName":  { "type": "string", "minLength": 1 }
+          "fileName":  { "type": "string", "minLength": 1 },
+          "source":    { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "commentRetrieval": {
+      "type": "object",
+      "description": "Whether the discussion thread was read. 'skipped' and 'unavailable' are distinct from an empty thread, so an unread thread is never mistaken for no comments.",
+      "additionalProperties": false,
+      "required": ["status", "reason"],
+      "properties": {
+        "status": { "type": "string", "enum": ["retrieved", "skipped", "unavailable"] },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "comments": {
+      "type": "array",
+      "description": "Work item discussion comments in chronological order, as plain text.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "author", "createdDate", "text"],
+        "properties": {
+          "id":          { "type": "string" },
+          "author":      { "type": "string" },
+          "createdDate": { "type": "string" },
+          "text":        { "type": "string" }
         }
       }
     }

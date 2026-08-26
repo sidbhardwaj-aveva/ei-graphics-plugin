@@ -26,6 +26,7 @@ param(
     [AllowEmptyString()][string]$Organization = '',
     [AllowEmptyString()][string]$Project = '',
     [AllowEmptyString()][string]$CliWorkItemJson = '',
+    [AllowEmptyString()][string]$CliCommentsJson = '',
     [AllowEmptyString()][string]$Summary = '',
     [string]$StageId = 'ado-intake',
     [switch]$Json
@@ -112,6 +113,7 @@ if (-not [string]::IsNullOrWhiteSpace($WorkItemId)) { $intakeArgs['WorkItemId'] 
 if (-not [string]::IsNullOrWhiteSpace($Organization)) { $intakeArgs['Organization'] = $Organization }
 if (-not [string]::IsNullOrWhiteSpace($Project)) { $intakeArgs['Project'] = $Project }
 if (-not [string]::IsNullOrWhiteSpace($CliWorkItemJson)) { $intakeArgs['CliWorkItemJson'] = $CliWorkItemJson }
+if (-not [string]::IsNullOrWhiteSpace($CliCommentsJson)) { $intakeArgs['CliCommentsJson'] = $CliCommentsJson }
 
 $intakeRaw = & $intakePath @intakeArgs
 $intake = $null
@@ -128,6 +130,31 @@ if ($null -eq $intake -or $intake.status -ne 'retrieved') {
 
 $context = $intake.workItemContext
 
+# A discussion thread that could not be read is reported rather than silently treated as empty: the
+# agent must be able to tell "nobody commented" from "the comments were not retrieved".
+$commentRetrieval = [ordered]@{ status = 'skipped'; reason = 'not-attempted' }
+if ($null -ne $intake.PSObject.Properties['commentRetrieval']) {
+    $commentRetrieval = [ordered]@{
+        status = [string]$intake.commentRetrieval.status
+        reason = [string]$intake.commentRetrieval.reason
+    }
+    if ($commentRetrieval.status -eq 'unavailable') {
+        $result = Add-EiWarning -Result $result -Message "Work item comments could not be retrieved (reason: $($commentRetrieval.reason)); the story was sealed without them."
+    }
+}
+
+$comments = @()
+if ($null -ne $intake.PSObject.Properties['comments']) {
+    $comments = @(@($intake.comments) | ForEach-Object {
+        [ordered]@{
+            id          = [string]$_.id
+            author      = [string]$_.author
+            createdDate = [string]$_.createdDate
+            text        = [string]$_.text
+        }
+    })
+}
+
 # Download embedded images so the agent can inspect them. Non-fatal: failures produce warnings only.
 $attachments = @()
 if (@($intake.attachmentUrls).Count -gt 0) {
@@ -142,6 +169,7 @@ if (@($intake.attachmentUrls).Count -gt 0) {
         $baseName = if ($fileNameMatch.Success) { [System.Uri]::UnescapeDataString($fileNameMatch.Groups[1].Value) } else { "image-$idx.png" }
         $localFileName = "$idx-$baseName"
         $localPath = Join-Path $attachmentsDir $localFileName
+        $source = if ($null -ne $att.PSObject.Properties['source']) { [string]$att.source } else { 'unknown' }
         $downloaded = $false
         if (-not [string]::IsNullOrWhiteSpace($token)) {
             try {
@@ -154,7 +182,7 @@ if (@($intake.attachmentUrls).Count -gt 0) {
             $result = Add-EiWarning -Result $result -Message 'No Azure DevOps bearer token available; attachments were not downloaded.'
         }
         if ($downloaded) {
-            $attachments += [ordered]@{ url = $att.url; localPath = $localPath; fileName = $localFileName }
+            $attachments += [ordered]@{ url = $att.url; localPath = $localPath; fileName = $localFileName; source = $source }
         }
     }
 }
@@ -179,6 +207,8 @@ $artifact = [ordered]@{
     }
     retrievedAt   = Get-EiUtcTimestamp
     attachments   = $attachments
+    commentRetrieval = $commentRetrieval
+    comments      = $comments
 }
 
 $written = & $writePath -StateDir $StateDir -Name 'ado' -Content ($artifact | ConvertTo-Json -Depth 10) -Json | ConvertFrom-Json

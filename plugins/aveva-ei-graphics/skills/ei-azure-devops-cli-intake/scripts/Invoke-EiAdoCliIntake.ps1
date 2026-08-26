@@ -5,6 +5,7 @@ param(
     [string]$Organization = '',
     [string]$Project = '',
     [string]$CliWorkItemJson = '',
+    [string]$CliCommentsJson = '',
     [switch]$Json
 )
 
@@ -43,22 +44,116 @@ function Get-AttachmentUrls {
     return $found.ToArray()
 }
 
+function Get-RawProperty {
+    param(
+        [object]$Object,
+        [string]$Name
+    )
+
+    if ($null -eq $Object -or [string]::IsNullOrWhiteSpace($Name)) {
+        return $null
+    }
+
+    $property = $Object.PSObject.Properties[$Name]
+    if ($null -eq $property) {
+        return $null
+    }
+
+    return $property.Value
+}
+
 function Get-FieldValue {
     param(
         [object]$FieldBag,
         [string]$Name
     )
 
-    if ($null -eq $FieldBag -or [string]::IsNullOrWhiteSpace($Name)) {
-        return ''
+    return [string](Get-RawProperty -Object $FieldBag -Name $Name)
+}
+
+# Comments are a separate endpoint: `az boards work-item show` never returns them, so a story whose
+# clarifications live in the discussion thread would otherwise reach the run as if they were never
+# written. Retrieval is best-effort -- an unavailable thread is reported, never fatal.
+function Get-WorkItemComments {
+    param(
+        [string]$Organization,
+        [string]$Project,
+        [string]$WorkItemId,
+        [string]$MockJson,
+        [bool]$IsMockRun
+    )
+
+    $empty = @()
+
+    if (-not [string]::IsNullOrWhiteSpace($MockJson)) {
+        try { $payload = $MockJson | ConvertFrom-Json -Depth 20 }
+        catch { return [PSCustomObject]@{ status = 'unavailable'; reason = 'mock-comments-invalid'; comments = $empty } }
+        return [PSCustomObject]@{ status = 'retrieved'; reason = 'mock-json'; comments = (ConvertTo-NormalizedComment -Payload $payload) }
     }
 
-    $property = $FieldBag.PSObject.Properties[$Name]
-    if ($null -eq $property) {
-        return ''
+    if ($IsMockRun) {
+        return [PSCustomObject]@{ status = 'skipped'; reason = 'mock-run-without-comments'; comments = $empty }
     }
 
-    return [string]$property.Value
+    $url = 'https://dev.azure.com/{0}/{1}/_apis/wit/workItems/{2}/comments?api-version=7.1-preview.4' -f `
+        [System.Uri]::EscapeDataString($Organization), [System.Uri]::EscapeDataString($Project), $WorkItemId
+
+    $stderrFile = [System.IO.Path]::GetTempFileName()
+    try {
+        $output = & az rest --method get --url $url --resource '499b84ac-1321-427f-aa17-267ca6975798' --output json 2>$stderrFile
+        $exitCode = $LASTEXITCODE
+    }
+    catch {
+        $exitCode = 1
+        $output = $null
+    }
+    finally {
+        Remove-Item -LiteralPath $stderrFile -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($exitCode -ne 0) {
+        return [PSCustomObject]@{ status = 'unavailable'; reason = 'comments-request-failed'; comments = $empty }
+    }
+
+    try { $payload = ($output -join [Environment]::NewLine) | ConvertFrom-Json -Depth 20 }
+    catch { return [PSCustomObject]@{ status = 'unavailable'; reason = 'comments-invalid-json'; comments = $empty } }
+
+    return [PSCustomObject]@{ status = 'retrieved'; reason = 'ado-cli'; comments = (ConvertTo-NormalizedComment -Payload $payload) }
+}
+
+function ConvertTo-NormalizedComment {
+    param([object]$Payload)
+
+    $items = Get-RawProperty -Object $Payload -Name 'comments'
+    if ($null -eq $items) { return @() }
+
+    # The endpoint returns newest-first; ordering by id makes the thread chronological and the
+    # artifact byte-identical across runs.
+    return @(@($items) | ForEach-Object {
+        $html = [string](Get-RawProperty -Object $_ -Name 'text')
+        [PSCustomObject]@{
+            id          = [string](Get-RawProperty -Object $_ -Name 'id')
+            author      = (Get-FieldValue -FieldBag (Get-RawProperty -Object $_ -Name 'createdBy') -Name 'displayName')
+            createdDate = (ConvertTo-IsoTimestamp -Value (Get-RawProperty -Object $_ -Name 'createdDate'))
+            text        = (Get-PlainText -Text $html)
+            html        = $html
+        }
+    } | Sort-Object -Property @{ Expression = { [int64]($_.id -as [int64]) } }, id)
+}
+
+# ConvertFrom-Json turns an ISO-8601 string into a DateTime, and casting that back to string renders
+# it in the current culture. Formatting explicitly keeps the artifact identical on every machine.
+function ConvertTo-IsoTimestamp {
+    param([object]$Value)
+
+    if ($null -eq $Value) { return '' }
+    if ($Value -is [datetime]) {
+        return ([datetime]$Value).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ', [System.Globalization.CultureInfo]::InvariantCulture)
+    }
+    if ($Value -is [datetimeoffset]) {
+        return ([datetimeoffset]$Value).UtcDateTime.ToString('yyyy-MM-ddTHH:mm:ssZ', [System.Globalization.CultureInfo]::InvariantCulture)
+    }
+    return [string]$Value
 }
 
 function Get-AdoCliFailureReason {
@@ -223,12 +318,26 @@ $parts = @($contentFields |
     ForEach-Object { Get-PlainText -Text $_ } |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
-# Collect image attachment URLs from the same HTML fields; deduplicate by URL.
+$commentResult = Get-WorkItemComments -Organization $Organization -Project $Project `
+    -WorkItemId $WorkItemId -MockJson $CliCommentsJson -IsMockRun ($authSource -eq 'cli-mock-json')
+$comments = @($commentResult.comments)
+
+# Collect image attachment URLs from the story fields and the discussion thread, keeping the source
+# so the agent can say which comment a picture came from. Deduplicate by URL, first source wins.
 $seenUrls = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$htmlSources = [System.Collections.Generic.List[object]]::new()
+for ($i = 0; $i -lt $contentFieldNames.Count; $i++) {
+    $htmlSources.Add([PSCustomObject]@{ source = "field:$($contentFieldNames[$i])"; html = $contentFields[$i] })
+}
+foreach ($comment in $comments) {
+    $htmlSources.Add([PSCustomObject]@{ source = "comment:$($comment.id)"; html = $comment.html })
+}
+
 $attachmentUrls = @(
-    $contentFields | ForEach-Object { Get-AttachmentUrls -Html $_ } |
-        Where-Object { $seenUrls.Add($_) } |
-        ForEach-Object { [PSCustomObject]@{ url = $_ } }
+    $htmlSources | ForEach-Object {
+        $source = $_.source
+        Get-AttachmentUrls -Html $_.html | ForEach-Object { [PSCustomObject]@{ url = $_; source = $source } }
+    } | Where-Object { $seenUrls.Add($_.url) }
 )
 
 if (@($parts).Count -eq 0) {
@@ -261,6 +370,14 @@ $result = [PSCustomObject]@{
     }
     descriptionText = ($parts -join ' ')
     attachmentUrls  = $attachmentUrls
+    commentRetrieval = [PSCustomObject]@{
+        status = $commentResult.status
+        reason = $commentResult.reason
+    }
+    # `html` is dropped here: it was only ever needed to scan the thread for images.
+    comments = @($comments | ForEach-Object {
+        [PSCustomObject]@{ id = $_.id; author = $_.author; createdDate = $_.createdDate; text = $_.text }
+    })
 }
 
 if ($Json) {
