@@ -888,7 +888,7 @@ so the test does not freeze behaviour we did not write.
 The count of `.ps1` files under `plugins/` is now 10, which matches Part 9: six written fresh,
 three copied with the ADO intake, one copied with the layer guard.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 60b59ac
 
 
 
