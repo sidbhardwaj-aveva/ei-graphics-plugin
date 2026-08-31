@@ -1046,6 +1046,25 @@ file does not exist yet, so checking here would have blocked the task for no rea
 
 **Result:** DONE at commit 7247517
 
+## T019 — The no-orphan check — 2026-08-31T20:56:00Z
+
+**Goal:** Scan the built repository for any name belonging to a skill or script this build dropped,
+including the old plugin name.
+
+**Assumptions:** The banned terms live in `tests/data/forbidden-identifiers.txt`, one per line, and
+not in the test body; otherwise the test matches itself. The seeded list holds the 23 names the
+plan gives. The skipped locations are exactly the seven the plan names, and no others: `docs/**`,
+`BUILD-LOG.md`, `BUILD-PROGRESS.md`, `plan.md`, the term file itself, `tests/fixtures/**` and
+`.git/**`. The `docs` exclusion is load-bearing, because `docs/architecture-v3.md` is a word for
+word archive holding many lines that match, and it is never edited. `plan.md` and `BUILD-LOG.md`
+both legitimately name the old plugin folder as a copy source. The scan is case insensitive and
+matches a plain substring, not a whole word, because these are identifiers rather than English.
+The fail-closed check runs before any scanning and requires at least 23 terms, so an emptied file
+cannot turn the guard into a silent pass. Part 2's list of what is deliberately not copied is
+checked against the term file in full, skills by folder name and scripts by file name without the
+extension.
+
+
 
 
 
