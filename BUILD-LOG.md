@@ -596,7 +596,7 @@ has 14 rows, `## Common Bug Patterns & Fixes` has 7 patterns, `## Critical Rules
 has 10 rules, and `### Problem: Cores Not Inserted After Wire Re-Addition (Update 2)` travelled
 with its parent section. All four hold.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 7552aa4
 
 
 
