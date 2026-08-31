@@ -839,7 +839,7 @@ Avoiding the word URL in prose was not a stylistic choice. It is a three letter 
 does not exempt, so the checker requires it to be spelled out. Writing link instead is plainer
 anyway, and `workItemUrl` stays in backticks where it is a field name.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit a85ce8b
 
 
 
