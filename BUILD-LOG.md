@@ -284,6 +284,23 @@ hits, and Part 3's own worked example is a script name.
 
 **Result:** DONE at commit 367b3da
 
+## T007 — Write-EiArtifact.ps1 — 2026-08-31T17:45:00Z
+
+**Goal:** A schema-checked JSON writer for `story-understanding`, `approved-files` and `ado`.
+
+**Assumptions:** `Test-Json -Schema` takes the schema as text, and the schema files sit at
+`$PSScriptRoot/../schemas/<artifact-type>.schema.json`. The canonical form used for the digest is
+compact JSON with object keys sorted ascending by ordinal, encoded as UTF-8 with no byte order
+mark, with the `hash` property left out. Ordinal sorting is done with `[StringComparer]::Ordinal`
+rather than `Sort-Object`, because `Sort-Object` compares by culture and would give a different
+order on some machines. The file on disk is written with sorted keys, indented, UTF-8 with no byte
+order mark and LF line endings; the digest is taken over the compact form, so the two can never
+disagree. A `hash` field is stamped for `story-understanding` and `approved-files` only. It is
+never stamped for `ado`, because the copied `ado.schema.json` sets `additionalProperties` to false
+and declares no such property. Writing the same payload twice produces the same file and the same
+hash, so the script is safe to run again.
+
+
 
 
 
