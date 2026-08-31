@@ -352,6 +352,44 @@ file behind. `-Finalize` computes `completedAt`, `totalDurationMs`, `totalTokens
 own parameters, because they cannot be derived. `agent` is the literal `ei-graphics` and
 `verbosity` starts as `verbose`, matching the schema default.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1` (new, 184 lines)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0, with all 13 tests
+for this script passing.
+
+**Attempts:** 3. Three tests failed on the first run and three on the second, each time for a
+different reason.
+
+**Decisions:**
+
+Found a real bug in round one, not just a bad assertion. Reading the log back with
+`ConvertFrom-Json` turns every timestamp string into a date object, and writing it out again then
+produced `2026-08-31T16:38:52.0000000Z` in place of `2026-08-31T16:38:52Z`. The schema only asks
+for a non-empty string, so it validated, and the change would have gone unnoticed until someone
+read the file. Added `ConvertTo-PlainValue`, which walks the structure after reading and turns any
+date back into the timestamp we wrote. Added a test that appends twice and then asserts the file
+holds three timestamps in the short form and none in the long one.
+
+Round two was a PowerShell detail again. An ordered dictionary has `Contains` but not
+`ContainsKey`, although a plain hashtable has both. This is the second time in this build that an
+ordered dictionary has behaved unlike a hashtable; T004 hit the same class of problem with
+`Clone`.
+
+Read the list of valid phases out of `session.schema.json` instead of repeating it in the script.
+An unknown phase is reported with the whole list, and exits 1, rather than failing as a parameter
+binding error. A binding error is a terminating exception, and a caller cannot act on it.
+
+Used the parameter sets themselves to make the append and finalize parameters exclusive, so
+passing one of each fails before anything is written. The test asserts the resulting message,
+which proves nothing was half written.
+
+`-Finalize` writes the four derived summary fields always, and the other six only when given. That
+keeps a part-finished session valid, which is what T004 built the optional summary for.
+
+**Result:** DONE at commit pending
+
 
 
 
