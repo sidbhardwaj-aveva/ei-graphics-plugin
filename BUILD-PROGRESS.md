@@ -22,7 +22,7 @@ in `BUILD-LOG.md`.
 | T015 | Copy and split termination-drawing | DONE | 7552aa4 | 2026-08-31T19:02:00Z |
 | T010 | Get-EiDomainSkillCatalog.ps1 | DONE | 556cfe1 | 2026-08-31T19:14:00Z |
 | T011 | Test-EiScopeDrift.ps1 | DONE | 5907ded | 2026-08-31T19:24:00Z |
-| T012 | Convert-EiAdoIntake.ps1 | DONE | pending | 2026-08-31T19:42:00Z |
+| T012 | Convert-EiAdoIntake.ps1 | DONE | 7329c09 | 2026-08-31T19:42:00Z |
 | T013 | Copy ei-azure-devops-cli-intake | TODO | — | — |
 | T014 | Copy ei-layer-guard | TODO | — | — |
 | T016 | agents/ei-graphics.agent.md | TODO | — | — |
