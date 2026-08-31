@@ -598,6 +598,21 @@ with its parent section. All four hold.
 
 **Result:** DONE at commit 7552aa4
 
+## T010 — Get-EiDomainSkillCatalog.ps1 — 2026-08-31T19:06:00Z
+
+**Goal:** Read the registry, then read only the front of each skill document, and report what the
+agent needs to shortlist a domain.
+
+**Assumptions:** T015 has run, so `skills/termination-drawing/SKILL.md` now exists and the
+acceptance can be met against the real registry. A `skillPath` is relative to the plugin folder,
+which is two levels above the script's own folder. The frontmatter `description` may be a folded
+YAML block written with `>`, as the copied skill uses, so continuation lines indented under it are
+joined with a space. The when-to-use list is the bullet list under `## When to Use`, and reading
+stops at the next heading; the rest of the skill body is never read. A malformed front is one with
+no frontmatter block, or with no `description` in it, and both exit 1. Every count in the tests is
+read from the registry, never hardcoded, so adding a domain skill stays a two-file change.
+
+
 
 
 
