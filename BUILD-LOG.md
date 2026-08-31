@@ -612,6 +612,41 @@ stops at the next heading; the rest of the skill body is never read. A malformed
 no frontmatter block, or with no `description` in it, and both exit 1. Every count in the tests is
 read from the registry, never hardcoded, so adding a domain skill stays a two-file change.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Get-EiDomainSkillCatalog.ps1` (new, 119 lines)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Get-EiDomainSkillCatalog.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 169 tests
+passing, 13 of them new. The catalogue for the real registry returns as many entries as the
+registry declares, each with a description and a non-empty when-to-use list.
+
+**Attempts:** 2.
+
+**Decisions:**
+
+The failure came from a PowerShell rule rather than the logic. Marking a `[string[]]` parameter
+`Mandatory` applies a not-null-or-empty check to every element, so the first blank line in a
+markdown file was rejected. Dropped `Mandatory` on both array parameters and left a one-line note
+saying why, since removing an attribute looks like an oversight otherwise.
+
+Worked the plugin root out from the registry's own folder with
+`[System.IO.Path]::GetFullPath`, not `Resolve-Path`. `Resolve-Path` throws when the path does not
+exist, and the failure tests deliberately point `-RegistryPath` at a registry whose skill document
+is missing. Throwing there would have given the tests an exception instead of the exit code 1 the
+plan asks for.
+
+The copied skill writes its description as a folded YAML block with `>`, so the text sits on the
+indented lines below the key. Handled both that and a plain one-line value, and added a test that
+the folded form comes back as one line with no leading marker.
+
+Reading stops at the next heading after `## When to Use`, and a test proves a bullet in the
+following section is not picked up. Two more tests assert that no part of the skill body reaches
+the output.
+
+Every count in the tests is read from the registry. Nothing asserts that there is one domain.
+
+**Result:** DONE at commit pending
+
 
 
 
