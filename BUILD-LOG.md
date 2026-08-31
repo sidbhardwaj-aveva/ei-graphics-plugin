@@ -696,6 +696,70 @@ an unapproved change makes it 1.
 
 **Result:** DONE at commit 5907ded
 
+## T012 — Convert-EiAdoIntake.ps1 — 2026-08-31T19:30:00Z
+
+**Goal:** Translate the intake script's output into the shape `ado.schema.json` demands, and fetch
+the images attached to the work item.
+
+**Assumptions:** Read the intake script directly rather than trusting a summary of it. Its success
+output carries `status`, `reason`, `workItemContext` with `workItemUrl`, `workItemId`,
+`organization`, `project` and `authSource`, plus `descriptionText`, `attachmentUrls`,
+`commentRetrieval` and `comments`. `attachmentUrls` is a plain array of strings today, so an entry
+with no `source` is the normal case and becomes the literal `unknown`; an object entry carrying a
+`source` is handled too, because the plan describes one. Both timestamp helpers are written inline
+with `InvariantCulture`, and neither old helper file is dot-sourced. The original
+`Get-EiUtcTimestamp` has a real bug that is not copied forward: without a culture argument, the
+`:` in the format string is the culture's time separator, so a machine using `.` would render
+`14.22.10` and fail this task's own `retrievedAt` check. `ConvertTo-EiIsoTimestamp` is rewritten
+with all four branches, because `ConvertFrom-Json` may hand back a `DateTime` or a
+`DateTimeOffset` and a string must pass through untouched. A payload that did not retrieve
+cleanly, an empty description, or a work item id that is not a positive integer each exit 1 with a
+message naming the field and the value, rather than surfacing later as a raw schema error out of
+`Write-EiArtifact.ps1`. The download path is not covered by a test and is not mocked; it is
+exercised in the live run at T022.
+
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.ps1` (new, 160 lines)
+- `tests/fixtures/ado-intake-stdout.json` (new, hand-written)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 203 tests
+passing, 23 of them new. Every row of the field mapping table is checked one by one.
+
+**Attempts:** 1 for the logic, plus two passes to fit the line ceiling.
+
+**Decisions:**
+
+Read the intake script's success path rather than working from the plan's summary of it, and built
+the fixture from the shape it really emits. Worth knowing: `attachmentUrls` is an array of plain
+strings, not of objects. The plan describes an entry that may carry its own `source`, so both are
+handled, and a bare string becomes `source` of `unknown`.
+
+Wrote both timestamp helpers inline with `InvariantCulture`, and dot-sourced neither old helper.
+The original `Get-EiUtcTimestamp` has a real defect that is deliberately not carried forward: with
+no culture argument, `:` in the format string is the culture's time separator, so a machine set to
+use `.` would produce `14.22.10` and fail this task's own `retrievedAt` check.
+
+`ConvertTo-IsoTimestamp` keeps all four branches. The fixture exercises two of them in one run: the
+first comment's date is a real timestamp, which `ConvertFrom-Json` hands over as a `DateTime`, and
+the second is the text "yesterday afternoon", which must pass through unchanged. Both are asserted.
+
+Checked the work item id here rather than leaving it to the schema, and covered four bad values:
+empty, `0`, `007` and `abc`. Left to the schema, a malformed id surfaces much later as a raw
+validation error out of `Write-EiArtifact.ps1`, which is the "validation failed" experience Part 3
+exists to prevent.
+
+The download path has no test and is not mocked. It needs a real token and a real network, so it is
+exercised in the live run at T022 and nowhere else.
+
+The first version was 174 lines against a ceiling of 160. Trimmed to exactly 160 by shortening the
+help comment, folding `Get-UtcTimestamp` onto one line, joining the paired stderr sentences into
+single messages, and removing blank lines between statements that belong together. The ceiling was
+left alone, because the script fits without becoming unclear.
+
+**Result:** DONE at commit pending
+
+
 
 
 

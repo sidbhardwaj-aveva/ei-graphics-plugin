@@ -1,0 +1,34 @@
+{
+  "status": "retrieved",
+  "reason": "ado-cli",
+  "workItemContext": {
+    "workItemUrl": "https://dev.azure.com/avevagroup/EI/_workitems/edit/4965976",
+    "workItemId": "4965976",
+    "organization": "avevagroup",
+    "project": "EI",
+    "authSource": "az-cli"
+  },
+  "descriptionText": "Core connectors are not inserted after wires are added back in the second update. Expected the cores to appear at the restored levels.",
+  "attachmentUrls": [
+    "https://dev.azure.com/avevagroup/EI/_apis/wit/attachments/1111-2222?fileName=before-update.png",
+    "https://dev.azure.com/avevagroup/EI/_apis/wit/attachments/3333-4444?fileName=after-update.png"
+  ],
+  "commentRetrieval": {
+    "status": "retrieved",
+    "reason": "ado-cli"
+  },
+  "comments": [
+    {
+      "id": "12",
+      "author": "a.reviewer",
+      "createdDate": "2026-08-25T10:00:00Z",
+      "text": "This is specifically about the existsInBoth path."
+    },
+    {
+      "id": "13",
+      "author": "a.developer",
+      "createdDate": "yesterday afternoon",
+      "text": "Reproduced it on the second update only."
+    }
+  ]
+}
