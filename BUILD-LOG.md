@@ -333,7 +333,7 @@ require `hash`, so validating before stamping would fail every time.
 `-ArtifactType ado` is carved out in one place only, at the stamping step. Everything else about
 the three artifact types is identical.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 9568e0c
 
 
 
