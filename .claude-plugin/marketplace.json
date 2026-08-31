@@ -1,0 +1,15 @@
+{
+  "name": "demo-ei-graphics-plugin",
+  "description": "Demo build of the EI Graphics agent plugin: Azure DevOps intake, story understanding, domain skills, a layer guard, and a readable session log.",
+  "version": "1.0.0",
+  "owner": {
+    "name": "sidbhardwaj-aveva"
+  },
+  "plugins": [
+    {
+      "name": "demo-ei-graphics",
+      "description": "Works an EI Graphics story from an Azure DevOps link to a verified fix. The agent does the reasoning; domain skills hold the code knowledge.",
+      "source": "./plugins/demo-ei-graphics"
+    }
+  ]
+}

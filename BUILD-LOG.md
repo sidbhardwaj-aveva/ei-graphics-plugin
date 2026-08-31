@@ -945,6 +945,25 @@ names do not appear.
 
 **Result:** DONE at commit 65a506d
 
+## T017 — The manifests — 2026-08-31T20:34:00Z
+
+**Goal:** Write the two marketplace files at the repository root and `plugin.json` inside the
+plugin, with the three name fields agreeing.
+
+**Assumptions:** The old files were read for their structure only. Every value that names the old
+plugin, and every description, is written fresh. The two marketplace files genuinely use different
+bases: in `.claude-plugin/marketplace.json` the `source` resolves from the repository root, while
+in `.github/plugin/marketplace.json` the `pluginRoot` resolves from the root but the `source`
+resolves from `pluginRoot`, so it is the bare folder name with no prefix. The catalogue entry name
+is `demo-ei-graphics-plugin` in both marketplace files, while the plugin itself is
+`demo-ei-graphics`. The test reads both names off the filesystem rather than comparing against a
+string in the test, because a hardcoded string cannot catch a half-finished rename. The plugin
+folder is found by walking up from `plugin.json`: its own folder is `plugin`, then `.github`, then
+the plugin folder. `plugin.json` keeps the folder-pointer form, so adding a skill is never a
+manifest edit. Neither marketplace file has a `skillPath` key and the test must not ask for one.
+The keyword list drops `workflow` and `lifecycle`, because v3 has neither.
+
+
 
 
 

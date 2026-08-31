@@ -1,0 +1,16 @@
+{
+  "name": "demo-ei-graphics",
+  "description": "Works an EI Graphics story from an Azure DevOps link to a verified fix. The agent does the reasoning; domain skills hold the code knowledge.",
+  "version": "1.0.0",
+  "author": {
+    "name": "siddhant.bhardwaj@aveva.com"
+  },
+  "keywords": [
+    "ei-graphics",
+    "azure-devops",
+    "domain-skills",
+    "legacy-safety"
+  ],
+  "skills": "skills/",
+  "agents": "agents/"
+}
