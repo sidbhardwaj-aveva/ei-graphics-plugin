@@ -183,7 +183,7 @@ would break the first script whose output changed.
 Gave `summary` no `required` list at all, rather than an empty one. That is what lets a session
 that is still running validate, which the plan calls load-bearing.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 3b3eb31
 
 
 
