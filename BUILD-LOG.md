@@ -550,6 +550,54 @@ no new top-level heading, so the per-file counts stay at 8, 7, 12, 4 and 8 as th
 the `### Step 2` heading itself stays. This skill is copied content, so Part 3 does not apply to
 it, and one of its critical rules legitimately contains a word on the jargon list.
 
+**Files touched:**
+- `tests/fixtures/termination-drawing-v2-SKILL.md` (new, the before picture, copied unchanged)
+- `plugins/demo-ei-graphics/skills/termination-drawing/SKILL.md` (new, 172 lines)
+- `plugins/demo-ei-graphics/skills/termination-drawing/references/architecture.md` (new, 8 headings)
+- `.../references/composite-key-system.md` (new, 7 headings)
+- `.../references/update-flow.md` (new, 12 headings)
+- `.../references/log-analysis.md` (new, 4 headings)
+- `.../references/bug-patterns.md` (new, 8 headings)
+- `tests/demo-ei-graphics/skills/termination-drawing/TerminationDrawingSplit.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 156 tests
+passing, 20 of them new.
+
+**Attempts:** 1.
+
+**Decisions:**
+
+Split by machine rather than by hand. The file is cut into sections at its real headings, every
+heading is assigned to exactly one destination, and the sections are written back in source order.
+Nothing is retyped, so "no content may be lost" holds by construction. The script refuses to run
+if any assigned heading is not found in the source, which is what would catch a typo in the
+assignment table.
+
+Counted before trusting the plan. The source has 504 lines, 55 real headings and 10 `#` lines
+inside fenced code blocks. Both figures match. 16 headings stayed and 39 moved, which is 55.
+`SKILL.md` then gained `## References` as the 56th.
+
+The reference files were given no new top-level heading. Adding one would have made the per-file
+counts 9, 8, 13, 5 and 9 rather than the 8, 7, 12, 4 and 8 the plan states, and the point of those
+numbers is to check the split.
+
+Moved the long command block out of `### Step 2 — Analyse the Log` into `log-analysis.md`, and
+left a one-line pointer. It was appended inside the existing
+`### Log Analysis Commands (PowerShell)` section rather than under a new heading, so that file
+still has exactly 4 headings.
+
+The heading test checks one direction only: nothing lost, nothing in two files. It does not
+compare the two sets for equality and does not assert a total. T023 is allowed to add headings
+after the live run, and a frozen set would turn that into a build failure. Missing and duplicated
+headings are counted and reported separately, as the plan asks.
+
+Added four tests for the numbers earlier drafts of the plan got wrong: the `### Key Files` table
+has 14 rows, `## Common Bug Patterns & Fixes` has 7 patterns, `## Critical Rules (Do NOT Violate)`
+has 10 rules, and `### Problem: Cores Not Inserted After Wire Re-Addition (Update 2)` travelled
+with its parent section. All four hold.
+
+**Result:** DONE at commit pending
+
 
 
 
