@@ -1,0 +1,12 @@
+{
+  "id": 789012,
+  "rev": 3,
+  "fields": {
+    "System.Id": 789012,
+    "System.WorkItemType": "User Story",
+    "System.State": "Active",
+    "System.Title": "Fix TerminationDrawing update deletes wrong shapes at LOC-1",
+    "System.Description": "<div><p>When the UpdateDrawing method runs it removes cable shapes and terminal arrangement markers using plain IDs instead of the composite key stored in insertedTags, so LOC-1 equipment placed by TerminationDrawingInserter disappears from the canvas.</p><p>The EquipmentInserter composite key system should be used to distinguish LOC-0 from LOC-1 cable and terminal arrangement shapes. The insertedTags lookup must use the full composite key including the ConnectivitySide metadata.</p></div>"
+  },
+  "url": "https://dev.azure.com/example/_apis/wit/workItems/789012"
+}

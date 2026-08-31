@@ -777,6 +777,70 @@ acronyms, so the prose says link and `workItemUrl` stays in backticks as a field
 `## Lifecycle stage` section goes, along with the sentence naming the dropped stage script and the
 reference to the dropped run script. A line about `Convert-EiAdoIntake.ps1` is added.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` (copied, then rewritten)
+- `.../scripts/Invoke-EiAdoCliIntake.ps1` (copied, unedited, hashed)
+- `.../scripts/helpers/EiWorkItemReference.ps1` (copied, unedited, hashed)
+- `.../scripts/helpers/EiAdoTimestamp.ps1` (copied, unedited, hashed)
+- `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.Tests.ps1` (copied, one edit)
+- `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-123456.json` (copied)
+- `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-789012.json` (copied)
+- `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/AdoIntakeChain.Tests.ps1` (new)
+- `tests/data/ported-file-hashes.json` (changed, now 4 entries)
+- `tests/fixtures/ado-intake-stdout.json` (corrected, see below)
+- `tests/PlainLanguageRules.psm1` (changed, see below)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 239 tests
+passing. The copied Pester file passes all 23 of its own tests. A grep for `workflow-state`,
+`lifecycle` or `EIWF-` across the three copied scripts returns zero hits. All three recorded hashes
+match.
+
+**Attempts:** 3 for the rewritten `SKILL.md`, which the plain-language checker rejected twice.
+
+**Decisions:**
+
+**A correction to what T012 assumed.** T012's block states that `attachmentUrls` is an array of
+plain strings. That is wrong. Reading the copied script directly shows it builds
+`[PSCustomObject]@{ url = ...; source = ... }` for every image, and the copied test file has a case
+named for it. The T012 block is left as written, because the log is append only, and the record is
+corrected here instead.
+
+Two things follow. `tests/fixtures/ado-intake-stdout.json` was rewritten to carry the real object
+shape, with sources of `field:System.Description` and `comment:12`. T012's 23 tests still pass
+against it, because `Convert-EiAdoIntake.ps1` was already written to accept a string or an object.
+The object branch is the one that runs in real use, and it now has a test.
+
+The end-to-end test does not use a hand-written payload at all. It runs the real
+`Invoke-EiAdoCliIntake.ps1` against each copied fixture through `-CliWorkItemJson`, pipes the
+result through `Convert-EiAdoIntake.ps1`, then through `Write-EiArtifact.ps1 -ArtifactType ado`,
+and checks the written file against `ado.schema.json`. Proving the chain by running it is worth
+more than proving it against a payload I wrote myself.
+
+The copied test file got exactly one edit, the plugin name. A test now asserts three things about
+it: the new name is present, the old name is absent, and the five-level `..` chain above it is
+still five levels. That last one is easy to break and hard to notice.
+
+The new fixture-driven cases went into a separate file, so the copied test file keeps a single
+reviewable change.
+
+`SKILL.md` lost the whole `## Lifecycle stage` section, the `## Implementation status` section, the
+sentence naming the dropped stage script, and the `metadata.dependencies` entry pointing at a skill
+this build does not ship. It gained a `## What happens next` section naming
+`Convert-EiAdoIntake.ps1` and `Write-EiArtifact.ps1`, and the stop rule for a non-zero exit.
+
+The plain-language checker earned its keep here. It caught a 30 word sentence, a 38 word sentence,
+a bare script name in the description, and the word `MIT` from the `license:` line. The first three
+were real defects in my writing and were fixed. The fourth was a defect in the checker: it treated
+every frontmatter value as prose. `name`, `license`, `allowed_actions` and `allowedTools` are
+machine fields, not writing. `Get-PlainLanguageText` now takes only the `description` value, folded
+lines included. The whole suite was re-run afterwards and T006 still passes.
+
+Avoiding the word URL in prose was not a stylistic choice. It is a three letter acronym that Part 3
+does not exempt, so the checker requires it to be spelled out. Writing link instead is plainer
+anyway, and `workItemUrl` stays in backticks where it is a field name.
+
+**Result:** DONE at commit pending
+
 
 
 

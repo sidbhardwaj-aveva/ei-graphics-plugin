@@ -25,8 +25,18 @@ function Get-PlainLanguageText {
     $frontmatter = [regex]::Match($Markdown, '(?s)\A---\r?\n(.*?)\r?\n---\r?\n')
     if ($frontmatter.Success) {
         $body = $Markdown.Substring($frontmatter.Length)
-        $frontmatterProse = ($frontmatter.Groups[1].Value -split '\r?\n' |
-            ForEach-Object { $_ -replace '^\s*[A-Za-z_][\w-]*:\s*', '' }) -join "`n"
+        # Only the description is prose. name, license and the tool lists are machine fields.
+        $lines = $frontmatter.Groups[1].Value -split '\r?\n'
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -notmatch '^description:\s*(.*)$') { continue }
+            $collected = @($Matches[1].Trim() -replace '^[>|]-?$', '')
+            for ($j = $i + 1; $j -lt $lines.Count; $j++) {
+                if ($lines[$j] -notmatch '^\s+\S') { break }
+                $collected += $lines[$j].Trim()
+            }
+            $frontmatterProse = ($collected -join ' ').Trim()
+            break
+        }
     }
 
     $text = $frontmatterProse + "`n" + $body
