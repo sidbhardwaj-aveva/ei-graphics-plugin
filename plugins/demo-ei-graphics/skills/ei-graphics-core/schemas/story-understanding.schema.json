@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics story understanding",
+  "description": "What the agent understood from the story, after a person confirmed it. Bound to one exact ado.json by adoHash, so an understanding can never drift away from the story it was read from.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "storyId",
+    "adoHash",
+    "status",
+    "understanding",
+    "proposedDomains",
+    "confirmedDomains",
+    "complexity",
+    "hash"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "adoHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "status": { "type": "string", "enum": ["draft", "confirmed"] },
+    "understanding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "expectedOutcome", "requirements"],
+      "properties": {
+        "subject": { "type": "string", "minLength": 1 },
+        "expectedOutcome": { "type": "string", "minLength": 1 },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "source"],
+            "properties": {
+              "text": { "type": "string", "minLength": 1 },
+              "source": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "technicalConcepts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "attachmentUnderstanding": {
+      "type": "array",
+      "description": "What the agent could see in each image attached to the story.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fileName", "observations"],
+        "properties": {
+          "fileName": { "type": "string", "minLength": 1 },
+          "observations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["text", "certainty"],
+              "properties": {
+                "text": { "type": "string", "minLength": 1 },
+                "certainty": { "type": "string", "enum": ["visible", "inferred", "unclear"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "commentUnderstanding": {
+      "type": "object",
+      "description": "A comment can correct the description. This records that the thread was read and what it changed.",
+      "additionalProperties": false,
+      "required": ["commentsRead"],
+      "properties": {
+        "commentsRead": { "type": "integer", "minimum": 0 },
+        "supersedingInfo": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["commentId", "effect"],
+            "properties": {
+              "commentId": { "type": "string", "minLength": 1 },
+              "effect": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "proposedDomains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["domainId", "reason", "confidence"],
+        "properties": {
+          "domainId": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+        }
+      }
+    },
+    "confirmedDomains": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "complexity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assessment", "reasoning"],
+      "properties": {
+        "assessment": { "type": "string", "enum": ["small", "large"] },
+        "reasoning": { "type": "string", "minLength": 1 },
+        "filesLikely": { "type": "integer", "minimum": 0 },
+        "methodsLikely": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "ambiguities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "humanReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewedBy", "reviewedAt", "decision"],
+      "properties": {
+        "reviewedBy": { "type": "string", "minLength": 1 },
+        "reviewedAt": { "type": "string", "minLength": 1 },
+        "decision": { "type": "string", "enum": ["confirmed", "corrected", "rejected"] },
+        "corrections": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

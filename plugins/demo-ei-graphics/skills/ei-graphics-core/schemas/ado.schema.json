@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics ADO intake",
+  "description": "Normalised Azure DevOps story intake written by ei-azure-devops-cli-intake at the ado-intake stage. Only a successful retrieval becomes an artifact: a failed intake blocks the stage instead of persisting a partial story.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "storyId",
+    "storyRef",
+    "summary",
+    "description",
+    "workItem",
+    "retrieval",
+    "retrievedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "enum": ["ei-azure-devops-cli-intake"] },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "storyRef": { "type": ["string", "null"] },
+    "summary": { "type": ["string", "null"] },
+    "description": { "type": "string", "minLength": 1 },
+    "workItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "organization", "project", "url"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "organization": { "type": "string", "minLength": 1 },
+        "project": { "type": "string", "minLength": 1 },
+        "url": { "type": ["string", "null"] }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "authSource"],
+      "properties": {
+        "status": { "type": "string", "enum": ["retrieved"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "authSource": { "type": "string", "minLength": 1 }
+      }
+    },
+    "retrievedAt": { "type": "string", "minLength": 1 },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "localPath", "fileName"],
+        "properties": {
+          "url":       { "type": "string", "minLength": 1 },
+          "localPath": { "type": "string", "minLength": 1 },
+          "fileName":  { "type": "string", "minLength": 1 },
+          "source":    { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "commentRetrieval": {
+      "type": "object",
+      "description": "Whether the discussion thread was read. 'skipped' and 'unavailable' are distinct from an empty thread, so an unread thread is never mistaken for no comments.",
+      "additionalProperties": false,
+      "required": ["status", "reason"],
+      "properties": {
+        "status": { "type": "string", "enum": ["retrieved", "skipped", "unavailable"] },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "comments": {
+      "type": "array",
+      "description": "Work item discussion comments in chronological order, as plain text.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "author", "createdDate", "text"],
+        "properties": {
+          "id":          { "type": "string" },
+          "author":      { "type": "string" },
+          "createdDate": { "type": "string" },
+          "text":        { "type": "string" }
+        }
+      }
+    }
+  }
+}

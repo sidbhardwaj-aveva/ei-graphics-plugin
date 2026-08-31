@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics session log",
+  "description": "The running record of one agent session. Write-EiSessionEntry.ps1 appends one entry per step, then fills in the summary at the end. Export-EiSessionSummary.ps1 renders session-summary.md from this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "storyId",
+    "startedAt",
+    "agent",
+    "verbosity",
+    "entries"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "startedAt": { "type": "string", "minLength": 1 },
+    "agent": { "type": "string", "minLength": 1 },
+    "verbosity": {
+      "type": "string",
+      "description": "How much detail the rendered summary carries. The setting belongs to the session, so it is never passed to the renderer as a parameter.",
+      "enum": ["verbose", "concise"],
+      "default": "verbose"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["timestamp", "phase", "action", "outcome"],
+        "properties": {
+          "timestamp": { "type": "string", "minLength": 1 },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "ado-intake",
+              "understanding",
+              "human-checkpoint",
+              "complexity",
+              "implementation",
+              "validation",
+              "commit"
+            ]
+          },
+          "action": { "type": "string", "minLength": 1 },
+          "reasoning": { "type": ["string", "null"] },
+          "outcome": { "type": "string", "minLength": 1 },
+          "durationMs": { "type": ["integer", "null"], "minimum": 0 },
+          "tokensUsed": { "type": ["integer", "null"], "minimum": 0 },
+          "filesRead": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "filesModified": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "humanInput": { "type": ["string", "null"] },
+          "scriptOutput": {
+            "description": "Whatever the called script returned. Left free-form on purpose, because each script has its own output shape."
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "description": "Written by -Finalize at the end of the session. Every field is optional, so a session that is still running still validates.",
+      "additionalProperties": false,
+      "properties": {
+        "completedAt": { "type": "string", "minLength": 1 },
+        "totalDurationMs": { "type": "integer", "minimum": 0 },
+        "totalTokens": { "type": "integer", "minimum": 0 },
+        "filesModified": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "testsRun": { "type": "integer", "minimum": 0 },
+        "testsPassed": { "type": "integer", "minimum": 0 },
+        "humanInteractions": { "type": "integer", "minimum": 0 },
+        "outcome": { "type": "string", "minLength": 1 },
+        "domainSkillUsed": { "type": ["string", "null"] },
+        "bugPatternMatched": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

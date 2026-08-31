@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "SHA-256 of every file copied from the old repository and never edited here. T020 checks each one still matches.",
+  "files": {
+    "plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/ado.schema.json": "sha256:82934f8e38bb2e217e048f91498ea561299cf4e18e7a0b255b6b17bd5516beab"
+  }
+}

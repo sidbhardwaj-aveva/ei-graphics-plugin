@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EI Graphics approved files",
+  "description": "The files a person agreed the agent may change, for one story. Bound to one exact story-understanding.json by understandingHash. Test-EiScopeDrift.ps1 compares this list against what actually changed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "storyId",
+    "understandingHash",
+    "approvedAt",
+    "approvedBy",
+    "approvalType",
+    "files",
+    "hash"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "understandingHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "approvedAt": { "type": "string", "minLength": 1 },
+    "approvedBy": { "type": "string", "minLength": 1 },
+    "approvalType": {
+      "type": "string",
+      "description": "direct is a small bug the person approved on the spot. plan-reviewed is a larger change they read a plan for first.",
+      "enum": ["direct", "plan-reviewed"]
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "intent", "reason"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "intent": { "type": "string", "enum": ["create", "modify", "delete"] },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

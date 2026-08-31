@@ -147,5 +147,43 @@ them, `additionalProperties: false` would reject every real entry. `scriptOutput
 free-form object, because it holds whatever a called script returned. The copied `ado.schema.json`
 is not edited, not loosened, and not rewritten in T013.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/story-understanding.schema.json` (new)
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/approved-files.schema.json` (new)
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/session.schema.json` (new)
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/ado.schema.json` (copied, unedited)
+- `tests/data/ported-file-hashes.json` (new, one entry so far)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/schemas/Schemas.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 33 new tests
+passing, on top of T002's 20.
+
+**Attempts:** 2. The first run failed 16 tests on a PowerShell detail, not on the schemas.
+
+**Decisions:**
+
+Copied `ado.schema.json` and compared the source and destination hashes in the same run, so the
+copy is provably byte for byte. Recorded it as the first and so far only entry in
+`tests/data/ported-file-hashes.json`. T020 will assert that file holds exactly 6 entries once
+T013 and T014 have added the other 5.
+
+The 16 failures were all the same mistake. An ordered dictionary in PowerShell does not expose a
+`Clone` method, although a plain hashtable does. Replaced it with a small `Copy-Payload` helper
+that builds a fresh ordered dictionary key by key. Key order matters here, because these payloads
+are turned into JSON.
+
+Set the session entry `phase` list to the seven phases the archive's worked example uses:
+`ado-intake`, `understanding`, `human-checkpoint`, `complexity`, `implementation`, `validation`
+and `commit`. T008 needs a closed list so it can reject an invalid `-Phase`.
+
+Left `scriptOutput` free-form, with no `type` keyword. It holds whatever a called script returned,
+and the layer guard, the drift check and a test runner all return different shapes. Pinning it
+would break the first script whose output changed.
+
+Gave `summary` no `required` list at all, rather than an empty one. That is what lets a session
+that is still running validate, which the plan calls load-bearing.
+
+**Result:** DONE at commit pending
+
 
 
