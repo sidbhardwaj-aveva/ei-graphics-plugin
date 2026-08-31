@@ -1107,6 +1107,26 @@ separately, where writing it is safe.
 
 **Result:** DONE at commit 8cdc553
 
+## T020 — The script contract check — 2026-08-31T21:08:00Z
+
+**Goal:** Check every `.ps1` under `plugins/` against one of two contracts, and check the recorded
+hashes, the script count and the registry.
+
+**Assumptions:** The roster parser is anchored on the `#### T0NN` heading, never on the marker
+text, because two rosters say "exactly these 7" and neither the marker nor the count identifies a
+task on its own. Inside a task's section, the parser finds the "Parameters, exactly these N"
+marker and then reads every `-Name` token to the end of the roster block, which may span several
+bullets: T008's 21 names sit in three bullets below its marker, not beside it. Reading stops at
+the next paragraph that is not part of the roster. The parser gets its own test, asserting the
+exact expected name set for T008 and T012, and asserting that it fails loudly rather than
+returning nothing when a roster cannot be found. Getting this parse wrong is the worst failure
+available here, because it produces a green suite that checked nothing. The line ceilings live in
+one hashtable at the top of the test file, as the plan requires, and none has been raised. The
+copied set is hardcoded and gets the reduced contract only: `Set-StrictMode` present, nothing
+prompts, no parameter budget, and no requirement for `#Requires` or `-Help`. Every `.ps1` found
+under `plugins/` must fall in exactly one set, checked in both directions.
+
+
 
 
 

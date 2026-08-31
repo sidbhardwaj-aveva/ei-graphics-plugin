@@ -29,7 +29,7 @@ in `BUILD-LOG.md`.
 | T017 | The manifests | DONE | b95a93d | 2026-08-31T20:40:00Z |
 | T018 | The documents | DONE | 7247517 | 2026-08-31T20:52:00Z |
 | T019 | The no-orphan check | DONE | 8cdc553 | 2026-08-31T21:04:00Z |
-| T020 | The script contract check | TODO | — | — |
+| T020 | The script contract check | IN-PROGRESS | — | — |
 | T021 | Everything green, before the live run | TODO | — | — |
 | T022 | Dry run against story 4965976 | TODO | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |
