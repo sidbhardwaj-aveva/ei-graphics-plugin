@@ -28,7 +28,7 @@ in `BUILD-LOG.md`.
 | T016 | agents/ei-graphics.agent.md | DONE | 65a506d | 2026-08-31T20:30:00Z |
 | T017 | The manifests | DONE | b95a93d | 2026-08-31T20:40:00Z |
 | T018 | The documents | DONE | 7247517 | 2026-08-31T20:52:00Z |
-| T019 | The no-orphan check | DONE | pending | 2026-08-31T21:04:00Z |
+| T019 | The no-orphan check | DONE | 8cdc553 | 2026-08-31T21:04:00Z |
 | T020 | The script contract check | TODO | — | — |
 | T021 | Everything green, before the live run | TODO | — | — |
 | T022 | Dry run against story 4965976 | TODO | — | — |
