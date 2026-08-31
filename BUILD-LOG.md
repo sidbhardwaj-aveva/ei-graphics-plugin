@@ -647,6 +647,56 @@ Every count in the tests is read from the registry. Nothing asserts that there i
 
 **Result:** DONE at commit 556cfe1
 
+## T011 — Test-EiScopeDrift.ps1 — 2026-08-31T19:18:00Z
+
+**Goal:** Compare the files that actually changed against the files a person approved, and report
+drift.
+
+**Assumptions:** `approved-files.json` is found the same way T007 wrote it, at
+`<Root>/.ei-session-logs/<StoryId>/approved-files.json`. `-ChangedFiles` is the seam that makes
+the script testable: supply it and the script uses that list, leave it out and the script asks git
+for its diff plus its untracked files. The three test cases are written and watched failing before
+the script exists, as the task asks. Paths are compared after turning every backslash into a
+forward slash and trimming any leading `./`, because git reports forward slashes while a caller on
+Windows may not. Comparison is case sensitive, since the repositories this runs against are read
+on case sensitive systems too. An approved file nobody touched is a warning and does not change
+the exit code; only an unapproved change does. There is no seal and no scope-change-request
+artifact, per Part 10. The tests call the script in process with `&`, never with `pwsh -File`,
+which flattens an array argument and would let the check pass silently.
+
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Test-EiScopeDrift.ps1` (new, 99 lines)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Test-EiScopeDrift.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 180 tests
+passing, 11 of them new.
+
+**Attempts:** 1, after the tests were watched failing.
+
+**Decisions:**
+
+Wrote all 11 tests first and ran them against a script that did not exist. All 11 failed with a
+command-not-found error, which is the proof the task asks for that they are really exercising the
+script rather than passing by accident.
+
+Told an omitted `-ChangedFiles` apart from an empty one with
+`$PSBoundParameters.ContainsKey('ChangedFiles')`. Testing the variable for emptiness would have
+sent the "nothing changed at all" case off to git, and that test would then depend on the state of
+this repository.
+
+Added a test that passes three files and asserts three come back. That is the array flattening
+trap in Part 8 written as a check, so nobody can quietly switch the call to `pwsh -File` later.
+
+Compared paths after turning backslashes into forward slashes and dropping a leading `./`. Used
+`-cnotcontains` so the comparison stays case sensitive, because these repositories are also read
+on case sensitive systems, where two names differing only in case are two different files.
+
+The warning for an approved file nobody touched goes to stderr and leaves the exit code at 0. Only
+an unapproved change makes it 1.
+
+**Result:** DONE at commit pending
+
+
 
 
 
