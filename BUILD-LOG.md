@@ -185,5 +185,21 @@ that is still running validate, which the plan calls load-bearing.
 
 **Result:** DONE at commit 3b3eb31
 
+## T005 — The domain skill registry — 2026-08-31T17:10:00Z
+
+**Goal:** Write `references/domain-skill-registry.json` as a plain index, and
+`schemas/domain-skill-registry.schema.json` beside the other four schemas.
+
+**Assumptions:** A `skillPath` is written relative to the plugin folder, so
+`skills/termination-drawing/SKILL.md` resolves from `plugins/demo-ei-graphics/`. That is the form
+the archive uses, and it is what T010 and T020 will resolve against. The registry holds no
+detection terms and no synonyms; matching a story to a domain is the agent's job, using the
+descriptions `Get-EiDomainSkillCatalog.ps1` returns. The schema lives in `schemas/` while the data
+stays in `references/`, so a reader can tell the contract from the content. No test counts the
+domains against a hardcoded number; every count is read from the registry, because adding a domain
+skill later must stay a two-file change. The `termination-drawing` skill folder does not exist
+yet, so this task does not check that the path resolves. T020 does, once T015 has copied it.
+
+
 
 
