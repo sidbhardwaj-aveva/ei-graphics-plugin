@@ -14,7 +14,7 @@
 | T006 | ei-graphics-core SKILL.md and the plain-language checker | DONE | 367b3da | 2026-08-31T17:38:00Z |
 | T007 | Write-EiArtifact.ps1 | DONE | 9568e0c | 2026-08-31T17:56:00Z |
 | T008 | Write-EiSessionEntry.ps1 | DONE | 45e49b9 | 2026-08-31T18:12:00Z |
-| T009 | Export-EiSessionSummary.ps1 | DONE | pending | 2026-08-31T18:34:00Z |
+| T009 | Export-EiSessionSummary.ps1 | DONE | 95d3a1b | 2026-08-31T18:34:00Z |
 | T010 | Get-EiDomainSkillCatalog.ps1 | TODO | — | — |
 | T011 | Test-EiScopeDrift.ps1 | TODO | — | — |
 | T012 | Convert-EiAdoIntake.ps1 | TODO | — | — |

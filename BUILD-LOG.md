@@ -459,7 +459,7 @@ case here, so the ceiling was left alone. Merged the paired emit calls, folded t
 fallback assignments into one `Get-Text` helper, and removed one blank line from the help comment.
 It now stands at 178 lines with no loss of clarity.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 95d3a1b
 
 
 
