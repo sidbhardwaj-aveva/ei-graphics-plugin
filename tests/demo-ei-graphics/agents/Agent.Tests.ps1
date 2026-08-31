@@ -68,10 +68,20 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:AgentFlat | Should -Match '(?i)comment can correct the description'
     }
 
-    It 'contains none of the dropped names: <_>' -ForEach @(
-        'lifecycle', 'EIWF-', 'Format-EiWorkflowSummary', 'ei-graphics-workflow'
-    ) {
-        $script:Agent | Should -Not -BeLike "*$_*"
+    It 'names nothing this build dropped' {
+        # The list is read from tests/data/forbidden-identifiers.txt. Writing the names here would
+        # make this file fail T019's own scan.
+        $terms = @(
+            Get-Content -LiteralPath (Join-Path $repoRoot 'tests' 'data' 'forbidden-identifiers.txt') |
+                ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+        )
+        $terms.Count | Should -BeGreaterOrEqual 23
+        $hits = @($terms | Where-Object { $script:Agent -like "*$_*" })
+        $hits.Count | Should -Be 0 -Because "the agent file names: $($hits -join ', ')"
+    }
+
+    It 'mentions no lifecycle, which v3 does not have' {
+        $script:Agent | Should -Not -Match '(?i)lifecycle'
     }
 }
 

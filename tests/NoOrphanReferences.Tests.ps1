@@ -32,6 +32,20 @@ $SkillFolders = @(
         ForEach-Object { $_.FullName }
 )
 
+# Part 2's "what we are deliberately not copying" list, read out of plan.md rather than repeated
+# here. Writing it here would make this file fail its own scan.
+$NotCopiedParagraph = [regex]::Match(
+    (Get-Content -LiteralPath (Join-Path $RepoRoot 'plan.md') -Raw),
+    '(?ms)^### What we are deliberately not copying\s*\r?\n\r?\n(.*?)\r?\n\r?\n'
+).Groups[1].Value
+
+$NotCopied = @(
+    [regex]::Matches($NotCopiedParagraph, '`([^`]+)`') |
+        ForEach-Object { $_.Groups[1].Value } |
+        ForEach-Object { (Split-Path -Leaf $_) -replace '\.ps1$', '' } |
+        Sort-Object -Unique
+)
+
 BeforeAll {
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
     $script:TermFile = Join-Path $script:RepoRoot 'tests' 'data' 'forbidden-identifiers.txt'
@@ -39,21 +53,6 @@ BeforeAll {
         Get-Content -LiteralPath $script:TermFile |
             ForEach-Object { $_.Trim() } |
             Where-Object { $_ -ne '' }
-    )
-
-    # Part 2, "what we are deliberately not copying". Skills by folder name, scripts by file name
-    # without the extension.
-    $script:NotCopied = @(
-        'ei-graphics-workflow'
-        'ei-workflow-state'
-        'ei-scope-resolver'
-        'ei-scope-validator'
-        'ei-vocabulary-navigator'
-        'ei-bug-reproducer'
-        'ei-test-scaffolder'
-        'Test-EiGraphicsSpecSync'
-        'Invoke-EiAdoIntakeStage'
-        'EiTestPreflight'
     )
 }
 
@@ -83,30 +82,26 @@ Describe 'No orphan references' -Tag 'Unit' {
 
         It 'a planted term in a scanned location would fail the scan' {
             $planted = Join-Path $TestDrive 'planted.md'
-            Set-Content -LiteralPath $planted -Value 'This mentions ei-graphics-workflow in prose.' -Encoding utf8NoBOM
-            $hits = @($script:Terms | Where-Object { (Get-Content -LiteralPath $planted -Raw) -like "*$_*" })
-            $hits.Count | Should -BeGreaterThan 0
+            Set-Content -LiteralPath $planted -Encoding utf8NoBOM -Value "This prose mentions $($script:Terms[0]) by name."
+            $raw = Get-Content -LiteralPath $planted -Raw
+            @($script:Terms | Where-Object { $raw -like "*$_*" }).Count | Should -BeGreaterThan 0
         }
     }
 
     Context 'the term file covers everything the build dropped' {
-        It 'names <_>' -ForEach @(
-            'ei-graphics-workflow'
-            'ei-workflow-state'
-            'ei-scope-resolver'
-            'ei-scope-validator'
-            'ei-vocabulary-navigator'
-            'ei-bug-reproducer'
-            'ei-test-scaffolder'
-            'Test-EiGraphicsSpecSync'
-            'Invoke-EiAdoIntakeStage'
-            'EiTestPreflight'
-        ) {
+        It 'the not-copied list was found in plan.md' -TestCases @(@{ Names = $NotCopied }) {
+            # A parse that quietly returns nothing would make the next check vacuous.
+            $Names.Count | Should -BeGreaterOrEqual 10
+        }
+
+        It 'names <_>' -ForEach $NotCopied {
             $script:Terms | Should -Contain $_
         }
 
-        It 'names the old plugin, which must not survive anywhere' {
-            $script:Terms | Should -Contain 'aveva-ei-graphics'
+        It 'names the old plugin folder, which must not survive anywhere' -TestCases @(
+            @{ Old = (Split-Path -Leaf (Resolve-Path (Join-Path $RepoRoot '..' 'ei-graphics-plugin' 'plugins' '*')).Path) }
+        ) {
+            $script:Terms | Should -Contain $Old
         }
     }
 

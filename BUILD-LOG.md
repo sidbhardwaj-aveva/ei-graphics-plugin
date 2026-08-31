@@ -1064,6 +1064,49 @@ cannot turn the guard into a silent pass. Part 2's list of what is deliberately 
 checked against the term file in full, skills by folder name and scripts by file name without the
 extension.
 
+**Files touched:**
+- `tests/data/forbidden-identifiers.txt` (new, 23 terms)
+- `tests/NoOrphanReferences.Tests.ps1` (new)
+- `tests/demo-ei-graphics/agents/Agent.Tests.ps1` (changed, see below)
+- `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/AdoIntakeChain.Tests.ps1` (changed)
+- `tests/demo-ei-graphics/skills/ei-layer-guard/scripts/LayerGuardCopy.Tests.ps1` (changed)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 419 tests
+passing, 100 of them new. The scan covers every file in the repository outside the seven skipped
+locations, and finds nothing.
+
+**Attempts:** 3.
+
+**Decisions:**
+
+The first run failed four files, and every one of them was the same mistake the plan warns about:
+a test that names a banned term matches itself. Three of my earlier test files asserted the
+absence of `EIWF-`, `Format-EiWorkflowSummary`, `ei-graphics-workflow` and `aveva-ei-graphics` by
+writing those names out. The guard was right to flag them.
+
+Fixed it properly rather than by widening the skip list. All three now read the terms from
+`tests/data/forbidden-identifiers.txt` and assert that none of them appears. One list, read
+everywhere. The skip list stays at exactly the seven locations the plan names.
+
+The fourth failure was in this file itself. It held Part 2's not-copied list as a literal array.
+That list is now parsed out of the first paragraph under plan.md's
+"What we are deliberately not copying" heading, and the backticked names are reduced to leaf names
+with any extension stripped. Deriving it from the plan means the check cannot drift away from the
+plan, and this file no longer trips its own scan.
+
+A parser that quietly returns nothing would make the whole check vacuous, so there is a test that
+it recovered at least ten names before any of them are looked up. The same reasoning as T020's
+parser test.
+
+The old plugin folder name is read off the old repository on disk, not typed here, for the same
+self-matching reason.
+
+Kept `lifecycle` out of the term file, because the plan seeds `lifecycle-iterate` and
+`lifecycle-implement` rather than the bare word. The agent file is checked for the bare word
+separately, where writing it is safe.
+
+**Result:** DONE at commit pending
+
 
 
 

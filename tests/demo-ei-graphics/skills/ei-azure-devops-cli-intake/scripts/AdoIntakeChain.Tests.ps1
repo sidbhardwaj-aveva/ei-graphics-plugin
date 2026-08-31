@@ -40,15 +40,29 @@ Describe 'ei-azure-devops-cli-intake, as copied' -Tag 'Unit' {
         }
 
         It 'none of them mentions a skill this build dropped' {
-            $paths = $script:CopiedScripts | ForEach-Object { Join-Path $script:RepoRoot $_ }
-            @(Select-String -Path $paths -Pattern 'workflow-state|lifecycle|EIWF-').Count | Should -Be 0
+            # The list is read from tests/data/forbidden-identifiers.txt, never written here.
+            $terms = @(
+                Get-Content -LiteralPath (Join-Path $script:RepoRoot 'tests' 'data' 'forbidden-identifiers.txt') |
+                    ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+            )
+            $terms.Count | Should -BeGreaterOrEqual 23
+            foreach ($relative in $script:CopiedScripts) {
+                $raw = Get-Content -LiteralPath (Join-Path $script:RepoRoot $relative) -Raw
+                $hits = @($terms | Where-Object { $raw -like "*$_*" })
+                $hits.Count | Should -Be 0 -Because "$relative names: $($hits -join ', ')"
+            }
         }
 
         It 'the copied test file points at the renamed plugin folder' {
             $testFile = Join-Path $PSScriptRoot 'Invoke-EiAdoCliIntake.Tests.ps1'
             $raw = Get-Content -LiteralPath $testFile -Raw
-            $raw | Should -BeLike "*'demo-ei-graphics'*"
-            $raw | Should -Not -BeLike '*aveva-ei-graphics*'
+            $pluginName = Split-Path -Leaf (Join-Path $script:RepoRoot 'plugins' 'demo-ei-graphics')
+            $raw | Should -BeLike "*'$pluginName'*"
+            $terms = @(
+                Get-Content -LiteralPath (Join-Path $script:RepoRoot 'tests' 'data' 'forbidden-identifiers.txt') |
+                    ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+            )
+            @($terms | Where-Object { $raw -like "*$_*" }).Count | Should -Be 0
             # Renaming a folder does not change how deep it sits, so the chain stays at five.
             $raw | Should -BeLike "*Join-Path `$PSScriptRoot '..' '..' '..' '..' '..'*"
         }
