@@ -127,6 +127,6 @@ naming the path that was searched.
 Kept the `Unit` tag filter, the `Detailed` verbosity and the two code coverage parameters exactly
 as the old harness had them. Only the two changes the task calls for were made.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit c61eb07
 
 
