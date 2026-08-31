@@ -243,6 +243,47 @@ boundaries and ignoring case, because `termination` must not trip a rule aimed a
 The backtick rule checks for a `Verb-EiNoun` name or a `.ps1`, `.json` or `.md` file name that is
 not already inside backticks, a fenced block, a link target or a heading.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/SKILL.md` (new)
+- `tests/data/jargon-terms.txt` (new, the 18 words from Part 3)
+- `tests/PlainLanguageRules.psm1` (new)
+- `tests/PlainLanguage.Tests.ps1` (new)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/Skill.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 91 tests
+passing, 28 of them new.
+
+**Attempts:** 2. The first draft of `SKILL.md` came out at 136 lines, over the 120 line ceiling.
+
+**Decisions:**
+
+Put the four rules in `tests/PlainLanguageRules.psm1` rather than inside the test file. T009 has to
+apply the same four rules to the rendered summary, which never exists on disk and so cannot be
+scanned here. Two copies of the rules would drift apart. The plan only asks T009 to reuse the word
+list, so this goes a little further, and the module is the smaller thing to maintain. It sits
+under `tests/`, so it is outside both of T020's sets and outside T019's scan of skill documents.
+
+Cut `SKILL.md` from 136 lines to 118 by folding the writes, output and exit code lines together
+per script, rather than by dropping content.
+
+Added `AVEVA` to the acronym exemption list, alongside the seven Part 3 names. It is a company
+name, not an acronym, and there is no expansion to write for it. Expanded `EI` properly instead,
+as Electrical and Instrumentation, in the skill description.
+
+Frontmatter is scanned, not skipped. The `key:` prefix is stripped and the value is treated as
+prose, because the description is written for a person. That is what forced the description to be
+shortened into two sentences.
+
+Sentence splitting happens after headings, table rows, list markers and inline code are removed.
+Splitting on a full stop also splits version numbers such as 7.0, which only makes the resulting
+fragments shorter, so it can never cause a false failure of the 25 word rule.
+
+The backtick rule looks for two things only: a `Verb-EiNoun` name, and a file name ending in
+`.ps1`, `.psm1`, `.json`, `.md` or `.txt`. Matching bare paths as well produced too many false
+hits, and Part 3's own worked example is a script name.
+
+**Result:** DONE at commit pending
+
 
 
 
