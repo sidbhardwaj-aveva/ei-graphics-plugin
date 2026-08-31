@@ -943,7 +943,7 @@ agent, in the same plain words the rest of the file uses.
 Everything on the archive's "What's cut" list is absent, and four tests assert that the dropped
 names do not appear.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 65a506d
 
 
 
