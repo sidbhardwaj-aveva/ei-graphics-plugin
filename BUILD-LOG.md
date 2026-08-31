@@ -1126,6 +1126,46 @@ copied set is hardcoded and gets the reduced contract only: `Set-StrictMode` pre
 prompts, no parameter budget, and no requirement for `#Requires` or `-Help`. Every `.ps1` found
 under `plugins/` must fall in exactly one set, checked in both directions.
 
+**Files touched:**
+- `tests/ScriptContract.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 477 tests
+passing, 58 of them new. All six of our scripts are within their ceilings, all six declare exactly
+the parameters their task lists, all six recorded hashes match, and the script count is 10.
+
+**Attempts:** 2. The roster parser was wrong on the first run, and its own tests caught it.
+
+**Decisions:**
+
+The parser bug is worth recording, because the plan calls this the worst failure available here.
+The first version read from the marker until it ran out of lines that looked like a roster, which
+swallowed the paragraph below. For T010 that paragraph says "No `-Root` and no `-DomainId` filter",
+so the parser reported 5 names where the roster lists 3, and the check failed against a correct
+script. Reading too much is the safe direction; reading too little would have passed silently.
+
+The rule is now simpler and matches how the plan is actually written. The roster is the marker's
+own paragraph, ending at the blank line. Only when that paragraph carries no parameter names, which
+is true of T008 alone, does the parser fall through to the bullet block below it. That handles both
+shapes without special-casing a task by name.
+
+The parser has five tests of its own. Two check exact name sets, for T008's 21 across three
+bullets and T012's 7. One proves T007 and T012 are told apart although both rosters say seven. Two
+prove it throws rather than returning nothing when the heading or the marker is missing.
+
+Parameters are read from the script with the PowerShell parser, not with a regular expression, so
+attributes and line breaks inside the `param()` block cannot confuse it.
+
+The copied set gets a test asserting each of the four has **no** `-Help` switch. The plan says
+their absence is expected and must not be fixed, so stating it as a check stops a well-meaning
+edit later.
+
+The hash check asserts the count and the file list together, as the plan requires. A count that
+disagrees with its own contents is how a check like this rots.
+
+No ceiling was raised. All six scripts fit as written.
+
+**Result:** DONE at commit pending
+
 
 
 

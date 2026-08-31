@@ -84,8 +84,8 @@ BeforeAll {
         .DESCRIPTION
             Anchored on the '#### T0NN' heading, never on the marker text: two rosters say "exactly
             these 7", so neither the marker nor the count identifies a task on its own. The roster
-            may span several bullets below the marker, as T008's does, so reading continues to the
-            end of the roster block rather than to the end of the marker line.
+            is the marker's own paragraph. When that paragraph carries no parameter names, as
+            T008's does, the roster is the bullet block below it instead.
         #>
         param([Parameter(Mandatory)] [string] $PlanText, [Parameter(Mandatory)] [string] $TaskId)
 
@@ -99,21 +99,24 @@ BeforeAll {
             throw "The '#### $TaskId' section of plan.md has no 'Parameters, exactly these N' marker."
         }
 
-        $roster = [System.Collections.Generic.List[string]]::new()
-        $started = $false
-        foreach ($line in (($section.Value.Substring($marker.Index)) -split '\r?\n')) {
-            $trimmed = $line.Trim()
-            if ($trimmed -match '`-[A-Za-z]') { $roster.Add($trimmed); $started = $true; continue }
-            if (-not $started) { continue }
-            if ($trimmed -eq '' -or $trimmed -match '^\*\*') { continue }
-            break
+        $extract = {
+            param([string[]] $Block)
+            @([regex]::Matches(($Block -join ' '), '`-([A-Za-z][A-Za-z0-9]*)`') |
+                    ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
         }
 
-        $names = @(
-            [regex]::Matches(($roster -join ' '), '`-([A-Za-z][A-Za-z0-9]*)`') |
-                ForEach-Object { $_.Groups[1].Value } |
-                Sort-Object -Unique
-        )
+        $lines = ($section.Value.Substring($marker.Index)) -split '\r?\n'
+        $block = [System.Collections.Generic.List[string]]::new()
+        $i = 0
+        while ($i -lt $lines.Count -and $lines[$i].Trim() -ne '') { $block.Add($lines[$i]); $i++ }
+        $names = & $extract $block.ToArray()
+
+        if ($names.Count -eq 0) {
+            while ($i -lt $lines.Count -and $lines[$i].Trim() -eq '') { $i++ }
+            while ($i -lt $lines.Count -and $lines[$i].Trim() -ne '') { $block.Add($lines[$i]); $i++ }
+            $names = & $extract $block.ToArray()
+        }
+
         if ($names.Count -eq 0) { throw "No parameter names were found in the roster for $TaskId." }
         , $names
     }
