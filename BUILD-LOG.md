@@ -963,6 +963,39 @@ the plugin folder. `plugin.json` keeps the folder-pointer form, so adding a skil
 manifest edit. Neither marketplace file has a `skillPath` key and the test must not ask for one.
 The keyword list drops `workflow` and `lifecycle`, because v3 has neither.
 
+**Files touched:**
+- `.claude-plugin/marketplace.json` (new, at the repository root)
+- `.github/plugin/marketplace.json` (new, at the repository root)
+- `plugins/demo-ei-graphics/.github/plugin/plugin.json` (new, inside the plugin)
+- `tests/Manifests.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 302 tests
+passing, 15 of them new.
+
+**Attempts:** 1.
+
+**Decisions:**
+
+Read both plugin names off the filesystem rather than comparing them against a string written in
+the test. The plugin folder is found by walking up from `plugin.json` three levels, exactly as the
+plan describes. A hardcoded string would pass happily through a half-finished rename, which is the
+one failure this check exists to catch.
+
+Treated the two marketplace files separately, because they really do use different bases. The test
+resolves the first `source` from the repository root and the second from `pluginRoot`, and also
+asserts that the second carries no `plugins` prefix. Getting that backwards is the mistake the plan
+warns about, and it would only show up when the plugin failed to load.
+
+Added a check that `plugin.json` names none of the skill folders found on disk. That is the
+filesystem-driven way to state "manifests must never list individual skills", and it will keep
+holding as skills are added.
+
+Every description was written fresh. None of the three files carries `ITERATE routing`,
+`scope control` or `gated delivery lifecycle`, and a test scans all three for those phrases. Also
+dropped `workflow` and `lifecycle` from the keyword list, since this build has neither.
+
+**Result:** DONE at commit pending
+
 
 
 

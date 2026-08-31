@@ -1,8 +1,8 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T017
-**Last verified green:** T016 (2026-08-31T20:30:00Z)
+**Current task:** T018
+**Last verified green:** T017 (2026-08-31T20:40:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -26,7 +26,7 @@ in `BUILD-LOG.md`.
 | T013 | Copy ei-azure-devops-cli-intake | DONE | a85ce8b | 2026-08-31T20:02:00Z |
 | T014 | Copy ei-layer-guard | DONE | 60b59ac | 2026-08-31T20:12:00Z |
 | T016 | agents/ei-graphics.agent.md | DONE | 65a506d | 2026-08-31T20:30:00Z |
-| T017 | The manifests | IN-PROGRESS | — | — |
+| T017 | The manifests | DONE | pending | 2026-08-31T20:40:00Z |
 | T018 | The documents | TODO | — | — |
 | T019 | The no-orphan check | TODO | — | — |
 | T020 | The script contract check | TODO | — | — |
