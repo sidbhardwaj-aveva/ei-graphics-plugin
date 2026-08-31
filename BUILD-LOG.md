@@ -101,4 +101,32 @@ it defaults to the `tests` folder beside the script rather than to `$PSScriptRoo
 the same folder. The code coverage parameters are kept as the old file had them, because the
 harness sits outside `plugins/` and T020 does not police its parameter list.
 
+**Files touched:**
+- `tests/Invoke-PesterTests.ps1` (copied from the old repository, then changed)
+
+**Acceptance:** All three checks in T003 hold.
+
+1. `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 and runs T002's 20 tests.
+2. `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1 -Path ./tests/tools` exits 0.
+3. `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1 -Path ./tests/does-not-exist` exits 1.
+
+**Attempts:** 2. The first version failed check 3 and exited 0 on a path that does not exist.
+
+**Decisions:**
+
+The plan asks for `exit 1` when `TotalCount` is zero. That alone was not enough. Pester throws
+when it finds no test files, so `Invoke-Pester` never returned and `$result` stayed null. The
+zero test guard then compared `$null` against `0`, which is false, and the script fell through to
+`exit $result.FailedCount`, which is also null, so it exited 0. That is the exact false pass this
+task exists to remove.
+
+Fixed it two ways together. `Invoke-Pester` now runs inside a `try` with `-ErrorAction Stop`, and
+the guard tests for a null result as well as a zero count. Either path now exits 1 with a message
+naming the path that was searched.
+
+Kept the `Unit` tag filter, the `Detailed` verbosity and the two code coverage parameters exactly
+as the old harness had them. Only the two changes the task calls for were made.
+
+**Result:** DONE at commit pending
+
 

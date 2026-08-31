@@ -1,14 +1,14 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T003
-**Last verified green:** T002 (2026-08-31T16:34:00Z)
+**Current task:** T004
+**Last verified green:** T003 (2026-08-31T16:48:00Z)
 
 | ID | Task | Status | Commit | Acceptance verified at |
 |----|------|--------|--------|------------------------|
 | T001 | Repo bootstrap and source check | DONE | 7254028 | 2026-08-31T16:10:15Z |
 | T002 | The progress checker | DONE | c179400 | 2026-08-31T16:34:00Z |
-| T003 | The test harness | IN-PROGRESS | — | — |
+| T003 | The test harness | DONE | pending | 2026-08-31T16:48:00Z |
 | T004 | Four schemas: three written, one copied | TODO | — | — |
 | T005 | The domain skill registry | TODO | — | — |
 | T006 | ei-graphics-core SKILL.md and the plain-language checker | TODO | — | — |
