@@ -300,6 +300,41 @@ never stamped for `ado`, because the copied `ado.schema.json` sets `additionalPr
 and declares no such property. Writing the same payload twice produces the same file and the same
 hash, so the script is safe to run again.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.ps1` (new, 117 lines)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0. All 15 tests for
+this script pass, covering a valid write, a rejected payload, running twice, a stable hash across
+runs, a stable hash when the input key order changes, an `ado` write that validates against the
+copied schema, and an `ado.json` with no `hash` property.
+
+**Attempts:** 2. Six tests failed on the first run.
+
+**Decisions:**
+
+All six failures were the array unrolling trap that Part 8 warns about. `ConvertTo-CanonicalNode`
+returned `@(...)` for a list, and PowerShell unrolled a one-item array back into a bare object, so
+`proposedDomains` and `files` arrived at the schema as objects rather than arrays. Returning
+`, $items` instead stops the unrolling. One of the failing tests, the one comparing hashes across
+two key orders, had been passing for the wrong reason: both runs failed and both hashes were null.
+That is a useful reminder that comparing two results is not a test unless each one is also known
+to be good.
+
+Sorted keys with `[StringComparer]::Ordinal` rather than `Sort-Object`. `Sort-Object` compares by
+culture, so the same payload could hash differently on two machines.
+
+Hashed the compact form, and wrote the indented form to disk. The file stays readable, and the
+digest is still whitespace independent, because it is recomputed from the parsed content.
+
+Validated the payload with the `hash` already stamped onto it. The two written schemas both
+require `hash`, so validating before stamping would fail every time.
+
+`-ArtifactType ado` is carved out in one place only, at the stamping step. Everything else about
+the three artifact types is identical.
+
+**Result:** DONE at commit pending
+
 
 
 
