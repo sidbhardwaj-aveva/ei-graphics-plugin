@@ -856,6 +856,40 @@ to keep returning `pass`, `blocked` or `needs-manual-review`, and to keep honour
 this task `tests/data/ported-file-hashes.json` should hold 6 entries, which is the number T020 will
 assert.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-layer-guard/SKILL.md` (copied, unedited, hashed)
+- `plugins/demo-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1` (copied, unedited, hashed)
+- `tests/demo-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.Tests.ps1` (copied, one edit)
+- `tests/demo-ei-graphics/skills/ei-layer-guard/scripts/LayerGuardCopy.Tests.ps1` (new)
+- `tests/data/ported-file-hashes.json` (changed, now 6 entries)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 254 tests
+passing. The copied Pester file passes all 7 of its own tests. Both recorded hashes match.
+
+**Attempts:** 1.
+
+**Decisions:**
+
+Nothing needed rewriting. `SKILL.md` and the script were copied byte for byte, and a scan confirms
+neither mentions a dropped skill or the old plugin name. The one edit was the plugin name in the
+test file.
+
+Added a test asserting that the test file is **absent** from `ported-file-hashes.json`. The plan
+warns that recording a hash for a file we edit is how T020 breaks, so the absence is worth checking
+rather than merely intending.
+
+Checked the guard still returns one of `pass`, `blocked` or `needs-manual-review`, and still writes
+parsable JSON under `-Json`. The assertion is that the status is one of the three, not which one,
+so the test does not freeze behaviour we did not write.
+
+`tests/data/ported-file-hashes.json` now holds 6 entries: 3 from T013, 2 from here and
+`ado.schema.json` from T004. That is the number T020 will assert, together with the file list.
+
+The count of `.ps1` files under `plugins/` is now 10, which matches Part 9: six written fresh,
+three copied with the ADO intake, one copied with the layer guard.
+
+**Result:** DONE at commit pending
+
 
 
 

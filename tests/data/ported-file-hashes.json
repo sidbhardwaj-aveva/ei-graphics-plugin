@@ -5,6 +5,8 @@
     "plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/ado.schema.json": "sha256:82934f8e38bb2e217e048f91498ea561299cf4e18e7a0b255b6b17bd5516beab",
     "plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1": "sha256:03ab30440b793e72fcd64901dcaf21d7647c087af824ffa9d3f85f18c067ff1a",
     "plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1": "sha256:ccb664e47557f2903ae2c3407057d2631dcc0a01cd201dfa81d255a773ca8d4f",
-    "plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1": "sha256:0025632d7184dcef11ef7255246ccb3c94f926dfefdaa284c5befb4bcec75b84"
+    "plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1": "sha256:0025632d7184dcef11ef7255246ccb3c94f926dfefdaa284c5befb4bcec75b84",
+    "plugins/demo-ei-graphics/skills/ei-layer-guard/SKILL.md": "sha256:6afe7705b43b4ab1d91f42312c1b718ab28bf76d8bfcf2f1e580e4b09fa846de",
+    "plugins/demo-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1": "sha256:fb1be97d6f151cb9521de703e907811b74a1a7f47cbc35cfbf229d003c5d2f34"
   }
 }
