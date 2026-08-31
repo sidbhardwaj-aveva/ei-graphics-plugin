@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "domains": [
+    {
+      "id": "termination-drawing",
+      "displayName": "Termination Drawing",
+      "skillPath": "skills/termination-drawing/SKILL.md"
+    }
+  ]
+}

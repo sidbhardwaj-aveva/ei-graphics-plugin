@@ -200,6 +200,30 @@ domains against a hardcoded number; every count is read from the registry, becau
 skill later must stay a two-file change. The `termination-drawing` skill folder does not exist
 yet, so this task does not check that the path resolves. T020 does, once T015 has copied it.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/references/domain-skill-registry.json` (new)
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/domain-skill-registry.schema.json` (new)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/references/DomainSkillRegistry.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 10 new tests
+passing.
+
+**Attempts:** 1.
+
+**Decisions:**
+
+Constrained `skillPath` with the pattern `skills/<name>/SKILL.md` and `id` to lowercase letters,
+digits and hyphens. A test then asserts that the path names the same folder as the id, so a typo
+in either one is caught by the other.
+
+Checked for the absence of detection terms in both the registry and its schema. Checking only the
+data would let someone add the field to the schema and open the door again.
+
+Every count in the tests is read from the registry. Nothing asserts that there is one domain,
+because Part 10 says adding a domain skill later must stay a two-file change.
+
+**Result:** DONE at commit pending
+
 
 
 
