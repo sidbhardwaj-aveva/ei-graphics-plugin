@@ -7,7 +7,7 @@
 | ID | Task | Status | Commit | Acceptance verified at |
 |----|------|--------|--------|------------------------|
 | T001 | Repo bootstrap and source check | DONE | 7254028 | 2026-08-31T16:10:15Z |
-| T002 | The progress checker | TODO | — | — |
+| T002 | The progress checker | IN-PROGRESS | — | — |
 | T003 | The test harness | TODO | — | — |
 | T004 | Four schemas: three written, one copied | TODO | — | — |
 | T005 | The domain skill registry | TODO | — | — |

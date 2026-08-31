@@ -40,3 +40,18 @@ T001 has two commits, not three. The repository did not exist before step 2, so 
 progress row to mark `IN-PROGRESS` beforehand.
 
 **Result:** DONE at commit 7254028
+
+## T002 — The progress checker — 2026-08-31T16:20:00Z
+
+**Goal:** Write `tools/Test-BuildProgress.ps1`, which decides whether `BUILD-PROGRESS.md` is in a
+state a later session can resume from, plus its own Pester tests.
+
+**Assumptions:** The task list is read out of `plan.md` by collecting every `#### T0NN` heading,
+never hardcoded, so adding or renumbering a task cannot rot the checker. A commit value is
+accepted as a real SHA when it is 7 to 40 lowercase hexadecimal characters; the em dash is the
+only other legal value for a row that is not `DONE`. The word `pending` is counted across the
+whole table and its position does not matter, because the repair procedure in Part 8 legitimately
+puts it in a middle row. The three path parameters exist so the tests can point at fixtures under
+`$TestDrive` instead of the live files. This script lives in `tools/`, so T020's parameter roster
+and line ceiling do not apply to it, and it needs no `-Help` switch.
+
