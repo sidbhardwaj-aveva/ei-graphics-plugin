@@ -1166,6 +1166,21 @@ No ceiling was raised. All six scripts fit as written.
 
 **Result:** DONE at commit 4e68ec1
 
+## T021 — Everything green, before the live run — 2026-08-31T21:24:00Z
+
+**Goal:** Confirm every task up to T020 is `DONE` with a real commit, that no `pending` marker or
+`BLOCKED` row is left, and that all nine plain-language targets now exist.
+
+**Assumptions:** T022 and T023 may still be `TODO`, because both need a person and a live Azure
+DevOps connection, so this task cannot require them. The nine target paths are the ones T006 named
+and hardcoded; asserting here that all nine exist is the check that catches that hardcoded list
+drifting away from the repository, which Part 10 calls the one deliberate exception to building
+lists from the filesystem. The `pending` check reads the Commit column of every row, not the raw
+file text, so the word appearing in a task title could not hide a real one. A row is accepted as
+done only when its commit value is 7 to 40 lowercase hexadecimal characters, which is the same
+rule `tools/Test-BuildProgress.ps1` applies.
+
+
 
 
 
