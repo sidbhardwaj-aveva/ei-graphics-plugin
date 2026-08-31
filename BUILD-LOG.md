@@ -388,7 +388,7 @@ which proves nothing was half written.
 `-Finalize` writes the four derived summary fields always, and the other six only when given. That
 keeps a part-finished session valid, which is what T004 built the optional summary for.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 45e49b9
 
 
 
