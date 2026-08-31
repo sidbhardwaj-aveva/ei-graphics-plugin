@@ -1012,6 +1012,40 @@ scans the whole repository one task later and its term file does not exist yet. 
 URL in prose is avoided again, for the same reason as T013: it is not one of the seven exempt
 acronyms.
 
+**Files touched:**
+- `README.md` (new)
+- `PLUGIN-INFO.md` (new)
+- `plugins/demo-ei-graphics/README.md` (new)
+- `plugins/demo-ei-graphics/INSTRUCTIONS.md` (new)
+- `.github/copilot-instructions.md` (new)
+- `tests/Documents.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 319 tests
+passing, 17 of them new. All five documents exist and are not empty, and
+`copilot-instructions.md` names `Test-BuildProgress.ps1`, `gc.auto=0` and `Set-StrictMode`.
+
+**Attempts:** 2. One sentence in the root readme ran to 27 words.
+
+**Decisions:**
+
+All nine of Part 3's covered files now exist, and all nine pass the four rules. This is the first
+task at which the T006 scanner has had its whole list to work with. T021 will assert the same
+thing, which is the check that the hardcoded list has not drifted.
+
+Wrote two tests that read the filesystem rather than a list. The plugin readme must name every
+skill folder that exists on disk, and it must name every artifact a run produces. A skill added
+later without a readme entry will fail the first of those.
+
+Put the traps this build actually paid for into `copilot-instructions.md`, not the ones the plan
+predicted. The array flattening trap and the culture-sensitive sort came from the plan. The three
+about ordered dictionaries, timestamp round-tripping and Pester discovery data were learned here,
+in T004, T008, T009 and T006.
+
+Ran no banned-name scan in this task. T019 scans the whole repository one task later, and its term
+file does not exist yet, so checking here would have blocked the task for no reason.
+
+**Result:** DONE at commit pending
+
 
 
 

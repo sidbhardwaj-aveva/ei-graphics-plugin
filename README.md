@@ -53,9 +53,9 @@ The timeline is one row per step, with the time and what happened.
 The reasoning trail is the agent explaining, in its own words, why it did each thing. This is the
 part to read when the result surprised you.
 
-The last part is written for you as the maintainer. It says which skill was used, which files the
-agent had to read, how long it spent waiting for a person, and how much work it did. Read this one
-even when the run went well.
+The last part is written for you as the maintainer. It says which skill was used and which files
+the agent had to read. It also gives the time spent waiting for a person, and how much work the
+agent did. Read this one even when the run went well.
 
 ## Making the skills better
 
