@@ -906,6 +906,45 @@ unexplained acronyms such as PR, which is exempt, and others which are not. The 
 output style" line is not copied as it stands. It is rewritten as the Part 3 rules addressed to the
 agent, because Part 10 says Part 3 changes what the agent writes and nothing else.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/agents/ei-graphics.agent.md` (new, 69 lines)
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/references/rnd-delegation.md` (new)
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/references/checkpoint-templates.md` (new)
+- `tests/demo-ei-graphics/agents/Agent.Tests.ps1` (new)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 287 tests
+passing, 30 of them new. The agent file is 69 lines, under the 80 line limit. All three files pass
+the four plain-language rules.
+
+**Attempts:** 3. One test assertion was brittle, and one plain-language rule caught a real problem.
+
+**Decisions:**
+
+The `aveva-rnd` delegation table and the Checkpoint 2 template went into the two reference files,
+with one pointer line each in the agent file. Both would have blown the line budget.
+
+Counted the 11 `aveva-rnd` skills from the archive's "Used" list rather than guessing. The test
+checks each of the 11 by name **and** asserts the count is 11, so adding a twelfth without
+thinking would fail.
+
+The first failure was mine, in the test rather than the file. A phrase assertion broke because the
+sentence happened to wrap across two lines. Fixed by matching against a whitespace-flattened copy
+of the file. A content check that breaks when a paragraph is re-wrapped is a check nobody will keep.
+
+The second failure was more interesting. The agent file's own plain-language rule said: write
+"start", not "commence". The checker flagged `commence`, correctly, because it was scanning the
+prose and there it was. The word is being named as an example, not used. Putting it in backticks
+marks it as a token rather than as writing, and the checker strips inline code before scanning.
+Part 3 itself has the same sentence, which is why the rule needed a way to quote a banned word.
+
+The archive's "direct output style" line was not copied. It is rewritten as instructions to the
+agent, in the same plain words the rest of the file uses.
+
+Everything on the archive's "What's cut" list is absent, and four tests assert that the dropped
+names do not appear.
+
+**Result:** DONE at commit pending
+
 
 
 
