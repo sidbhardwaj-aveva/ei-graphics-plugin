@@ -996,6 +996,23 @@ dropped `workflow` and `lifecycle` from the keyword list, since this build has n
 
 **Result:** DONE at commit b95a93d
 
+## T018 — The documents — 2026-08-31T20:44:00Z
+
+**Goal:** Write the five documents: two readme files, the plugin information file, the plugin
+instructions, and the instructions this build follows.
+
+**Assumptions:** The first four are written for someone who has never seen this repository, and
+Part 3 applies to them, so the T006 scanner will check them. `.github/copilot-instructions.md` is
+build paperwork and Part 3 explicitly exempts it, so it may name things such as PowerShell
+conventions plainly. The prerequisites checklist is copied from the archive's preflight list: `az`
+signed in with ADO access, a clean git tree, the dotnet toolkit available, the product repository
+cloned, and an editor with agent mode. There is no automated preflight, by decision, so the
+checklist is prose and not a script. This task runs no banned-name scan of its own, because T019
+scans the whole repository one task later and its term file does not exist yet. Writing the word
+URL in prose is avoided again, for the same reason as T013: it is not one of the seven exempt
+acronyms.
+
+
 
 
 

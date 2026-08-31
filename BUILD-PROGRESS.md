@@ -27,7 +27,7 @@ in `BUILD-LOG.md`.
 | T014 | Copy ei-layer-guard | DONE | 60b59ac | 2026-08-31T20:12:00Z |
 | T016 | agents/ei-graphics.agent.md | DONE | 65a506d | 2026-08-31T20:30:00Z |
 | T017 | The manifests | DONE | b95a93d | 2026-08-31T20:40:00Z |
-| T018 | The documents | TODO | — | — |
+| T018 | The documents | IN-PROGRESS | — | — |
 | T019 | The no-orphan check | TODO | — | — |
 | T020 | The script contract check | TODO | — | — |
 | T021 | Everything green, before the live run | TODO | — | — |
