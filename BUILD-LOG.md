@@ -890,6 +890,23 @@ three copied with the ADO intake, one copied with the layer guard.
 
 **Result:** DONE at commit 60b59ac
 
+## T016 — agents/ei-graphics.agent.md — 2026-08-31T20:18:00Z
+
+**Goal:** Write the agent file at about 60 lines, plus the two reference files that keep it short.
+
+**Assumptions:** The rules come from the archive's "Lean agent.md" list, and everything under its
+"What's cut" list is left out. The archive names 11 `aveva-rnd` skills as used, which is the number
+the test will check for in `rnd-delegation.md`: `code-review`, `git-commit`, `create-pr`,
+`git-rebase`, `csharp-conventions`, `refactor`, `nuget-manager`, `test-value-analysis`,
+`pr-security-compliance`, `get-reviewresults` and `mermaid-diagrams`. The Checkpoint 2 template has
+four headings, taken from the archive: "Files I'll change", "Tests I'll verify", "New tests
+needed?" and "Risks". The agent file, `rnd-delegation.md` and `checkpoint-templates.md` are all on
+Part 3's covered list, so all three must pass the four plain-language rules; that again rules out
+unexplained acronyms such as PR, which is exempt, and others which are not. The archive's "direct
+output style" line is not copied as it stands. It is rewritten as the Part 3 rules addressed to the
+agent, because Part 10 says Part 3 changes what the agent writes and nothing else.
+
+
 
 
 
