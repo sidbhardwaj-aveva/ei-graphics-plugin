@@ -44,16 +44,32 @@ function Get-ProseSentence {
     <#
     .SYNOPSIS
         Splits prose into sentences, after dropping headings, tables and list markers.
+
+    .DESCRIPTION
+        A blank line, a heading, a table row and a new list item all end the current block. Only
+        lines inside the same block are joined, so a header line with no full stop cannot run on
+        into the paragraph below it.
     #>
     param([Parameter(Mandatory)] [string] $Text)
 
-    $lines = $Text -split '\r?\n' | Where-Object {
-        $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*\|' -and $_ -notmatch '^\s*-{3,}\s*$'
+    $blocks = [System.Collections.Generic.List[string]]::new()
+    $current = ''
+    foreach ($line in ($Text -split '\r?\n')) {
+        $trimmed = $line.Trim()
+        if ($trimmed -eq '' -or $trimmed -match '^#' -or $trimmed -match '^\|' -or $trimmed -match '^-{3,}$') {
+            if ($current) { $blocks.Add($current); $current = '' }
+            continue
+        }
+        if ($trimmed -match '^[-*+]\s+' -and $current) { $blocks.Add($current); $current = '' }
+        $trimmed = $trimmed -replace '^[-*+]\s+', '' -replace '^>\s*', ''
+        if ($current) { $current = "$current $trimmed" } else { $current = $trimmed }
     }
-    $prose = ($lines -join ' ') -replace '\*+', '' -replace '^\s*[-*+]\s+', ' '
-    $prose = $prose -replace '\s+', ' '
+    if ($current) { $blocks.Add($current) }
 
-    $prose -split '(?<=[.!?])\s+' | Where-Object { $_ -match '\S' }
+    foreach ($block in $blocks) {
+        $prose = ($block -replace '\*+', '') -replace '\s+', ' '
+        $prose -split '(?<=[.!?])\s+' | Where-Object { $_ -match '\S' }
+    }
 }
 
 function Get-PlainLanguageProblem {

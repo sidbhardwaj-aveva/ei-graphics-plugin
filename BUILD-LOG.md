@@ -408,6 +408,59 @@ rather than parsed as dates, so no culture setting can change them. Numbers are 
 golden files are hand-written and committed in the start commit, before the renderer exists, so
 the renderer is written to match them and not the other way round.
 
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.ps1` (new, 178 lines)
+- `tests/fixtures/session-verbose.json`, `session-concise.json`, `session-empty.json` (new)
+- `tests/fixtures/session-summary-verbose.md`, `session-summary-concise.md` (new, hand-written)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.Tests.ps1` (new)
+- `tests/PlainLanguageRules.psm1` (changed, see below)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0 with 136 tests
+passing, 17 of them new. Both golden files match the rendered output exactly.
+
+**Attempts:** 2 for the renderer, plus two passes to fit the line ceiling.
+
+**Decisions:**
+
+Committed the fixtures and both golden files in the start commit, before the renderer existed.
+The plan asks for that, and the three commit rule does not allow a fourth commit, so folding them
+into the start commit satisfies both.
+
+Hit the timestamp problem from T008 again, from the other side. `ConvertFrom-Json` had already
+turned every timestamp into a date object, so casting it to a string gave `08/26/2026 09:02:30`
+and the parse failed. Checked what the conversion actually produces: a `DateTime` whose `Kind` is
+`Utc`. Added one `Get-Moment` helper that accepts a string, a `DateTime` or a `DateTimeOffset`, and
+used it for both the clock column and the wait time. This is the third appearance of the same
+trap in this build.
+
+Changed `Get-ProseSentence` in `tests/PlainLanguageRules.psm1` to treat a blank line, a heading, a
+table row and a new list item as ending a block. Before the change, the three header lines carry no
+full stop, so they ran on into the first line of the reasoning trail and produced a single 25 word
+sentence, one word away from failing for no real reason. Blockquote markers are stripped too. Ran
+the whole suite afterwards: T006 still passes, so this is an improvement rather than a regression.
+
+Shortening the timeline at `concise` means one row per phase, showing the last entry of that
+phase. The plan only says "shorten", and this is a rule a test can state exactly: 11 rows become
+7. A rule such as truncating each cell would have been untestable.
+
+Human wait time counts only a `human-checkpoint` entry with no `humanInput`, measured to the next
+entry. Counting every checkpoint entry would have added the one second reply itself and given
+2m 22s where the archive shows 2m 21s.
+
+The heading names the story number only. The archive's example heading also carries the story
+title, but no field in `session.schema.json` holds it, and inventing one is not an option.
+
+No cost is rendered, and a test asserts that none of the three fixtures produces the word cost or
+a currency amount.
+
+The first version came out at 203 lines against a ceiling of 180. The plan allows raising a
+ceiling once, but only when a script cannot meet it without becoming unclear. That was not the
+case here, so the ceiling was left alone. Merged the paired emit calls, folded three repeated
+fallback assignments into one `Get-Text` helper, and removed one blank line from the help comment.
+It now stands at 178 lines with no loss of clarity.
+
+**Result:** DONE at commit pending
+
 
 
 
