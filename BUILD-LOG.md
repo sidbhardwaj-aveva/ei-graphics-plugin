@@ -282,7 +282,7 @@ The backtick rule looks for two things only: a `Verb-EiNoun` name, and a file na
 `.ps1`, `.psm1`, `.json`, `.md` or `.txt`. Matching bare paths as well produced too many false
 hits, and Part 3's own worked example is a script name.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 367b3da
 
 
 

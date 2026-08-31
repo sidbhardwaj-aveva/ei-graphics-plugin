@@ -11,7 +11,7 @@
 | T003 | The test harness | DONE | c61eb07 | 2026-08-31T16:48:00Z |
 | T004 | Four schemas: three written, one copied | DONE | 3b3eb31 | 2026-08-31T17:05:00Z |
 | T005 | The domain skill registry | DONE | 1ebf8c4 | 2026-08-31T17:14:00Z |
-| T006 | ei-graphics-core SKILL.md and the plain-language checker | DONE | pending | 2026-08-31T17:38:00Z |
+| T006 | ei-graphics-core SKILL.md and the plain-language checker | DONE | 367b3da | 2026-08-31T17:38:00Z |
 | T007 | Write-EiArtifact.ps1 | TODO | — | — |
 | T008 | Write-EiSessionEntry.ps1 | TODO | — | — |
 | T009 | Export-EiSessionSummary.ps1 | TODO | — | — |
