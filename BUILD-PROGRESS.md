@@ -1,7 +1,7 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T010
+**Current task:** T011
 **Last verified green:** T009 (2026-08-31T18:34:00Z)
 
 | ID | Task | Status | Commit | Acceptance verified at |
@@ -15,7 +15,7 @@
 | T007 | Write-EiArtifact.ps1 | DONE | 9568e0c | 2026-08-31T17:56:00Z |
 | T008 | Write-EiSessionEntry.ps1 | DONE | 45e49b9 | 2026-08-31T18:12:00Z |
 | T009 | Export-EiSessionSummary.ps1 | DONE | 95d3a1b | 2026-08-31T18:34:00Z |
-| T010 | Get-EiDomainSkillCatalog.ps1 | TODO | — | — |
+| T010 | Get-EiDomainSkillCatalog.ps1 | BLOCKED | — | — |
 | T011 | Test-EiScopeDrift.ps1 | TODO | — | — |
 | T012 | Convert-EiAdoIntake.ps1 | TODO | — | — |
 | T013 | Copy ei-azure-devops-cli-intake | TODO | — | — |

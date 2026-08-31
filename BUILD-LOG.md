@@ -461,6 +461,65 @@ It now stands at 178 lines with no loss of clarity.
 
 **Result:** DONE at commit 95d3a1b
 
+## T010 — Get-EiDomainSkillCatalog.ps1 — 2026-08-31T18:40:00Z
+
+**Goal:** Read the registry and report each domain skill, with the description and the when-to-use
+list taken from the front of its skill document.
+
+**Assumptions:** None were needed. The task stopped before any work began, under rule 9.
+
+**Result:** BLOCKED. No files were changed.
+
+### What is wrong
+
+T010's acceptance says the catalogue for the **real** registry must return the number of entries
+the registry declares, each with a non-empty `whenToUse`. That cannot be made to pass yet.
+
+Checked directly:
+
+| Fact | Value |
+|---|---|
+| Entries in `domain-skill-registry.json` | 1 |
+| Its `skillPath` | `skills/termination-drawing/SKILL.md` |
+| That file exists in this repository | no |
+| That file exists in the old repository | yes |
+| The old file has a `## When to Use` heading | yes |
+| The old file has a `description` in its frontmatter | yes |
+
+The file arrives in T015, which runs five tasks later. So T010 depends on T015, and the plan runs
+them the other way round.
+
+This is not a case of a missing file that a test can tolerate. Rule 8 says a skipped test is a
+blocked task, not a green one, so writing the check to ignore an absent skill is not open to me.
+T005 already recorded that the path does not resolve yet, and left that check to T020.
+
+### The options
+
+**Option A. Move T015 to run immediately before T010.** Copy and split `termination-drawing`
+first, then build the catalogue against it. Nothing in T015 depends on T010, so the swap is safe.
+The T015 row moves above T010 in `BUILD-PROGRESS.md`. All 23 task IDs still appear exactly once,
+and no TODO row would sit above the running task, so `Test-BuildProgress.ps1` stays green. Every
+task keeps its acceptance exactly as the plan writes it. Nothing new is invented.
+
+**Option B. Copy the skill document early, inside T010.** Put
+`termination-drawing/SKILL.md` in place during T010 and leave the split to T015. Task order is
+untouched. The cost is that T010 quietly does a piece of T015's work, and T015's copy step then
+finds the file already there. Two tasks would own one file.
+
+**Option C. Point the content checks at a fixture registry.** Add a small skill document under
+`tests/fixtures/`, aim `-RegistryPath` at it for the description and when-to-use checks, and
+assert only structure against the real registry. This weakens the acceptance the plan actually
+wrote, and the weakening would have to be undone at T021.
+
+### Recommendation
+
+**Option A.** It is the smallest change, it keeps every task's acceptance exactly as written, it
+needs no new fixture, and it leaves the progress checker green. Option B splits ownership of one
+file across two tasks. Option C trades away the check the task exists to make.
+
+Waiting for a decision before going further.
+
+
 
 
 
