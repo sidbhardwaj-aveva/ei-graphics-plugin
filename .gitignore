@@ -1,6 +1,7 @@
 testResults.xml
 coverage.xml
 .copilottracking/
+.copilot-backup/
 .ei-session-logs/
 .specify/feature.json
 .vscode/
