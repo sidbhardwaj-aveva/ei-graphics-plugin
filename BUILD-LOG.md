@@ -87,3 +87,18 @@ comes back normally, which is what the tests use.
 
 **Result:** DONE at commit c179400
 
+## T003 — The test harness — 2026-08-31T16:40:00Z
+
+**Goal:** Copy `tests/Invoke-PesterTests.ps1` from the old repository, then give it a `-Path`
+parameter and make it fail when no tests run.
+
+**Assumptions:** The old harness is 25 lines, already carries `#Requires -Version 7.0`, sets
+`$config.Filter.Tag = @('Unit')` and ends with `exit $result.FailedCount`. Every test we write
+carries the `Unit` tag, and so do both copied test files, so keeping that filter loses nothing.
+A run that discovers zero tests is treated as a failure, because otherwise every later task's
+check command becomes a false pass. `-Path` accepts a string array so a subset can be named, and
+it defaults to the `tests` folder beside the script rather than to `$PSScriptRoot` alone, which is
+the same folder. The code coverage parameters are kept as the old file had them, because the
+harness sits outside `plugins/` and T020 does not police its parameter list.
+
+
