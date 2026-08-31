@@ -85,5 +85,5 @@ Wrote the report messages to stderr and kept the result object on stdout. Runnin
 so the stderr summary line is what a person actually reads. Called in process with `&`, the object
 comes back normally, which is what the tests use.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit c179400
 
