@@ -129,4 +129,23 @@ as the old harness had them. Only the two changes the task calls for were made.
 
 **Result:** DONE at commit c61eb07
 
+## T004 — Four schemas: three written, one copied — 2026-08-31T16:55:00Z
+
+**Goal:** Put four schemas under `skills/ei-graphics-core/schemas/`. Write
+`story-understanding.schema.json`, `approved-files.schema.json` and `session.schema.json` from the
+shapes in `docs/architecture-v3.md`. Copy `ado.schema.json` byte for byte and record its hash.
+
+**Assumptions:** `Test-Json -Schema` on PowerShell 7.6 handles draft-07 well enough for these
+four files, and the schema text is passed as a string rather than a file path. All three written
+schemas use draft-07, set `additionalProperties` to false, and carry a populated `required` list.
+The hash format is the literal text `sha256:` followed by 64 lowercase hexadecimal characters,
+anchored at both ends, which matches the `adoHash` and `understandingHash` fields beside it.
+Every field of the `summary` object in `session.schema.json` is optional, because `-Finalize`
+writes them only at the end and a check partway through a session must still pass. Each session
+entry declares `filesRead`, `filesModified`, `humanInput` and `scriptOutput` as optional; without
+them, `additionalProperties: false` would reject every real entry. `scriptOutput` is left as a
+free-form object, because it holds whatever a called script returned. The copied `ado.schema.json`
+is not edited, not loosened, and not rewritten in T013.
+
+
 
