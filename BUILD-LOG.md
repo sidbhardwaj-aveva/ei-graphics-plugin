@@ -694,7 +694,7 @@ on case sensitive systems, where two names differing only in case are two differ
 The warning for an approved file nobody touched goes to stderr and leaves the exit code at 0. Only
 an unapproved change makes it 1.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 5907ded
 
 
 
