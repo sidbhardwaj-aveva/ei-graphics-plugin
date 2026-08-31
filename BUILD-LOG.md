@@ -1180,6 +1180,42 @@ file text, so the word appearing in a task title could not hide a real one. A ro
 done only when its commit value is 7 to 40 lowercase hexadecimal characters, which is the same
 rule `tools/Test-BuildProgress.ps1` applies.
 
+**Files touched:**
+- `tests/EverythingGreen.Tests.ps1` (new)
+
+**Acceptance:** All four conditions hold.
+
+1. `pwsh -NoProfile -File ./tools/Test-BuildProgress.ps1` exits 0.
+2. `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0, with 498 tests passing.
+3. A grep for `pending` in the Commit column returns zero hits.
+4. All nine plain-language targets exist on disk.
+
+**Attempts:** 2.
+
+**Decisions:**
+
+The first run failed three checks, all for the same reason: T021 was asserting its own
+completion. While this task runs, its row is `IN-PROGRESS` with no commit and no timestamp, so a
+rule reading "everything except T022 and T023 must be DONE" can never pass. Narrowed the scope to
+T001 through T020, which is what the plan actually says.
+
+The `pending` check reads the Commit column of each parsed row rather than searching the file text.
+A task title containing that word would otherwise produce a false hit, and a real one could hide
+behind it.
+
+Closed the T006 gap. That checker hardcodes nine paths, because whether a file is human-facing
+cannot be read off the filesystem, and at T006 only one of the nine existed. All nine now exist and
+all nine pass. Two tests cover it: one per path, and one asserting the list is nine long and that
+nine were found. Without the second, a shortened list would still pass every per-path check.
+
+Added two shape checks from Part 9: the plugin ships exactly the four named skills, and the script
+count under `plugins/` is 12 or fewer.
+
+T022 and T023 remain `TODO`. Both need a person and a live Azure DevOps connection, and rule 8
+forbids claiming a pass without evidence.
+
+**Result:** DONE at commit pending
+
 
 
 
