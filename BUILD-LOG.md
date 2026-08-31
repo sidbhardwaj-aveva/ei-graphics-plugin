@@ -841,6 +841,22 @@ anyway, and `workItemUrl` stays in backticks where it is a field name.
 
 **Result:** DONE at commit a85ce8b
 
+## T014 — Copy ei-layer-guard — 2026-08-31T20:06:00Z
+
+**Goal:** Copy the three files, change the plugin name in the copied test file, and record two
+hashes.
+
+**Assumptions:** `SKILL.md` and `Invoke-EiLayerGuard.ps1` are copied without a single change, so
+both are hashed. The test file is the only edited file, and it is deliberately not hashed;
+recording a hash for a file we then edit is how T020 breaks. The one edit is the plugin name on the
+line that builds `$script:ScriptPath`, and the five-level `..` chain above it stays as it is. This
+`SKILL.md` is copied content, so Part 3 does not apply to it and it is not on T006's list; it has
+already been checked and holds no banned identifier, so it needs no rewrite. The guard is expected
+to keep returning `pass`, `blocked` or `needs-manual-review`, and to keep honouring `-Json`. After
+this task `tests/data/ported-file-hashes.json` should hold 6 entries, which is the number T020 will
+assert.
+
+
 
 
 

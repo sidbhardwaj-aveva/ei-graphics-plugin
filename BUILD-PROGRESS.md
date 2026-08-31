@@ -24,7 +24,7 @@ in `BUILD-LOG.md`.
 | T011 | Test-EiScopeDrift.ps1 | DONE | 5907ded | 2026-08-31T19:24:00Z |
 | T012 | Convert-EiAdoIntake.ps1 | DONE | 7329c09 | 2026-08-31T19:42:00Z |
 | T013 | Copy ei-azure-devops-cli-intake | DONE | a85ce8b | 2026-08-31T20:02:00Z |
-| T014 | Copy ei-layer-guard | TODO | — | — |
+| T014 | Copy ei-layer-guard | IN-PROGRESS | — | — |
 | T016 | agents/ei-graphics.agent.md | TODO | — | — |
 | T017 | The manifests | TODO | — | — |
 | T018 | The documents | TODO | — | — |
