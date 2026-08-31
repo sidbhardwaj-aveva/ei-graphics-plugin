@@ -519,6 +519,37 @@ file across two tasks. Option C trades away the check the task exists to make.
 
 Waiting for a decision before going further.
 
+## T010 — decision on task order — 2026-08-31T18:50:00Z
+
+**Assumptions:** none. This block records a decision, not work.
+
+The human chose Option A. T015 now runs immediately before T010. In `BUILD-PROGRESS.md` the T015
+row moves above the T010 row, and T010 goes back to `TODO`. All 23 task IDs still appear exactly
+once, so `tools/Test-BuildProgress.ps1` stays green, and no task's acceptance changes.
+
+**Result:** unblocked.
+
+## T015 — Copy and split termination-drawing — 2026-08-31T18:52:00Z
+
+**Goal:** Copy the old `termination-drawing/SKILL.md` into the plugin and into
+`tests/fixtures/`, then split it into `SKILL.md` plus five reference files, losing nothing.
+
+**Assumptions:** The split is done by machine, not by hand. The file is cut into sections at its
+real headings, each heading is assigned to exactly one destination by the table in T015, and the
+sections are written back in their original order. That is what makes "no content may be lost"
+true by construction rather than by inspection. Counted the file directly before trusting any
+number in the plan: it has 504 lines, **55** real headings, and **10** `#`-prefixed lines inside
+fenced code blocks that are not headings. Both figures match the plan, including
+`### Problem: Cores Not Inserted After Wire Re-Addition (Update 2)`, which two earlier drafts of
+the plan lost. Fence tracking flips on any line starting with three backticks, so the ghost lines
+never reach the heading list. The frontmatter stays with `SKILL.md`, and its `name` is already
+`termination-drawing`, which matches the folder name that T019 will check. The reference files get
+no new top-level heading, so the per-file counts stay at 8, 7, 12, 4 and 8 as the plan states.
+`SKILL.md` gains one heading, `## References`, which is the 56th. The long PowerShell block under
+`### Step 2 — Analyse the Log` moves into `log-analysis.md` and leaves a one-line pointer behind;
+the `### Step 2` heading itself stays. This skill is copied content, so Part 3 does not apply to
+it, and one of its critical rules legitimately contains a word on the jargon list.
+
 
 
 
