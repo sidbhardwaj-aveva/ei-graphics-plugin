@@ -224,6 +224,26 @@ because Part 10 says adding a domain skill later must stay a two-file change.
 
 **Result:** DONE at commit 1ebf8c4
 
+## T006 — ei-graphics-core SKILL.md and the plain-language checker — 2026-08-31T17:20:00Z
+
+**Goal:** Write `skills/ei-graphics-core/SKILL.md` as a usage reference for the six core scripts,
+then build the Part 3 plain-language checker that scans every file a person reads.
+
+**Assumptions:** `SKILL.md` is written from the parameter rosters in Part 7, because none of the
+six scripts exists yet. Its `name` must equal the folder name, `ei-graphics-core`. The checker
+hardcodes its target list, because whether a file is human-facing cannot be read off the
+filesystem; Part 10 accepts this as the one deliberate exception, and T021 catches its drift by
+asserting every listed path exists by then. Part 3 names ten files and `session-summary.md` is
+rendered at run time into a gitignored folder, so nine paths are scanned here and T009 covers the
+tenth with golden files. Most of the nine do not exist yet, so the scanner reads whichever are
+present and ignores the rest. Sentence splitting is done on `.`, `?` and `!` followed by
+whitespace, with common abbreviations and version numbers left alone, and fenced code blocks,
+tables, headings, link targets and inline code removed before counting. Jargon is matched on word
+boundaries and ignoring case, because `termination` must not trip a rule aimed at `terminate`.
+The backtick rule checks for a `Verb-EiNoun` name or a `.ps1`, `.json` or `.md` file name that is
+not already inside backticks, a fenced block, a link target or a heading.
+
+
 
 
 
