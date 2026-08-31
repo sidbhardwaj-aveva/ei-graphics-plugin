@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "1.0.0",
+  "storyId": "4965976",
+  "startedAt": "2026-08-26T09:00:00Z",
+  "agent": "ei-graphics",
+  "verbosity": "concise",
+  "entries": [
+    {
+      "timestamp": "2026-08-26T09:00:01Z",
+      "phase": "ado-intake",
+      "action": "retrieve-story",
+      "reasoning": "A story link was given, so the intake script runs before anything else.",
+      "outcome": "Retrieved the story, with 3 comments and 2 images.",
+      "durationMs": 4200,
+      "tokensUsed": null
+    },
+    {
+      "timestamp": "2026-08-26T09:00:06Z",
+      "phase": "understanding",
+      "action": "read-story",
+      "reasoning": "The title names a core connector that is missing after an update. That matches a known bug pattern in the `termination-drawing` skill.",
+      "outcome": "Matched the story to a documented bug pattern.",
+      "durationMs": 2100,
+      "tokensUsed": 1847
+    },
+    {
+      "timestamp": "2026-08-26T09:00:08Z",
+      "phase": "understanding",
+      "action": "select-domain",
+      "reasoning": "The story names core connectors and an update run. The `termination-drawing` skill documents both.",
+      "outcome": "Proposed the `termination-drawing` domain, with high confidence.",
+      "durationMs": 800,
+      "tokensUsed": 523
+    },
+    {
+      "timestamp": "2026-08-26T09:00:09Z",
+      "phase": "human-checkpoint",
+      "action": "present-understanding",
+      "reasoning": null,
+      "outcome": "Showed the understanding to a person and waited.",
+      "durationMs": 0,
+      "tokensUsed": 0
+    },
+    {
+      "timestamp": "2026-08-26T09:02:30Z",
+      "phase": "human-checkpoint",
+      "action": "human-response",
+      "reasoning": null,
+      "outcome": "The person confirmed it, with no corrections.",
+      "durationMs": 0,
+      "tokensUsed": 0,
+      "humanInput": "yes, that is correct"
+    },
+    {
+      "timestamp": "2026-08-26T09:02:31Z",
+      "phase": "complexity",
+      "action": "assess",
+      "reasoning": "One file and one method are affected, and the fix is already written down.",
+      "outcome": "Assessed as a small change.",
+      "durationMs": 400,
+      "tokensUsed": 312
+    },
+    {
+      "timestamp": "2026-08-26T09:02:45Z",
+      "phase": "implementation",
+      "action": "read-source",
+      "reasoning": "Looking for the guard that returns before the shape is inserted.",
+      "outcome": "Found the guard. It returns whether or not the shape was found.",
+      "durationMs": 1200,
+      "tokensUsed": 3400,
+      "filesRead": [
+        "Presentation/Manager/CoreConnectorManager.cs"
+      ]
+    },
+    {
+      "timestamp": "2026-08-26T09:03:00Z",
+      "phase": "implementation",
+      "action": "apply-fix",
+      "reasoning": "Only return when the shape is really there. Otherwise fall through and insert it.",
+      "outcome": "Added a check after the search, so insertion is no longer skipped.",
+      "durationMs": 2000,
+      "tokensUsed": 1200,
+      "filesModified": [
+        "Presentation/Manager/CoreConnectorManager.cs"
+      ]
+    },
+    {
+      "timestamp": "2026-08-26T09:03:10Z",
+      "phase": "validation",
+      "action": "layer-guard",
+      "reasoning": null,
+      "outcome": "The layer guard passed, with no violations.",
+      "durationMs": 300,
+      "tokensUsed": 0,
+      "scriptOutput": {
+        "status": "pass",
+        "violations": []
+      }
+    },
+    {
+      "timestamp": "2026-08-26T09:03:15Z",
+      "phase": "validation",
+      "action": "run-tests",
+      "reasoning": "Running the targeted tests the skill names for this area.",
+      "outcome": "All 12 tests passed.",
+      "durationMs": 18000,
+      "tokensUsed": 0
+    },
+    {
+      "timestamp": "2026-08-26T09:03:35Z",
+      "phase": "commit",
+      "action": "delegate-commit",
+      "reasoning": "The fix is checked, so the commit is handed to the shared commit skill.",
+      "outcome": "Committed the fix on a new branch.",
+      "durationMs": 1500,
+      "tokensUsed": 400
+    }
+  ],
+  "summary": {
+    "completedAt": "2026-08-26T09:03:37Z",
+    "totalDurationMs": 216000,
+    "totalTokens": 7682,
+    "filesModified": [
+      "Presentation/Manager/CoreConnectorManager.cs"
+    ],
+    "testsRun": 12,
+    "testsPassed": 12,
+    "humanInteractions": 2,
+    "outcome": "fixed",
+    "domainSkillUsed": "termination-drawing",
+    "bugPatternMatched": "Core Connector Update"
+  }
+}

@@ -390,6 +390,25 @@ keeps a part-finished session valid, which is what T004 built the optional summa
 
 **Result:** DONE at commit 45e49b9
 
+## T009 — Export-EiSessionSummary.ps1 — 2026-08-31T18:20:00Z
+
+**Goal:** Render `session-summary.md` from `session.json`, at both detail levels, in words a
+maintainer can act on without knowing this repository.
+
+**Assumptions:** Everything in the rendered file is derived from `session.json` alone. The story
+title is not, so the heading names the story number only. Detail level is read from the
+`verbosity` field, never from a parameter. Shortening the timeline at `concise` means one row per
+phase, showing the last entry of that phase, rather than one row per entry; that is a rule a test
+can check. The reasoning trail is dropped at `concise`, and the maintainer section is written at
+both levels. Human wait time counts only a `human-checkpoint` entry that carries no `humanInput`,
+measured from its timestamp to the next entry; counting every checkpoint entry would add the
+reply itself to the wait. Times are cut out of the timestamp string with a regular expression
+rather than parsed as dates, so no culture setting can change them. Numbers are formatted with
+`InvariantCulture`. No cost is shown and no rate is invented, per Part 10. The fixtures and the
+golden files are hand-written and committed in the start commit, before the renderer exists, so
+the renderer is written to match them and not the other way round.
+
+
 
 
 
