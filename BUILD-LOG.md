@@ -335,6 +335,24 @@ the three artifact types is identical.
 
 **Result:** DONE at commit 9568e0c
 
+## T008 — Write-EiSessionEntry.ps1 — 2026-08-31T18:00:00Z
+
+**Goal:** Append one entry to `.ei-session-logs/<storyId>/session.json`, create the envelope on
+the first call, and fill in the summary with `-Finalize`.
+
+**Assumptions:** The 21 parameters split into two mutually exclusive sets, `Append` and
+`Finalize`, with `Append` as the default. The four shared parameters carry no set name, so they
+belong to both. The list of valid phases is read out of `session.schema.json` rather than repeated
+in the script, so the two cannot drift apart. An invalid `-Phase` exits 1 with a message naming
+the file and listing the phases, rather than failing as a parameter binding error, because a
+binding error is not an exit code a caller can act on. Appending is made atomic by writing a
+temporary file beside the target and moving it over, so a second append cannot leave a truncated
+file behind. `-Finalize` computes `completedAt`, `totalDurationMs`, `totalTokens` and
+`filesModified` from the entries already written, and takes the other six summary fields from its
+own parameters, because they cannot be derived. `agent` is the literal `ei-graphics` and
+`verbosity` starts as `verbose`, matching the schema default.
+
+
 
 
 
