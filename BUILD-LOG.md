@@ -759,6 +759,25 @@ left alone, because the script fits without becoming unclear.
 
 **Result:** DONE at commit 7329c09
 
+## T013 — Copy ei-azure-devops-cli-intake — 2026-08-31T19:48:00Z
+
+**Goal:** Copy the five files and two fixtures, make the two edits the task calls for, record three
+hashes, and prove the whole chain from intake to a schema-valid `ado.json`.
+
+**Assumptions:** The three scripts are copied byte for byte and never edited, so their hashes go
+into `tests/data/ported-file-hashes.json`. `SKILL.md`, the copied test file and the two JSON
+fixtures are deliberately not hashed, because the first two are edited in this very task. The
+copied test file gets exactly the one edit the plan prescribes: the plugin name on the line that
+builds `$script:ScriptPath`. The five-level `..` chain above it is untouched, because renaming a
+folder does not change how deep it sits. The new fixture-driven cases and the end-to-end chain test
+go in a separate file rather than into the copied one, so the copied file keeps a single, easily
+reviewed change. The rewritten `SKILL.md` is on Part 3's covered list, so it must pass the four
+plain-language rules; that rules out the word URL in prose, which is not one of the seven exempt
+acronyms, so the prose says link and `workItemUrl` stays in backticks as a field name. The whole
+`## Lifecycle stage` section goes, along with the sentence naming the dropped stage script and the
+reference to the dropped run script. A line about `Convert-EiAdoIntake.ps1` is added.
+
+
 
 
 
