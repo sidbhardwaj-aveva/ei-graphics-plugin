@@ -222,7 +222,7 @@ data would let someone add the field to the schema and open the door again.
 Every count in the tests is read from the registry. Nothing asserts that there is one domain,
 because Part 10 says adding a domain skill later must stay a two-file change.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 1ebf8c4
 
 
 
