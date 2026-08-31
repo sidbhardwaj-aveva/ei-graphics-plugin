@@ -20,7 +20,7 @@ in `BUILD-LOG.md`.
 | T008 | Write-EiSessionEntry.ps1 | DONE | 45e49b9 | 2026-08-31T18:12:00Z |
 | T009 | Export-EiSessionSummary.ps1 | DONE | 95d3a1b | 2026-08-31T18:34:00Z |
 | T015 | Copy and split termination-drawing | DONE | 7552aa4 | 2026-08-31T19:02:00Z |
-| T010 | Get-EiDomainSkillCatalog.ps1 | DONE | pending | 2026-08-31T19:14:00Z |
+| T010 | Get-EiDomainSkillCatalog.ps1 | DONE | 556cfe1 | 2026-08-31T19:14:00Z |
 | T011 | Test-EiScopeDrift.ps1 | TODO | — | — |
 | T012 | Convert-EiAdoIntake.ps1 | TODO | — | — |
 | T013 | Copy ei-azure-devops-cli-intake | TODO | — | — |

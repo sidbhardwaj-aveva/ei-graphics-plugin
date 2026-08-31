@@ -645,7 +645,7 @@ the output.
 
 Every count in the tests is read from the registry. Nothing asserts that there is one domain.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit 556cfe1
 
 
 
