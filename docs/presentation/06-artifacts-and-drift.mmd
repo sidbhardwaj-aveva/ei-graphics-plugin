@@ -1,0 +1,10 @@
+flowchart TB
+    Intake["ADO intake"] --> Ado[("ado.json")]
+    Ado -->|"adoHash"| SU[("story-understanding.json")]
+    SU --> AF[("approved-files.json")]
+    AF -->|"approved list and hash"| Drift{"Drift check vs git changes"}
+    Changes["Actual file changes"] --> Drift
+    Drift -->|"pass"| Commit["Delegate commit"]
+    Drift -->|"drift"| Report["Report unapproved files"]
+    Steps["Every agent step"] --> Session[("session.json")]
+    Session --> Summary["session-summary.md"]

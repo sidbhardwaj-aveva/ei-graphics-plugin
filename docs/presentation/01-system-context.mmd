@@ -1,0 +1,20 @@
+flowchart LR
+    Dev["Developer"]
+
+    subgraph Plugin["demo-ei-graphics plugin"]
+        Agent["EI Graphics agent"]
+        Skills["Core and domain skills"]
+    end
+
+    ADO["Azure DevOps story"]
+    Repo["Product code repo"]
+    Rnd["aveva-rnd plugin"]
+    Logs[("Session logs")]
+
+    Dev -->|"story link"| Agent
+    Agent -->|"two approvals"| Dev
+    Agent -->|"read only"| ADO
+    Agent -->|"read and edit"| Repo
+    Agent -->|"review, commit, PR"| Rnd
+    Agent -->|"append every step"| Logs
+    Skills -->|"code knowledge"| Agent

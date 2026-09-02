@@ -1,0 +1,14 @@
+flowchart TD
+    A["ADO intake script writes ado.json"] --> B["Agent reads and understands story"]
+    B --> C{"Checkpoint 1: understanding and domain"}
+    C -->|"human agrees"| D["Persist story-understanding.json"]
+    D --> E{"Complexity?"}
+    E -->|"small bug"| I["Implement surgical fix"]
+    E -->|"large change"| F["Agent proposes scope and plan"]
+    F --> G{"Checkpoint 2: plan approval"}
+    G -->|"human approves"| H["Persist approved-files.json"]
+    H --> I
+    I --> J{"Layer guard and drift check"}
+    J -->|"clear"| K["Delegate to aveva-rnd"]
+    J -->|"violation or drift"| X["Report and stop"]
+    K --> L["Render session summary"]

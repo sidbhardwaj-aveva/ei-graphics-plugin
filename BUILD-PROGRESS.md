@@ -1,7 +1,7 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T022
+**Current task:** T024
 **Last verified green:** T009 (2026-09-02T09:52:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -31,5 +31,6 @@ in `BUILD-LOG.md`.
 | T019 | The no-orphan check | DONE | ee21c44 | 2026-09-02T09:36:00Z |
 | T020 | The script contract check | DONE | 4e68ec1 | 2026-08-31T21:20:00Z |
 | T021 | Everything green, before the live run | DONE | 2abf97f | 2026-08-31T21:32:00Z |
+| T024 | Evidence behind the reasoning | IN-PROGRESS | — | — |
 | T022 | Dry run against story 4965976 | TODO | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |

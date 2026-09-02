@@ -1576,3 +1576,45 @@ against tasks that had nothing wrong with them.
 **Result:** DONE at commit e768ce3. Full suite 505 passed, 3 failed, and those three are T021's
 roster tests, which fail by design while T008 sits at IN-PROGRESS and clear when the row is
 restored. `Test-BuildProgress.ps1` exits 0.
+
+## T024 — Evidence behind the reasoning — 2026-09-02T13:05:00Z
+
+**Goal:** Let a session entry carry the evidence its reasoning rests on, and render that evidence
+under the reasoning in `session-summary.md`, so a reader can open the file and check the claim.
+
+**Why now, before T022:** the trigger was a real summary, for story 3742785, written by a run that
+happened outside this build. Its reasoning trail says a test comment named a field, and names
+neither the comment, the file, nor the line. Nothing in it can be checked. T022 asks a stranger to
+read a summary and say what happened, and T023 asks a maintainer to act on it. Both are weaker
+while the trail cannot be verified, so the fix goes in first. The row therefore sits above T022 in
+`BUILD-PROGRESS.md`, the same way T015 sits above T010.
+
+**Assumptions:** Evidence is optional, so every session log written before today still validates
+and still renders. An evidence item names a file and nothing else is required, because the agent
+often knows the file before it knows the line. Paths are recorded relative to the repository root,
+the same as `filesRead`, and the renderer turns them into links relative to the summary file,
+which sits two folders down at `.ei-session-logs/<storyId>/`. The quote is rendered inside a
+fenced block and the link text inside backticks, which puts both outside the reach of the Part 3
+plain-language rules; that is deliberate, because quoted source code is not our prose and
+rewording it to pass a readability check would destroy the thing that makes it evidence. At
+`concise` verbosity the reasoning trail is already dropped, so evidence is dropped with it rather
+than being given a section of its own.
+
+**Files touched:**
+- `plan.md` (T024 added, T008 roster extended to 22)
+- `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/session.schema.json`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.ps1`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/SKILL.md`
+- `tests/fixtures/session-verbose.json`, `tests/fixtures/session-summary-verbose.md`
+- the three test files that hold the roster count, the row count and the two script suites
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0, and
+`pwsh -NoProfile -File ./tools/Test-BuildProgress.ps1` exits 0.
+
+**Attempts:**
+
+**Decisions:**
+
+**Result:**

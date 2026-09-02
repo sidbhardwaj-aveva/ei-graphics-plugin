@@ -1,0 +1,15 @@
+flowchart LR
+    subgraph T1["Tier 1: always loaded"]
+        M["Skill name and description"]
+    end
+
+    subgraph T2["Tier 2: on activation"]
+        B["SKILL.md body"]
+    end
+
+    subgraph T3["Tier 3: on demand"]
+        R["references and scripts"]
+    end
+
+    M -->|"skill looks relevant"| B
+    B -->|"need deeper detail"| R

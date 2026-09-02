@@ -787,13 +787,15 @@ create the envelope: `schemaVersion`, `storyId`, `startedAt`, `agent`, `verbosit
 
 Appending must be atomic. Write a temporary file, then move it.
 
-**Parameters, exactly these 21, in two mutually exclusive sets.**
+**Parameters, exactly these 22, in two mutually exclusive sets.**
 
 - Shared by both (4): `-StoryId`, `-Root`, `-Json`, `-Help`
-- Append set (10): `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`, `-TokensUsed`,
-  `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`
+- Append set (11): `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`, `-TokensUsed`,
+  `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`, `-Evidence`
 - Finalize set (7): `-Finalize`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
   `-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`
+
+`-Evidence` arrived in T024. Read that task before changing it.
 
 **`-SessionOutcome` is deliberately not called `-Outcome`.** In JSON, the entry field and the
 summary field are both named `outcome`. One PowerShell parameter cannot carry two meanings.
@@ -1450,6 +1452,40 @@ a file that was never written would have been silently skipped by every run of t
 **Done when.** `pwsh -NoProfile -File ./tools/Test-BuildProgress.ps1` exits 0, **and**
 `pwsh -NoProfile -File $P` exits 0, **and** a grep for `pending` in the Commit column of
 `BUILD-PROGRESS.md` returns zero hits, **and** all nine plain-language targets exist.
+
+#### T024 — Evidence behind the reasoning
+
+**Why this task exists.** A person read a real `session-summary.md` and could not check any of
+it. The trail said a comment named a field, and named neither the comment, the file, nor the
+line. Prose about evidence is not evidence. The reader had to take the agent's word for it.
+
+**Do this.** Let an entry carry the evidence its reasoning rests on, and render it.
+
+`session.schema.json` gains an optional `evidence` array on each entry. Every item names a
+`file`. Each may also carry a `line`, a `symbol` and a `quote`, the last being the exact text
+that was read. Nothing else is allowed.
+
+`Write-EiSessionEntry.ps1` gains `-Evidence` in the append set, taking hashtables or the objects
+`ConvertFrom-Json` produces. An item with no `file` is an error, not a silent drop.
+
+`Export-EiSessionSummary.ps1` renders the evidence under the reasoning it belongs to, as a
+bullet per item: the file as a link, the line as a `#L` fragment, the symbol in backticks, and
+the quote in a fenced block beneath. The link is written relative to the summary file, which
+sits two folders below the repository root, so it opens from the rendered page.
+
+**The quote goes in a fenced block, and the link text in backticks.** Both are then invisible to
+the Part 3 rules, which is right: quoted source is not our prose, and must not be reworded to
+pass a readability check.
+
+At `concise` verbosity the reasoning trail is dropped, and the evidence goes with it.
+
+**Two line ceilings are raised here.** Record the old and new values in `BUILD-LOG.md`.
+
+**Done when.** Tests show: an entry records its evidence and reads back unchanged; an item with
+no `file` exits 1 with a message naming the missing key; the rendered summary links the file
+with its line and shows the quote in a fenced block; an entry with no evidence renders no
+evidence heading; and the rendered output still passes the four Part 3 rules. The golden files
+are updated in the same commit. `$P` exits 0.
 
 ---
 

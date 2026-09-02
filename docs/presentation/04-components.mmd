@@ -1,0 +1,21 @@
+flowchart TB
+    Agent["ei-graphics agent"]
+
+    subgraph Owns["EI plugin owns"]
+        subgraph SkillSet["Skills"]
+            Intake["ei-azure-devops-cli-intake"]
+            Core["ei-graphics-core: six scripts"]
+            Guard["ei-layer-guard"]
+            Domain["termination-drawing domain"]
+        end
+    end
+
+    subgraph Delegates["Delegated to aveva-rnd"]
+        Review["code-review"]
+        Commit["git-commit"]
+        PR["create-pr"]
+    end
+
+    Agent --> SkillSet
+    Agent --> Delegates
+    Core --> Artifacts[("JSON artifacts and summary")]
