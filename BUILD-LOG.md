@@ -1450,3 +1450,17 @@ The first version of that guard compared characters against bytes on disk and re
 edit, which is the safer way for a guard to be wrong.
 
 **Result:** DONE at commit bfc9d6e
+
+## T022 — third run, story 3742785 — 2026-09-02T10:00:00Z
+
+**Goal:** Complete T022 by running a story that warrants a code change, so the second checkpoint is
+exercised rather than reasoned about.
+
+**Assumptions:** T022 was reopened after the two regression fixes in T009 and T019, so this run uses
+the corrected renderer and the corrected guard. The first two runs each stopped short of the second
+checkpoint for an honest reason: 4965976 was already fixed on `main`, and 513452 was not actionable
+as written. Neither warranted an edit, and inventing one would have been dishonest. This third story
+was chosen by the person watching for that purpose. The two logging rules learned in run one are
+applied from the start: the checkpoint entry is written before the person is asked, and the agent's
+own artifacts are never passed to `-FilesModified`. Nothing is merged and no pull request is opened,
+as the task requires.
