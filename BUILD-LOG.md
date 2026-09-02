@@ -1354,3 +1354,19 @@ pass.
 
 
 
+
+## T019 — regression: the guard was scanning run output — 2026-09-02T09:30:00Z
+
+**Goal:** Stop the no-orphan scan from reading the gitignored session logs, and prove it stays
+stopped.
+
+**Assumptions:** T019 was reopened under Part 8, which says a DONE task that starts failing goes
+back to IN-PROGRESS, is fixed, is re-checked and is restored to DONE, logged as a regression.
+The task was not failing its own assertions; it was failing its stated purpose, which is to scan
+the built repository. .ei-session-logs/ is gitignored run output and is not part of the built
+repository, so it belongs with the archive, the fixtures and .git rather than in the scan. Adding
+it makes the skip list eight entries where the plan writes seven; the plan pins that list down, so
+the change is recorded here as a deliberate deviation with its reason. The defect was invisible on
+a clean checkout, because the folder only exists after a live run, which is why T019 passed at the
+time and only the T022 runs exposed it. A test is added that fails if the folder is ever scanned
+again, so this cannot come back silently.
