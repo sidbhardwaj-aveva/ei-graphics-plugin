@@ -1464,3 +1464,57 @@ was chosen by the person watching for that purpose. The two logging rules learne
 applied from the start: the checkpoint entry is written before the person is asked, and the agent's
 own artifacts are never passed to `-FilesModified`. Nothing is merged and no pull request is opened,
 as the task requires.
+
+**What the third run reached.** Story 3742785 is a `Ready` user story asking whether an existing
+vertical spacing setting can be repurposed to control the gap around the content column header. It
+warranted a change, so it exercised the path the first two runs could not.
+
+The investigation answered the story's own question with evidence. The setting exists end to end
+for storage and display: `GetTerminationDrawingsVerticalSpaceSetting` and its setter in
+`AdvancedSettingsService.cs`, the key `TerminationDrawingsSettingsVerticalSpaceConfigKey`, and a
+default of 10 in `TerminationDrawingTypeSettingsViewModel`. No termination drawing layout code
+reads it. The only production caller is the settings screen showing its own value; the other eleven
+callers are test stubs returning 10. The layout instead computes spacing geometrically through
+`SpacingCalculator`, the class the first run found, and header spacing is
+`LayoutAdjustmentService.ComputeEquipmentHeaderHeight`, which had no configurable term at all. The
+stored value reached a private field, `_terminationVerticalSpaceValue`, with no accessor, and
+stopped there.
+
+**One moment worth recording.** A comment in `LayoutAdjustmentServiceTests.cs` referred to
+`TdVerticalSpaceValue`, a name the first search would have missed, and it appeared to contradict
+the finding. It was checked rather than ignored. The name exists only in that comment: no such
+member exists anywhere in the codebase. That strengthened the conclusion instead of overturning it,
+and it suggests the plumbing was intended once and never finished.
+
+**Both checkpoints paused for input, which is what the first two runs could not show.** The
+understanding was presented and confirmed, then a plan naming two files, a test command, the need
+for a new test and four risks was presented and approved. The rendered summary records 2 pauses and
+30m 41s of real waiting, because the checkpoint entries were written before each question rather
+than afterwards.
+
+Two edits were made, exactly the two that were approved. `Test-EiScopeDrift.ps1` ran on real
+changes for the first time and returned `pass` with nothing unapproved and nothing approved left
+untouched. `Invoke-EiLayerGuard.ps1` returned `pass` with no violations.
+
+**The change is unverified, and is recorded as such.** The product repository cannot be built in
+this environment. The `dotnet` CLI misreads the legacy test project as `net40` and fails restore
+with three package compatibility errors, and MSBuild stops earlier still, in the bootstrap, because
+`Build/Nuget/Tools/BuildSupport/tools/AVEVA_msbuild_path.props` has never been restored from the
+private feed. No error named either edited file. The agent rule is that a fix needs a test run or a
+build check, and that looking correct is not verification, so the session outcome is recorded as
+`changed-but-unverified` rather than as a fix.
+
+**That exposes a gap in this repository's own README.** Its prerequisites list says the product
+repository must be cloned. It does not say the repository must already build, which is a stronger
+and different requirement, and the one that actually blocked this run.
+
+**The two renderer fixes were confirmed on real data.** The maintainer section named five source
+files and no artifacts or skill documents, and the wait time was true rather than zero. Run one had
+reported a false `1 file changed` and a false `0s`.
+
+**Status.** Of T022's five conditions, four now hold. All five artifacts exist, including
+`approved-files.json`, which the earlier runs could not produce because nothing was approved. Both
+checkpoints paused. Attachments downloaded on the first run, and this story has none, which is
+recorded. The command budget did not hold: this run took more than ten terminal commands, largely
+on build diagnosis after the test command failed. The reader check has still not been done, and
+rule 8 forbids claiming it without evidence.
