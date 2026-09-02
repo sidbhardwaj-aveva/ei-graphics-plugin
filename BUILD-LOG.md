@@ -1395,3 +1395,17 @@ arrive. While T019 sat at IN-PROGRESS, three of T021 checks failed by design, na
 done. That is the everything-green gate doing its job, and it clears as this row returns to DONE.
 
 **Result:** DONE at commit ee21c44
+
+## T009 — regression: the improvement section mixed source with the agent's own reads — 2026-09-02T09:45:00Z
+
+**Goal:** Make the maintainer section name only files that could belong in a Key Files table.
+
+**Assumptions:** T009 was reopened under Part 8, as a regression. The live runs in T022 showed the
+improvement opportunity listing `ado.json` and the skill's own `SKILL.md` alongside real source
+files. Neither is a candidate for a Key Files table: one is the agent's own output and the other is
+the skill being measured. The advice "check them against the Key Files table" only makes sense for
+source files, so the noise buries the useful entries. A read is still a read, so the efficiency
+line keeps counting every file; only the improvement opportunity is filtered. Anything under
+`.ei-session-logs/` or `plugins/` is the agent's own, and everything else is treated as source.
+Both golden files are unaffected, because their session fixtures record no reads under those two
+roots, so this is a real behaviour change with no change to the frozen output.
