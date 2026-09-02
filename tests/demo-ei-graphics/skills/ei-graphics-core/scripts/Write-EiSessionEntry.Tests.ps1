@@ -157,6 +157,51 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
         }
     }
 
+    Context '-Finalize tells a measured zero from no measurement at all' {
+        It 'omits totalTokens when no entry recorded one' {
+            # Nothing here can count tokens, so reporting 0 would claim the run was free.
+            Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'; DurationMs = 1000
+            }) | Out-Null
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+
+            $summary = (Get-Session -Root $script:Root | ConvertFrom-Json).summary
+            $summary.PSObject.Properties.Name | Should -Not -Contain 'totalTokens'
+            $summary.PSObject.Properties.Name | Should -Contain 'totalDurationMs'
+        }
+
+        It 'omits totalDurationMs when no entry recorded one' {
+            Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'; TokensUsed = 50
+            }) | Out-Null
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+
+            $summary = (Get-Session -Root $script:Root | ConvertFrom-Json).summary
+            $summary.PSObject.Properties.Name | Should -Not -Contain 'totalDurationMs'
+            $summary.totalTokens | Should -Be 50
+        }
+
+        It 'keeps a genuine zero that was actually measured' {
+            # A checkpoint really does consume nothing, and that is worth reporting.
+            Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'human-checkpoint'; Action = 'present'; Outcome = 'waited'
+                DurationMs = 0; TokensUsed = 0
+            }) | Out-Null
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+
+            $summary = (Get-Session -Root $script:Root | ConvertFrom-Json).summary
+            $summary.PSObject.Properties.Name | Should -Contain 'totalTokens'
+            $summary.totalTokens | Should -Be 0
+            $summary.totalDurationMs | Should -Be 0
+        }
+
+        It 'still validates against the schema when both are omitted' {
+            Invoke-Entry -Splat ($script:Base + @{ Phase = 'ado-intake'; Action = 'a'; Outcome = 'b' }) | Out-Null
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+            Get-Session -Root $script:Root | Test-Json -Schema $script:SchemaText | Should -BeTrue
+        }
+    }
+
     It 'refuses an append parameter together with -Finalize' {
         # A parameter set error, not a silent partial write.
         { & $script:ScriptPath -StoryId '4965976' -Root $script:Root -Finalize -Phase 'ado-intake' } |

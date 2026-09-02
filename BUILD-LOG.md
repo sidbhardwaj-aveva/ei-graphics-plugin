@@ -1538,3 +1538,41 @@ fixed in the same pass. `filesModified` is left as it is, because an empty list 
 nothing was changed. The two golden files should be unaffected, since their fixture records both a
 duration and a token count on most entries, but that is checked rather than assumed, because the
 same assumption was wrong in T009.
+
+**Files touched:** `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1`,
+`tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.Tests.ps1`
+
+**Acceptance:** `-Finalize` now writes `totalDurationMs` and `totalTokens` only when at least one
+entry recorded the matching field, and omits each independently. Four tests were added, under a new
+context named for the distinction being drawn: the field is omitted when nothing recorded one, for
+each of the two fields; a zero that was genuinely measured at a checkpoint is still reported,
+because a checkpoint really does consume nothing and that is worth saying; and the file still
+validates against session.schema.json when both fields are absent. The existing tests that assert
+3500 and 500 still pass, so the populated path is unchanged. The file grew from 184 to 186 lines
+against a ceiling of 200.
+
+**Attempts:** One, for the fix itself. The verification took considerably longer than the fix, for
+a reason worth recording.
+
+**Decisions:** The two golden files were checked rather than assumed, and are unaffected: the whole
+suite passes them. That check was the cheap part. The expensive part was self-inflicted. A
+throwaway helper written to run the suite began with `Set-StrictMode -Version Latest` and then
+called `./tests/Invoke-PesterTests.ps1` in-process with `&`. Strict mode leaked through Pester into
+every test file, and under StrictMode Latest reading `.Count` on a scalar throws, so three tests
+that read `.Count` off a pipeline yielding a single item appeared to fail. They were reported as
+pre-existing defects in ScriptContract.Tests.ps1 and DomainSkillRegistry.Tests.ps1. They are not.
+The repository was green throughout. This was proved, not argued: plan.md was shown byte-identical
+to the baseline by hash, the T008 start commit was shown to touch only the two log files, and the
+two suspect files were run at commit bacbc33 in a throwaway worktree, where they passed 57 and 10.
+The contradiction between identical inputs and different results is what identified the harness as
+the variable. The rule this cost is now recorded: never wrap this project's test runner in a strict
+mode helper and call it in-process, always launch it in a child process. Related, and also
+recorded: `pwsh -WorkingDirectory <dir> -File ./relative.ps1` does not work, because the relative
+path is resolved before the working directory is applied, and `Invoke-PesterTests.ps1` calls `exit`,
+which kills any wrapping script before it can save output, so capture must be redirected at the
+process level. The near-miss is that this very nearly became three unnecessary Part 8 regressions
+against tasks that had nothing wrong with them.
+
+**Result:** DONE at commit pending. Full suite 505 passed, 3 failed, and those three are T021's
+roster tests, which fail by design while T008 sits at IN-PROGRESS and clear when the row is
+restored. `Test-BuildProgress.ps1` exits 0.

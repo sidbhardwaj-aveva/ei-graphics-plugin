@@ -114,16 +114,18 @@ if (Test-Path -LiteralPath $target) {
 
 if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
     $entries = @($session['entries'])
-    $durations = @($entries | ForEach-Object { if ($_.Contains('durationMs')) { $_['durationMs'] } })
-    $tokens = @($entries | ForEach-Object { if ($_.Contains('tokensUsed')) { $_['tokensUsed'] } })
+    $durations = @($entries | ForEach-Object { if ($_.Contains('durationMs')) { $_['durationMs'] } } | Where-Object { $null -ne $_ })
+    $tokens = @($entries | ForEach-Object { if ($_.Contains('tokensUsed')) { $_['tokensUsed'] } } | Where-Object { $null -ne $_ })
     $touched = @($entries | ForEach-Object { if ($_.Contains('filesModified')) { $_['filesModified'] } })
 
     $summary = [ordered]@{
-        completedAt       = Get-UtcStamp
-        totalDurationMs   = [int](($durations | Where-Object { $null -ne $_ } | Measure-Object -Sum).Sum)
-        totalTokens       = [int](($tokens | Where-Object { $null -ne $_ } | Measure-Object -Sum).Sum)
-        filesModified     = @($touched | Where-Object { $_ } | Sort-Object -Unique)
+        completedAt   = Get-UtcStamp
+        filesModified = @($touched | Where-Object { $_ } | Sort-Object -Unique)
     }
+    # Omitted, not zeroed, when nothing recorded a value. A measured zero and no measurement at all
+    # are different things, and the summary must never present the second as the first.
+    if ($durations.Count -gt 0) { $summary['totalDurationMs'] = [int](($durations | Measure-Object -Sum).Sum) }
+    if ($tokens.Count -gt 0) { $summary['totalTokens'] = [int](($tokens | Measure-Object -Sum).Sum) }
     if ($null -ne $TestsRun) { $summary['testsRun'] = [int] $TestsRun }
     if ($null -ne $TestsPassed) { $summary['testsPassed'] = [int] $TestsPassed }
     if ($null -ne $HumanInteractions) { $summary['humanInteractions'] = [int] $HumanInteractions }
