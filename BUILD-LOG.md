@@ -1573,6 +1573,6 @@ which kills any wrapping script before it can save output, so capture must be re
 process level. The near-miss is that this very nearly became three unnecessary Part 8 regressions
 against tasks that had nothing wrong with them.
 
-**Result:** DONE at commit pending. Full suite 505 passed, 3 failed, and those three are T021's
+**Result:** DONE at commit e768ce3. Full suite 505 passed, 3 failed, and those three are T021's
 roster tests, which fail by design while T008 sits at IN-PROGRESS and clear when the row is
 restored. `Test-BuildProgress.ps1` exits 0.
