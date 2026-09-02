@@ -1,8 +1,8 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T009
-**Last verified green:** T019 (2026-09-02T09:36:00Z)
+**Current task:** T022
+**Last verified green:** T009 (2026-09-02T09:52:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -18,7 +18,7 @@ in `BUILD-LOG.md`.
 | T006 | ei-graphics-core SKILL.md and the plain-language checker | DONE | 367b3da | 2026-08-31T17:38:00Z |
 | T007 | Write-EiArtifact.ps1 | DONE | 9568e0c | 2026-08-31T17:56:00Z |
 | T008 | Write-EiSessionEntry.ps1 | DONE | 45e49b9 | 2026-08-31T18:12:00Z |
-| T009 | Export-EiSessionSummary.ps1 | IN-PROGRESS | — | — |
+| T009 | Export-EiSessionSummary.ps1 | DONE | pending | 2026-09-02T09:52:00Z |
 | T015 | Copy and split termination-drawing | DONE | 7552aa4 | 2026-08-31T19:02:00Z |
 | T010 | Get-EiDomainSkillCatalog.ps1 | DONE | 556cfe1 | 2026-08-31T19:14:00Z |
 | T011 | Test-EiScopeDrift.ps1 | DONE | 5907ded | 2026-08-31T19:24:00Z |

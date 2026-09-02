@@ -92,6 +92,8 @@ $testsPassed = Get-Field -Owner $summary -Name 'testsPassed'
 
 $filesRead = @($entries | ForEach-Object { Get-Field -Owner $_ -Name 'filesRead' } |
     Where-Object { $_ } | Sort-Object -Unique)
+# The agent's own artifacts and its own skills can never belong in a Key Files table.
+$sourceRead = @($filesRead | Where-Object { $_ -notmatch '^(\.ei-session-logs|plugins)[\\/]' })
 
 $waitSeconds = 0
 $pauses = 0
@@ -148,12 +150,11 @@ $coverage = 'No domain skill was recorded. If this story belongs to a domain, it
 if ($domain -and $pattern) { $coverage = "The ``$domain`` skill was used. It matched the bug pattern named $pattern." }
 elseif ($domain) { $coverage = "The ``$domain`` skill was used. No bug pattern matched, so this may be new ground for that skill." }
 
-$opportunity = 'No file reads were recorded, so there is nothing to compare against the skill.'
-if ($filesRead.Count -gt 0) {
-    $named = ($filesRead | ForEach-Object { "``$_``" }) -join ', '
-    $it = 'them'
-    if ($filesRead.Count -eq 1) { $it = 'it' }
-    $opportunity = "The agent read $(Add-Plural $filesRead.Count 'file'). Check $it against the Key Files table in the skill, and add any that are missing: $named."
+$opportunity = 'No source file was read, so there is nothing to compare against the skill.'
+if ($sourceRead.Count -gt 0) {
+    $named = ($sourceRead | ForEach-Object { "``$_``" }) -join ', '
+    $it = 'them'; if ($sourceRead.Count -eq 1) { $it = 'it' }
+    $opportunity = "The agent read $(Add-Plural $sourceRead.Count 'source file'). Check $it against the Key Files table in the skill, and add any that are missing: $named."
 }
 
 $wait = 'None recorded.'

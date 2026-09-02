@@ -127,6 +127,57 @@ Describe 'Export-EiSessionSummary' -Tag 'Unit' {
         $run.Result.path | Should -Be (Join-Path $root '.ei-session-logs' '4965976' 'session-summary.md')
     }
 
+    Context 'the improvement opportunity names source files only' {
+        BeforeEach {
+            # A session that read one real source file, its own artifact and its own skill.
+            $script:MixedRoot = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+            $folder = Join-Path $script:MixedRoot '.ei-session-logs' '4965976'
+            $null = New-Item -ItemType Directory -Path $folder -Force
+            $session = Get-Content -LiteralPath (Join-Path $script:FixtureDir 'session-verbose.json') -Raw | ConvertFrom-Json
+            $session.entries[6].filesRead = @(
+                'src/Manager/CoreConnectorManager.cs'
+                '.ei-session-logs/4965976/ado.json'
+                'plugins/demo-ei-graphics/skills/termination-drawing/SKILL.md'
+            )
+            Set-Content -LiteralPath (Join-Path $folder 'session.json') -Encoding utf8NoBOM `
+                -Value ($session | ConvertTo-Json -Depth 30)
+        }
+
+        It 'lists the source file' {
+            $rendered = Get-Content -LiteralPath (Invoke-Export -Root $script:MixedRoot).Result.path -Raw
+            $rendered | Should -BeLike '*CoreConnectorManager.cs*'
+        }
+
+        It 'leaves out the agent own artifact and its own skill' {
+            $line = [regex]::Match(
+                (Get-Content -LiteralPath (Invoke-Export -Root $script:MixedRoot).Result.path -Raw),
+                '(?m)^- \*\*Improvement opportunity:\*\* (.*)$').Groups[1].Value
+            $line | Should -Not -Match 'ado\.json'
+            $line | Should -Not -Match 'SKILL\.md'
+            $line | Should -Match 'source file'
+        }
+
+        It 'still counts every read in the efficiency line' {
+            # A read is a read. Only the improvement advice is filtered.
+            $line = [regex]::Match(
+                (Get-Content -LiteralPath (Invoke-Export -Root $script:MixedRoot).Result.path -Raw),
+                '(?m)^- \*\*Agent efficiency:\*\* (.*)$').Groups[1].Value
+            $line | Should -BeLike '3 files read*'
+        }
+
+        It 'says so plainly when nothing but its own files were read' {
+            $session = Get-Content -LiteralPath (Join-Path $script:FixtureDir 'session-verbose.json') -Raw | ConvertFrom-Json
+            $session.entries[6].filesRead = @('.ei-session-logs/4965976/ado.json')
+            $root = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+            $folder = Join-Path $root '.ei-session-logs' '4965976'
+            $null = New-Item -ItemType Directory -Path $folder -Force
+            Set-Content -LiteralPath (Join-Path $folder 'session.json') -Encoding utf8NoBOM `
+                -Value ($session | ConvertTo-Json -Depth 30)
+            $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root).Result.path -Raw
+            $rendered | Should -Match 'No source file was read'
+        }
+    }
+
     It 'exits 1 when there is no session log' {
         $root = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         $null = New-Item -ItemType Directory -Path $root -Force

@@ -1409,3 +1409,44 @@ line keeps counting every file; only the improvement opportunity is filtered. An
 `.ei-session-logs/` or `plugins/` is the agent's own, and everything else is treated as source.
 Both golden files are unaffected, because their session fixtures record no reads under those two
 roots, so this is a real behaviour change with no change to the frozen output.
+
+**Files touched:**
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.ps1` (changed, 179 lines)
+- `tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.Tests.ps1` (four new tests)
+- `tests/fixtures/session-summary-verbose.md` (golden updated)
+- `tests/fixtures/session-summary-concise.md` (golden updated)
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0. The improvement
+opportunity names source files only, and the efficiency line still counts every read.
+
+**Attempts:** 2.
+
+**Decisions:**
+
+**The assumption written at the start of this entry was wrong.** It said both golden files would be
+unaffected. They were not. The filtering left the verbose and concise fixtures alone, as predicted,
+but the wording changed from "1 file" to "1 source file", and both goldens froze the old wording.
+Both were updated by hand to the new intended text rather than to whatever the renderer happened to
+emit, because a golden file regenerated from the code under test proves nothing.
+
+The efficiency line and the improvement line now count different things on purpose. A read is a
+read, so "3 files read" still counts all three. Only the advice is filtered, because "check them
+against the Key Files table" is meaningless for the agent's own output or for the skill being
+measured. A test asserts both halves of that split on one session that read all three kinds.
+
+The empty case was reworded too. "No file reads were recorded" was wrong whenever the agent had
+read only its own files; it now says no source file was read.
+
+The script went from 178 lines to 179, against a ceiling of 180. The ceiling was not raised.
+
+**A near miss worth recording, from T019's window rather than this one.** While recording T019's
+commit SHA, an inline shell command with mismatched quoting left its variable unassigned, and
+`Set-Content` wrote that empty value over `BUILD-LOG.md`. The file went from 83980 bytes to 12. It
+was recovered in full with `git checkout -- BUILD-LOG.md`, because the previous commit held it.
+Nothing was lost. Two things follow. The habit of committing at every step is what made the loss
+recoverable, which is the reason Part 1 insists on it. And edits to this file now go through a
+script that refuses to run when the file is under 50000 bytes, rather than through inline quoting.
+The first version of that guard compared characters against bytes on disk and refused a correct
+edit, which is the safer way for a guard to be wrong.
+
+**Result:** DONE at commit pending
