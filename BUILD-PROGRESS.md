@@ -31,5 +31,5 @@ in `BUILD-LOG.md`.
 | T019 | The no-orphan check | DONE | 8cdc553 | 2026-08-31T21:04:00Z |
 | T020 | The script contract check | DONE | 4e68ec1 | 2026-08-31T21:20:00Z |
 | T021 | Everything green, before the live run | DONE | 2abf97f | 2026-08-31T21:32:00Z |
-| T022 | Dry run against story 4965976 | TODO | — | — |
+| T022 | Dry run against story 4965976 | IN-PROGRESS | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |

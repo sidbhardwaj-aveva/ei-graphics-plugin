@@ -1216,6 +1216,37 @@ forbids claiming a pass without evidence.
 
 **Result:** DONE at commit 2abf97f
 
+## T022 — Dry run against story 4965976 — 2026-09-02T09:00:00Z
+
+**Goal:** Run the plugin against the real story, with a person watching, and confirm the five
+things the task lists.
+
+**Assumptions:** `az` is signed in as siddhant.bhardwaj@aveva.com and story 4965976 is reachable.
+It is a Bug, state Closed, titled "SR205 - Insertion of tstrip header symbol below previous symbol
+is not observing the symbol extents boundary". Note that this is not the story the archive's worked
+example describes, so the run is judged on its own terms rather than against that example. The
+organization and project come from the fixed defaults, `AVEVA-VSTS` and `Dabacon Products`, because
+the pasted link never decides where a work item is read from. `aveva-rnd` and `aveva-core` are
+installed as agent plugins and also cloned beside this repository, so the delegation targets exist.
+The product code is at `C:\Git\dabacon-products\Engineering\Modules\EI\Source`, on `main`, with a
+clean tree and 2452 C# files. All three files the `termination-drawing` skill names in its Key
+Files table resolve there, which is the first real evidence that skill-first resolution will work.
+The story is a Bug in state `Closed`, so the fix may already be present in the code; that is
+checked before anything is changed rather than assumed either way. The attachment download in
+`Convert-EiAdoIntake.ps1` is run for real here, because it is the one path in this build with no
+test behind it, by decision, since it needs a real token and a real network.
+
+**A correction to T011 and T012, recorded here because the log is append only.** Part 9's
+"three commits per task, in order" check was run for the first time at the end of T021 and found
+that T011 and T012 each have only two commits. Both are missing their `build(T0NN): start` commit.
+The content discipline held in both cases: each has its `IN-PROGRESS` row and its
+`**Assumptions:**` block written before any work, and that was verified. What slipped was
+committing that state on its own. The defect is not repairable. Inserting a commit means rewriting
+history, which would change every SHA already recorded in `BUILD-PROGRESS.md` and turn one small
+fault into twenty wrong records. T010's four commits are not a defect: the extra one is the blocked
+commit Part 8 requires.
+
+
 
 
 
