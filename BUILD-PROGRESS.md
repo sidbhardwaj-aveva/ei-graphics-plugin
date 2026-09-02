@@ -1,7 +1,7 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T022
+**Current task:** T008
 **Last verified green:** T009 (2026-09-02T09:52:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -17,7 +17,7 @@ in `BUILD-LOG.md`.
 | T005 | The domain skill registry | DONE | 1ebf8c4 | 2026-08-31T17:14:00Z |
 | T006 | ei-graphics-core SKILL.md and the plain-language checker | DONE | 367b3da | 2026-08-31T17:38:00Z |
 | T007 | Write-EiArtifact.ps1 | DONE | 9568e0c | 2026-08-31T17:56:00Z |
-| T008 | Write-EiSessionEntry.ps1 | DONE | 45e49b9 | 2026-08-31T18:12:00Z |
+| T008 | Write-EiSessionEntry.ps1 | IN-PROGRESS | — | — |
 | T009 | Export-EiSessionSummary.ps1 | DONE | bfc9d6e | 2026-09-02T09:52:00Z |
 | T015 | Copy and split termination-drawing | DONE | 7552aa4 | 2026-08-31T19:02:00Z |
 | T010 | Get-EiDomainSkillCatalog.ps1 | DONE | 556cfe1 | 2026-08-31T19:14:00Z |
@@ -31,5 +31,5 @@ in `BUILD-LOG.md`.
 | T019 | The no-orphan check | DONE | ee21c44 | 2026-09-02T09:36:00Z |
 | T020 | The script contract check | DONE | 4e68ec1 | 2026-08-31T21:20:00Z |
 | T021 | Everything green, before the live run | DONE | 2abf97f | 2026-08-31T21:32:00Z |
-| T022 | Dry run against story 4965976 | IN-PROGRESS | — | — |
+| T022 | Dry run against story 4965976 | TODO | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |

@@ -1518,3 +1518,23 @@ checkpoints paused. Attachments downloaded on the first run, and this story has 
 recorded. The command budget did not hold: this run took more than ten terminal commands, largely
 on build diagnosis after the test command failed. The reader check has still not been done, and
 rule 8 forbids claiming it without evidence.
+
+## T008 — regression: a missing measurement was reported as zero — 2026-09-02T11:40:00Z
+
+**Goal:** Stop `-Finalize` inventing a total from entries that recorded nothing, so the summary
+never presents an absence as a measurement.
+
+**Assumptions:** T008 was reopened under Part 8, as a regression. The third run in T022 rendered
+`Tokens: 0`, which a reader would take to mean the run was free. Nothing had counted tokens. Ten of
+the thirteen entries carried `tokensUsed` of null, because there is no interface in this setup that
+reports token use per step; the other three were checkpoints that genuinely consumed none.
+`-Finalize` filtered the nulls away, summed the three zeros and always wrote the field, so the
+renderer had a real `0` to print. The renderer is not at fault: it already prints `not recorded`
+when the field is absent, which is how `domainSkillUsed` and `bugPatternMatched` behave. The plan
+made every summary field optional for exactly this reason, and the archive's own worked example
+writes `"tokensUsed": null`, so omitting the field when nothing was measured is the intended
+behaviour rather than an invention. `totalDurationMs` carries the identical latent fault and is
+fixed in the same pass. `filesModified` is left as it is, because an empty list honestly means
+nothing was changed. The two golden files should be unaffected, since their fixture records both a
+duration and a token count on most entries, but that is checked rather than assumed, because the
+same assumption was wrong in T009.
