@@ -1246,6 +1246,94 @@ history, which would change every SHA already recorded in `BUILD-PROGRESS.md` an
 fault into twenty wrong records. T010's four commits are not a defect: the extra one is the blocked
 commit Part 8 requires.
 
+**Run one: story 4965976, a closed bug.**
+
+The chain ran end to end with no failure: intake, then `Convert-EiAdoIntake.ps1`, then
+`Write-EiArtifact.ps1 -ArtifactType ado`, giving a schema-valid `ado.json` with no `hash` property.
+
+**The attachment download works.** Five images were fetched with a real token over the real
+network, and every `localPath` points at a file that exists: 37654, 3159, 85286, 47272 and 3037
+bytes. Their sources were attributed correctly, two to `System.Description`, two to
+`Microsoft.VSTS.TCM.ReproSteps` and one to a comment. This is the one path in the build with no
+test behind it, by decision, and it worked on first contact with the real world. It also settles a
+question the old skill document raised: two of the five images came from the repro steps field, so
+dropping that field from the content list really would have reported a story with images as having
+none.
+
+Three design decisions paid off measurably. Reading the discussion changed the answer: the
+description had been rewritten twice by the reporter, and the third comment said the spacing was
+validated as correct in a later build. An agent that ignored comments would have confidently fixed
+a bug that was already fixed. Skill-first resolution behaved honestly: none of the seven bug
+patterns mentions extents, spacing, a header symbol or an insertion point, and the agent reported
+that rather than forcing a match. Refusing to edit before the cause is understood produced the
+right outcome, which was to change nothing.
+
+The verification found `SpacingCalculator.cs`, whose `TopVerticalDistance` and
+`BottomVerticalDistance` prefer the symbol's extended bounding box over its plain one whenever the
+extended box is defined. That is the extents-driven spacing the story asks for. It arrived in the
+commit "Drawing Update and Extended Boundary" on 4 August and was refined by "Spacing isues" on
+13 August, which sits between the corrected description on 11 August and the validation comment on
+24 August. No code was changed.
+
+**A vocabulary gap worth keeping.** The story says symbol extents. The code says extended bounding
+box. A search for the story's own words returns zero files in the drawings area.
+
+**Run two: story 513452, a 2020 user story in state New.**
+
+Run at the request of the person watching, in place of a second pass at 4965976. It exercises the
+path run one never reached: the catalogue returns `termination-drawing`, but all seven of its
+when-to-use entries are about termination drawings, and the story's own terms return zero hits
+across the whole skill. The agent reported no matching domain skill, word for word from
+`references/rnd-delegation.md`, rather than forcing the only domain it had.
+
+It also surfaced three things instead of guessing: the acceptance criteria point at a slide deck
+that is linked rather than attached, so the examples that define correct behaviour cannot be read;
+the story asks its own open question about multi-tier terminals; and it has sat in state `New`
+since September 2021. The person agreed it is not actionable as written. No scope was proposed and
+no source file was read.
+
+**Three defects found by reading the run one summary as a maintainer would.**
+
+1. It said "1 file changed" when nothing was changed. `ado.json` had been passed to
+   `-FilesModified`, and `-Finalize` rolls that into the summary, so the agent's own output was
+   counted as a source edit. A maintainer-facing file that states something false is worse than one
+   that says nothing.
+2. It said "Human wait time: 0s" when the real wait was about five minutes. The arithmetic was
+   right and the data was wrong, because both checkpoint entries were written afterwards in one
+   batch.
+3. The improvement opportunity mixed source files with the agent's own artifacts and the skill's
+   own documents, so the useful entries were buried.
+
+**Run two proves the first two are fixed by logging discipline, not by code.** Writing the
+`present-understanding` checkpoint entry before asking, and keeping artifacts out of `-FilesModified`,
+turned `0s` into a true `2m 13s` and `1 file changed` into `0 files changed`. The third is not
+fixable that way and is left for T023: the renderer has to separate source reads from the agent's
+own reads, because "check them against the Key Files table" only makes sense for source files.
+
+**One more defect, in the copied intake script.** The stored `ado.json` holds `U+00C6` where an
+apostrophe belongs, and contains no `U+2019` anywhere. This was checked against the file bytes, not
+the console, so it is real corruption and not a rendering artefact. The script is copied byte for
+byte and hashed, so it is recorded here rather than edited.
+
+**A fourth defect, and the one with teeth: T019's guard scans run output.** The scan walks the
+whole repository with `-Force` and skips exactly the seven locations the plan names.
+`.ei-session-logs/` is not one of them, because on a clean checkout that folder does not exist, so
+nothing revealed this until a live run created it. All 13 files from these two runs are now inside
+the scan, which is why the suite went from 498 tests to 511. They pass, but only by luck: a story
+whose description happened to mention one of the 23 banned identifiers would fail the build, and
+the failing text would be someone else's story rather than anything in this repository. That folder
+is gitignored and is not part of the built repository, so it belongs in the same category as the
+archive, the fixtures and `.git`. Fixing it means adding an eighth entry to a list the plan pins
+down at seven, so it is raised for a decision rather than changed here.
+
+**Status.** T022 is not complete, and its row stays `IN-PROGRESS`. Of its five conditions, the
+artifact list is four of five, because no file change was approved on either story, so
+`approved-files.json` was correctly never written. The attachment condition passed on run one, and
+run two had no images, which is recorded here as the plan asks. The command budget held. Two
+conditions remain unmet: neither story reached the second checkpoint, because neither warranted a
+code change, and no fresh reader has yet been given the summary. Rule 8 says no evidence means no
+pass.
+
 
 
 
