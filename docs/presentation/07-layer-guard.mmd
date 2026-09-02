@@ -1,0 +1,9 @@
+flowchart TD
+    In["Changed files and projects"] --> E{"Nothing provided?"}
+    E -->|"yes"| Manual["needs manual review"]
+    E -->|"no"| Sort["Sort each path into Domain, Application or Presentation"]
+    Sort --> B{"A Domain or Application project points at a Presentation project, or a build artifact was committed?"}
+    B -->|"yes"| Blocked["blocked: stop before commit"]
+    B -->|"no"| F{"A vocabulary mapping file changed, or a broad catch of Exception was added?"}
+    F -->|"yes"| Flag["pass, with review flags for a human"]
+    F -->|"no"| Pass["pass: clean"]

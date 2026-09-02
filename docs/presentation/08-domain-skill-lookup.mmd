@@ -1,0 +1,11 @@
+flowchart TD
+    Start["Agent needs a domain skill"] --> Run["Run the domain skill catalogue script"]
+    Run --> Reg[("domain-skill-registry.json")]
+    Reg --> Loop["For each listed domain, open its skill and read only the front"]
+    Loop --> Extract["Take the description and the When to Use bullets"]
+    Extract --> Miss{"A skill file is missing or has no description?"}
+    Miss -->|"yes"| Fail["Exit non-zero and name the file to fix"]
+    Miss -->|"no"| List["Return the shortlist of skills"]
+    List --> Pick{"Does one match the story?"}
+    Pick -->|"yes"| Use["Use that domain id, never invent one"]
+    Pick -->|"no"| None["Tell the developer no skill fits, offer to proceed or stop"]

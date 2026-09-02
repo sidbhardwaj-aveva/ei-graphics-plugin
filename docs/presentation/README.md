@@ -192,6 +192,55 @@ the run stops and asks a human. The session log then feeds the manual skill-impr
 
 ---
 
+## 7. Layer guard — the check that runs before commit
+
+The guard reads the changed files and projects, sorts each one into a layer, and returns one of
+three outcomes. A lower layer reaching into the presentation layer, or a committed build artifact,
+stops the run. Softer concerns become review flags a human reads but that do not block.
+
+```mermaid
+flowchart TD
+    In["Changed files and projects"] --> E{"Nothing provided?"}
+    E -->|"yes"| Manual["needs manual review"]
+    E -->|"no"| Sort["Sort each path into Domain, Application or Presentation"]
+    Sort --> B{"A Domain or Application project points at a Presentation project, or a build artifact was committed?"}
+    B -->|"yes"| Blocked["blocked: stop before commit"]
+    B -->|"no"| F{"A vocabulary mapping file changed, or a broad catch of Exception was added?"}
+    F -->|"yes"| Flag["pass, with review flags for a human"]
+    F -->|"no"| Pass["pass: clean"]
+```
+
+**Key idea:** the guard is read-only and evidence-backed. It never edits code; it decides whether
+the change is safe to hand to `aveva-rnd`, and every finding names the file and what to do next.
+
+---
+
+## 8. Domain skill lookup — how the agent picks the right knowledge pack
+
+The agent never guesses which area of the code a story touches. It runs the catalogue script, which
+reads a registry and opens only the front of each skill to collect its description and its
+*When to Use* bullets. The agent shortlists from that, and if nothing fits it says so plainly.
+
+```mermaid
+flowchart TD
+    Start["Agent needs a domain skill"] --> Run["Run the domain skill catalogue script"]
+    Run --> Reg[("domain-skill-registry.json")]
+    Reg --> Loop["For each listed domain, open its skill and read only the front"]
+    Loop --> Extract["Take the description and the When to Use bullets"]
+    Extract --> Miss{"A skill file is missing or has no description?"}
+    Miss -->|"yes"| Fail["Exit non-zero and name the file to fix"]
+    Miss -->|"no"| List["Return the shortlist of skills"]
+    List --> Pick{"Does one match the story?"}
+    Pick -->|"yes"| Use["Use that domain id, never invent one"]
+    Pick -->|"no"| None["Tell the developer no skill fits, offer to proceed or stop"]
+```
+
+**Key idea:** reading only the front of each skill keeps the lookup cheap, and the registry is the
+single source of valid domain ids. A missing or malformed skill fails loudly rather than silently
+narrowing the choices.
+
+---
+
 ## Using these in a slide or on a whiteboard
 
 - **Excalidraw:** open a `.mmd` file, copy its contents, then in Excalidraw use *Insert → Mermaid*
@@ -207,3 +256,5 @@ the run stops and asks a human. The session log then feeds the manual skill-impr
 | `04-components.mmd` | Owned vs delegated |
 | `05-progressive-disclosure.mmd` | Three-tier skill loading |
 | `06-artifacts-and-drift.mmd` | Artifacts, hashing and drift |
+| `07-layer-guard.mmd` | The pre-commit check and its three outcomes |
+| `08-domain-skill-lookup.mmd` | How the agent picks the right knowledge pack |
