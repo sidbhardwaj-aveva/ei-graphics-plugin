@@ -1449,4 +1449,4 @@ script that refuses to run when the file is under 50000 bytes, rather than throu
 The first version of that guard compared characters against bytes on disk and refused a correct
 edit, which is the safer way for a guard to be wrong.
 
-**Result:** DONE at commit pending
+**Result:** DONE at commit bfc9d6e
