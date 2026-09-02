@@ -1370,3 +1370,28 @@ the change is recorded here as a deliberate deviation with its reason. The defec
 a clean checkout, because the folder only exists after a live run, which is why T019 passed at the
 time and only the T022 runs exposed it. A test is added that fails if the folder is ever scanned
 again, so this cannot come back silently.
+
+**Files touched:**
+- 	ests/NoOrphanReferences.Tests.ps1 (changed: one skip entry, two new tests)
+
+**Acceptance:** pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1 exits 0. The scan no longer
+reads any file under .ei-session-logs/.
+
+**Attempts:** 1.
+
+**Decisions:**
+
+Added ^\.ei-session-logs[\\/] to the skip list and said why in the comment beside it. The plan
+writes seven entries and this makes eight, so the reason is recorded rather than left to be
+rediscovered: that folder holds a story author words, and a story mentioning one of the 23 banned
+identifiers would otherwise fail this build on text nobody here wrote.
+
+Two tests were added rather than one. The first asserts that no scanned path is under
+.ei-session-logs/, so the defect cannot return silently. The second asserts the skip list is
+exactly eight entries long, so a ninth cannot be added without someone deciding to.
+
+The count moves from 511 tests to 500: thirteen run output files leave the scan and two tests
+arrive. While T019 sat at IN-PROGRESS, three of T021 checks failed by design, naming T019 as not
+done. That is the everything-green gate doing its job, and it clears as this row returns to DONE.
+
+**Result:** DONE at commit pending

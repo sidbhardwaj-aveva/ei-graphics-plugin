@@ -7,7 +7,9 @@ $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 # The only place this list is written down. Everything else in the repository is scanned.
 # docs/** is load-bearing: architecture-v3.md is a word for word archive that legitimately holds
 # many of these names, and it is never edited. plan.md and BUILD-LOG.md name the old plugin folder
-# as a copy source.
+# as a copy source. .ei-session-logs/ is gitignored run output, not part of the built repository:
+# a real story's own text could otherwise fail this guard. That eighth entry is a deliberate
+# departure from the seven the plan lists, recorded in T019's regression block in BUILD-LOG.md.
 $SkipPatterns = @(
     '^docs[\\/]'
     '^BUILD-LOG\.md$'
@@ -16,6 +18,7 @@ $SkipPatterns = @(
     '^tests[\\/]data[\\/]forbidden-identifiers\.txt$'
     '^tests[\\/]fixtures[\\/]'
     '^\.git[\\/]'
+    '^\.ei-session-logs[\\/]'
 )
 
 $ScannedFiles = @(
@@ -85,6 +88,17 @@ Describe 'No orphan references' -Tag 'Unit' {
             Set-Content -LiteralPath $planted -Encoding utf8NoBOM -Value "This prose mentions $($script:Terms[0]) by name."
             $raw = Get-Content -LiteralPath $planted -Raw
             @($script:Terms | Where-Object { $raw -like "*$_*" }).Count | Should -BeGreaterThan 0
+        }
+
+        It 'never scans the gitignored session logs' -TestCases @(@{ Scanned = $ScannedFiles }) {
+            # A live run writes a story's own words into .ei-session-logs/. A story that happened to
+            # mention a banned identifier would otherwise fail this guard on someone else's text.
+            @($Scanned | Where-Object { $_ -match '^\.ei-session-logs[\\/]' }).Count | Should -Be 0
+        }
+
+        It 'skips only what the build plan and this file account for' -TestCases @(@{ Count = $SkipPatterns.Count }) {
+            # Seven from the plan, plus the run output folder added in T019's regression.
+            $Count | Should -Be 8
         }
     }
 
