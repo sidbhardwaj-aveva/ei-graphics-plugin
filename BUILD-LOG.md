@@ -1651,3 +1651,20 @@ whole index, not only the paths named in the preceding `git add`, so they went i
 alongside the plan edit. Nothing was lost and nothing was changed, but that commit is wider than
 its message says. Amending is forbidden here, so this note is the correction. Next time, check
 `git status` for a dirty index before the start commit.
+
+## T025 — Comment deviations in the summary — 2026-09-03T06:30:00Z
+
+**Goal:** Surface the comments that overrode the story description in the rendered
+`session-summary.md`, so a maintainer can see that a comment, and not the description, decided
+part of what was built. Add an optional `commentDeviations` array to the session summary, a
+`-CommentDeviations` parameter on the finalize path, and a "Comment corrections" line in the
+maintainer section.
+
+**Assumptions:** The confirmed comment overrides already live in `story-understanding.json`, and
+the agent hands them to `-Finalize` at close, so the writer does not derive them. Each override
+is one `commentId` plus the `effect` it had, both required strings; anything else is rejected so
+a half-filled item cannot slip through. The absent-field case renders as `None recorded.` rather
+than an empty line, matching the T024 rule that "not recorded" and "recorded as nothing" are
+different claims. The maintainer section renders at both verbosity settings, so the new line does
+too. Both scripts sit near their T024-raised ceilings, so a further small raise is expected and
+recorded below.

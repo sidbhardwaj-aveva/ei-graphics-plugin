@@ -642,11 +642,11 @@ All artifacts we write use `"schemaVersion": "1.0.0"`.
   beside it.
 - `session.schema.json` includes a `verbosity` field. It is `"verbose"` or `"concise"`, and
   defaults to `"verbose"`.
-- `session.schema.json` declares the `summary` object with its 10 fields — `completedAt`,
+- `session.schema.json` declares the `summary` object with its 11 fields — `completedAt`,
   `totalDurationMs`, `totalTokens`, `filesModified`, `testsRun`, `testsPassed`,
-  `humanInteractions`, `outcome`, `domainSkillUsed`, `bugPatternMatched` — and every one is
-  **optional**. `-Finalize` writes them only at the end, so a check partway through must still
-  pass.
+  `humanInteractions`, `outcome`, `domainSkillUsed`, `bugPatternMatched`, `commentDeviations` —
+  and every one is **optional**. `-Finalize` writes them only at the end, so a check partway
+  through must still pass.
 - Each session entry declares these optional fields: `filesRead`, `filesModified`, `humanInput`,
   `scriptOutput`.
 
@@ -787,13 +787,13 @@ create the envelope: `schemaVersion`, `storyId`, `startedAt`, `agent`, `verbosit
 
 Appending must be atomic. Write a temporary file, then move it.
 
-**Parameters, exactly these 22, in two mutually exclusive sets.**
+**Parameters, exactly these 23, in two mutually exclusive sets.**
 
 - Shared by both (4): `-StoryId`, `-Root`, `-Json`, `-Help`
 - Append set (11): `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`, `-TokensUsed`,
   `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`, `-Evidence`
-- Finalize set (7): `-Finalize`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
-  `-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`
+- Finalize set (8): `-Finalize`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
+  `-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`, `-CommentDeviations`
 
 `-Evidence` arrived in T024. Read that task before changing it.
 
@@ -803,7 +803,7 @@ summary field are both named `outcome`. One PowerShell parameter cannot carry tw
 Use `[CmdletBinding(DefaultParameterSetName='Append')]` with the two sets.
 
 `-Finalize` **computes** `completedAt`, `totalDurationMs`, `totalTokens` and `filesModified`
-from `entries[]`. The other six are supplied by the agent because they cannot be derived.
+from `entries[]`. The other seven are supplied by the agent because they cannot be derived.
 
 **Done when.** Tests show: the first call creates the envelope; three appends give three entries
 in order; a rapid second append does not truncate the file; an invalid `-Phase` is rejected;
@@ -1486,6 +1486,36 @@ no `file` exits 1 with a message naming the missing key; the rendered summary li
 with its line and shows the quote in a fenced block; an entry with no evidence renders no
 evidence heading; and the rendered output still passes the four Part 3 rules. The golden files
 are updated in the same commit. `$P` exits 0.
+
+#### T025 — Comment deviations in the summary
+
+**Why this task exists.** A comment on the work item can override the story description. The
+agent confirms which comments it followed in `story-understanding.json`, but the rendered
+`session-summary.md` never told the maintainer. So a reader saw what was built, but not that a
+comment, and not the description, decided a part of it.
+
+**Do this.** Carry the comment overrides into the summary, and render them for the maintainer.
+
+`session.schema.json` gains an optional `commentDeviations` array on the `summary` object. Every
+item names a `commentId` and the `effect` it had, both required, nothing else allowed.
+
+`Write-EiSessionEntry.ps1` gains `-CommentDeviations` in the finalize set, taking hashtables or
+the objects `ConvertFrom-Json` produces. An item missing either field is an error, not a silent
+drop.
+
+`Export-EiSessionSummary.ps1` adds one line to the "For the maintainer" section: **Comment
+corrections**. It lists each override as `comment <id>: <effect>`, or says `None recorded.` when
+there were none. The line renders at both verbosity settings, because the maintainer section
+always does.
+
+**Two line ceilings are raised here.** `Write-EiSessionEntry` and `Export-EiSessionSummary` both
+gained a small normaliser and renderer. Record the old and new values in `BUILD-LOG.md`.
+
+**Done when.** Tests show: the summary records its comment overrides and reads back unchanged; an
+item with no `effect` exits 1 with a message naming the missing key; the rendered summary lists
+each override under "Comment corrections"; a summary with none says so plainly; and the rendered
+output still passes the four Part 3 rules. The golden files are updated in the same commit. `$P`
+exits 0.
 
 ---
 
