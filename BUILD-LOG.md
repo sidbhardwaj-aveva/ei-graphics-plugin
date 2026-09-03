@@ -1713,3 +1713,29 @@ of its own.
 
 **Result:** DONE at commit 02eb879. Full suite 523 passed, 0 failed.
 `Test-BuildProgress.ps1` exits 0 with 25 rows and no warnings.
+
+## T022 — continuation with story 3408091 — 2026-09-03T10:41:39Z
+
+**Goal:** Complete the live dry run with the user-provided story, exercise both checkpoints, and
+stop before any commit, merge, or pull request in the product repository.
+
+**Assumptions:** Story 3408091 replaces the sample story in the T022 title for this run. The user
+is watching this session and can answer both checkpoint questions. The intake uses the fixed ADO
+organization and project defaults. The product repository remains at
+`C:\Git\dabacon-products\Engineering\Modules\EI\Source` unless the story points to another owned
+codebase. Existing `.ei-session-logs/3408091/` output, if any, is checked before use so a prior run
+cannot be mistaken for evidence from this run. The command count starts after the required T022
+start commit. Attachments are downloaded through the live intake path. No change is made until the
+story cause and proposed file list are confirmed.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+
+**Acceptance:** The five T022 conditions in `plan.md` hold for story 3408091, with the attachment
+result and fresh-reader response recorded here.
+
+**Attempts:** In progress.
+
+**Decisions:** In progress.
+
+**Result:** IN-PROGRESS.

@@ -33,5 +33,5 @@ in `BUILD-LOG.md`.
 | T021 | Everything green, before the live run | DONE | 2abf97f | 2026-08-31T21:32:00Z |
 | T024 | Evidence behind the reasoning | DONE | dfc5fa1 | 2026-09-03T05:59:24Z |
 | T025 | Comment deviations in the summary | DONE | 02eb879 | 2026-09-03T06:52:00Z |
-| T022 | Dry run against story 4965976 | TODO | — | — |
+| T022 | Dry run against story 3408091 | IN-PROGRESS | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |
