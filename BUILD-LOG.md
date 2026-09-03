@@ -1849,3 +1849,23 @@ untracked files. The README says new installations do not need the reset.
 
 **Result:** DONE pending the T027 build commit. Document tests: 14 passed. Full suite: 537
 passed, 0 failed, 0 skipped. Progress check: exit 0.
+
+## T028 — Set the approved shared-session path — 2026-09-03T13:15:00Z
+
+**Goal:** Set the approved internal location for shared EI Graphics session bundles.
+
+**Assumptions:** The only approved path is
+`\\INHYDD1510\Share\ei-graphics-plugin-sessions`. Existing T026 records preserve the originally
+approved path as historical evidence and are not edited. The exporter stays opt-in through
+`EI_GRAPHICS_SHARE_PATH`.
+
+**Files touched:**
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+
+**Acceptance:** The T028 conditions in `plan.md` hold.
+
+**Attempts:** In progress.
+
+**Decisions:** In progress.
+
+**Result:** IN-PROGRESS.

@@ -1566,6 +1566,18 @@ and say new installations do not need it. Keep the normal `git pull` command for
 **Done when.** The document test proves the README names both update paths, and the Pester suite
 and build-progress check exit 0.
 
+#### T028 — Set the approved shared-session path
+
+**Why this task exists.** The approved internal share is
+`\\INHYDD1510\Share\ei-graphics-plugin-sessions`. The earlier individual-folder path is not used.
+
+**Do this.** Make the approved share the only current documented session-export path. Add the
+optional `EI_GRAPHICS_SHARE_PATH` command to `README.md`. Update `PLUGIN-INFO.md` and the agent
+instructions. Do not rewrite old `BUILD-LOG.md` entries.
+
+**Done when.** Document tests prove the approved path is present and the former path is absent
+from current documents. The build-progress check and the Pester suite exit 0.
+
 ---
 
 ### Phase 6 — The live run, with a human watching
@@ -1660,7 +1672,7 @@ All of the following, checked in one sitting.
 
    Of the old repo's 36, four survive as copies and 32 are dropped. The other six are written
    fresh here.
-7. `BUILD-LOG.md` has an entry for every task, T001 through T027. That includes the resolved
+7. `BUILD-LOG.md` has an entry for every task, T001 through T028. That includes the resolved
    `$V2` path from T001 and the live-run notes from T022.
 8. Every human-facing file passes the Part 3 checker, and the T022 reader test was actually run
    on a person who does not know this plugin. Their reaction is written down in `BUILD-LOG.md`,
