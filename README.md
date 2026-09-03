@@ -55,6 +55,7 @@ After new commits land on `origin/main`, pull in the installed copy:
 
 ```powershell
 git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" pull
+git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com/AVEVA-Copilot-Access/aveva-agent-plugins" pull
 ```
 
 Then press **`Ctrl+Shift+P`** → **Developer: Reload Window**.
