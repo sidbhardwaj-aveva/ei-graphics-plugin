@@ -1517,6 +1517,41 @@ each override under "Comment corrections"; a summary with none says so plainly; 
 output still passes the four Part 3 rules. The golden files are updated in the same commit. `$P`
 exits 0.
 
+#### T026 — Publish team plugin and collect sessions
+
+**Why this task exists.** A human approved publishing before T022 and T023 are complete. T022
+remains `BLOCKED` because its live run lacks evidence. T023 remains `TODO` because its manual
+review depends on that evidence. This task does not change either status.
+
+**Do this.** Preserve the existing GitHub `main` branch at
+`backup/pre-v3-main-20260903` before replacing it. Fetch the remote first. Push the backup
+without force and verify it points at the captured remote `main` SHA. Replace `main` only with
+`--force-with-lease` against that captured SHA.
+
+Rename the plugin from `demo-ei-graphics` to `aveva-ei-graphics`. The plugin folder,
+`plugin.json`, and both marketplace manifests must agree. Update every current test, document,
+path, ported-file hash, and forbidden-name reference. Do not rewrite old `BUILD-LOG.md` entries.
+
+Replace `README.md` with the approved marketplace installation instructions. It must name
+`aveva-ei-graphics` and the `sidbhardwaj-aveva/ei-graphics-plugin` repository.
+
+Write `Export-EiSessionBundleToShare.ps1` beside the core session scripts. When
+`EI_GRAPHICS_SHARE_PATH` is set, the agent calls it after a session is finalized and rendered.
+It copies `ado.json`, `story-understanding.json`, `approved-files.json`, `session.json`, and
+`session-summary.md` into a unique completed folder below the configured share. The standard
+share is `\\INHYDD1510\Share\Siddanth\ei-graphics-plugin-sessions`.
+
+The share is a controlled internal location. Full session bundles can contain story text,
+comments, interaction records, and evidence. Do not export when the variable is absent. An
+unavailable share reports how to retry and exits 0 after keeping the local bundle. A missing or
+incomplete local bundle exits 1 and names what must be repaired.
+
+**Done when.** The focused export tests prove all five files copy unchanged into distinct
+directories, an incomplete local bundle exits 1, and an unavailable share exits 0 with a retry
+message. The manifest, document, no-orphan, script-contract, progress, and full Pester checks
+exit 0. The remote backup SHA is verified before `main` changes, and a post-push fetch shows the
+backup unchanged and `main` at the final T026 build commit.
+
 ---
 
 ### Phase 6 — The live run, with a human watching
@@ -1601,7 +1636,7 @@ All of the following, checked in one sitting.
 3. `git status --porcelain` is empty.
 4. `git log --oneline` shows the three-commit group per task, in order — `build(T0NN): start`,
    then `build(T0NN):`, then `chore(T0NN): record commit sha`. T001 is the exception with two.
-5. `plugins/demo-ei-graphics/skills/` contains exactly four skills: `ei-graphics-core`,
+5. `plugins/aveva-ei-graphics/skills/` contains exactly four skills: `ei-graphics-core`,
    `ei-azure-devops-cli-intake`, `ei-layer-guard`, `termination-drawing`.
 
    This is a snapshot of the finished build, not a permanent cap. Adding domain skills later is
@@ -1611,7 +1646,7 @@ All of the following, checked in one sitting.
 
    Of the old repo's 36, four survive as copies and 32 are dropped. The other six are written
    fresh here.
-7. `BUILD-LOG.md` has an entry for every task, T001 through T023. That includes the resolved
+7. `BUILD-LOG.md` has an entry for every task, T001 through T026. That includes the resolved
    `$V2` path from T001 and the live-run notes from T022.
 8. Every human-facing file passes the Part 3 checker, and the T022 reader test was actually run
    on a person who does not know this plugin. Their reaction is written down in `BUILD-LOG.md`,

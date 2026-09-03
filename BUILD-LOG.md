@@ -1739,3 +1739,73 @@ result and fresh-reader response recorded here.
 **Decisions:** In progress.
 
 **Result:** IN-PROGRESS.
+
+### T022 continuation result — 2026-09-03
+
+The live intake succeeded for story 3408091. `ado.json` records three comments and no images.
+The empty attachment list is explicit, and no attachment folder was created. Comment 19274566
+changed the implementation basis to story 4222544 and required automation plus a unit test.
+
+Both checkpoints paused and received human input. The understanding was confirmed. The approved
+plan added one focused MSTest file in the product repository:
+`Tests/Aveva.EI.CanvasDrawings.Test/SGCClient/CanvasEventManagerLevelOfConnectivityTests.cs`.
+It covers matching snapshots, left changes, right changes, and old drawings with no snapshots.
+
+The investigation found that production code already reads drawing-level left and right values in
+`TerminationDrawingModelBuilder.SetupConnectivitySettings`. It falls back to template values when
+either drawing value is absent. `CanvasEventManager.IsLevelOfConnectivityChanged` compares current
+values with the last generated snapshot. Existing model-builder tests cover value selection, but
+no focused test covered the update predicate.
+
+All five artifacts were written under `.ei-session-logs/3408091/`. Scope drift passed with no
+unapproved or untouched files. VS Code reports no diagnostics in the new C# file.
+
+The focused test could not run. The test project imports
+`C:\Build\AVEVA_Engineering_UnitTest.props`, which is missing. The layer guard returned
+`needs-manual-review` because the supplied project path could not be resolved from the solution
+root. No layer violation was reported. The product change remains uncommitted.
+
+The live run used ten terminal commands. The limit is fewer than ten. Two commands failed during
+discovery because `rg` was unavailable, and one checkpoint command ended before its input could be
+sent. The run also lacks the independent reader check. The current user watched both checkpoints,
+so they are not a reader who has never worked on this plugin.
+
+This is the fourth T022 run recorded in this log. Earlier runs also missed at least one manual
+condition. The task is therefore `BLOCKED` under the three-attempt rule. To continue, restore
+`C:\Build\AVEVA_Engineering_UnitTest.props`, rerun the focused test and layer guard with the correct
+solution path, then give `.ei-session-logs/3408091/session-summary.md` to a fresh reader. Start a
+new measured run if the command-budget condition must be satisfied literally.
+
+The final progress check passed with 25 rows and no warnings. The plugin suite passed 522 of 523
+tests. Its only failure was the deliberate T021 guard named "no row is BLOCKED", which reported
+T022. No plugin behavior test failed.
+
+**Result:** BLOCKED. The session outcome is `changed-but-unverified`.
+
+## T026 — Publish team plugin and collect sessions — 2026-09-03T11:00:00Z
+
+**Goal:** Preserve the existing GitHub repository before publishing this plugin under its final
+identity, and collect completed team session bundles in the approved internal share.
+
+**Assumptions:** The human approved this exception task before T022 and T023. T022 stays
+`BLOCKED` because its live run is changed but unverified. T023 stays `TODO` because it needs a
+manual review of a completed live session. The existing remote `main` is backed up at
+`backup/pre-v3-main-20260903` before any replacement. The final installed plugin name is
+`aveva-ei-graphics`, and the share path is
+`\\INHYDD1510\Share\Siddanth\ei-graphics-plugin-sessions`. That share is access-controlled and
+can store full session bundles containing story text, comments, interactions, and evidence.
+
+**Files touched:**
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+
+**Acceptance:** The T026 conditions in `plan.md` hold. In particular, the remote backup is
+verified before `main` changes, exporting handles all five completed artifacts, and all required
+Pester and build-progress checks exit 0.
+
+**Attempts:** In progress.
+
+**Decisions:** Keep `.ei-session-logs/` ignored. Export only when
+`EI_GRAPHICS_SHARE_PATH` is set. A network failure keeps the local bundle and reports how to
+retry; it does not invalidate the local completed session.
+
+**Result:** IN-PROGRESS.

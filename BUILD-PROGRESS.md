@@ -1,7 +1,7 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T022
+**Current task:** T026
 **Last verified green:** T025 (2026-09-03T06:52:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -33,5 +33,6 @@ in `BUILD-LOG.md`.
 | T021 | Everything green, before the live run | DONE | 2abf97f | 2026-08-31T21:32:00Z |
 | T024 | Evidence behind the reasoning | DONE | dfc5fa1 | 2026-09-03T05:59:24Z |
 | T025 | Comment deviations in the summary | DONE | 02eb879 | 2026-09-03T06:52:00Z |
-| T022 | Dry run against story 3408091 | IN-PROGRESS | — | — |
+| T026 | Publish team plugin and collect sessions | IN-PROGRESS | — | — |
+| T022 | Dry run against story 3408091 | BLOCKED | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |
