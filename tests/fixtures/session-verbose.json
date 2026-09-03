@@ -68,7 +68,15 @@
       "outcome": "Found the guard. It returns whether or not the shape was found.",
       "durationMs": 1200,
       "tokensUsed": 3400,
-      "filesRead": ["Presentation/Manager/CoreConnectorManager.cs"]
+      "filesRead": ["Presentation/Manager/CoreConnectorManager.cs"],
+      "evidence": [
+        {
+          "file": "Presentation/Manager/CoreConnectorManager.cs",
+          "line": 84,
+          "symbol": "existsInBoth",
+          "quote": "// nothing to do when the shape is already there\nif (existsInBoth) { return; }"
+        }
+      ]
     },
     {
       "timestamp": "2026-08-26T09:03:00Z",
@@ -78,7 +86,10 @@
       "outcome": "Added a check after the search, so insertion is no longer skipped.",
       "durationMs": 2000,
       "tokensUsed": 1200,
-      "filesModified": ["Presentation/Manager/CoreConnectorManager.cs"]
+      "filesModified": ["Presentation/Manager/CoreConnectorManager.cs"],
+      "evidence": [
+        { "file": "Presentation/Manager/CoreConnectorManager.cs", "line": 84 }
+      ]
     },
     {
       "timestamp": "2026-08-26T09:03:10Z",

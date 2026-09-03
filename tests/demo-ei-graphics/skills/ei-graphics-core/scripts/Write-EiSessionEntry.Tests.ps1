@@ -105,6 +105,66 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
         (Invoke-Entry -Splat ($script:Base + @{ Phase = 'ado-intake'; Action = 'a' })).ExitCode | Should -Be 1
     }
 
+    Context '-Evidence' {
+
+        It 'records what the reasoning rests on, and reads back unchanged' {
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'trace-setting'; Outcome = 'Found the caller.'
+                Reasoning = 'The setting reaches a private field and stops there.'
+                Evidence = @(
+                    @{ file = 'src/A.cs'; line = 84; symbol = 'existsInBoth'; quote = 'if (existsInBoth) { return; }' }
+                    @{ file = 'src/B.cs' }
+                )
+            })
+            $run.ExitCode | Should -Be 0
+
+            $raw = Get-Session -Root $script:Root
+            $raw | Test-Json -Schema $script:SchemaText | Should -BeTrue
+
+            $found = @(@($raw | ConvertFrom-Json).entries[0].evidence)
+            $found.Count | Should -Be 2
+            $found[0].file | Should -Be 'src/A.cs'
+            $found[0].line | Should -Be 84
+            $found[0].symbol | Should -Be 'existsInBoth'
+            $found[0].quote | Should -Be 'if (existsInBoth) { return; }'
+            # The optional keys are left out rather than written as null, so a reader cannot
+            # mistake "not recorded" for "recorded as nothing".
+            $found[1].PSObject.Properties.Name | Should -Be @('file')
+        }
+
+        It 'stays an array when only one item is given' {
+            Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'
+                Evidence = @(@{ file = 'src/A.cs' })
+            }) | Out-Null
+            (Get-Session -Root $script:Root) | Should -Match '"evidence":\s*\[\s*\{'
+        }
+
+        It 'takes the objects ConvertFrom-Json produces, not only hashtables' {
+            $parsed = '[{ "file": "src/A.cs", "line": 12 }]' | ConvertFrom-Json
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'; Evidence = @($parsed)
+            })
+            $run.ExitCode | Should -Be 0
+            @((Get-Session -Root $script:Root | ConvertFrom-Json).entries[0].evidence)[0].line | Should -Be 12
+        }
+
+        It 'rejects an item that names no file, and writes nothing' {
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'
+                Evidence = @(@{ file = 'src/A.cs' }, @{ line = 84 })
+            })
+            $run.ExitCode | Should -Be 1
+            Test-Path -LiteralPath (Join-Path $script:Root '.ei-session-logs' '4965976' 'session.json') | Should -BeFalse
+        }
+
+        It 'leaves the entry with no evidence key when none is given' {
+            Invoke-Entry -Splat ($script:Base + @{ Phase = 'ado-intake'; Action = 'a'; Outcome = 'b' }) | Out-Null
+            $entry = @((Get-Session -Root $script:Root | ConvertFrom-Json).entries)[0]
+            $entry.PSObject.Properties.Name | Should -Not -Contain 'evidence'
+        }
+    }
+
     Context '-Finalize' {
         BeforeEach {
             Invoke-Entry -Splat ($script:Base + @{

@@ -32,15 +32,15 @@ BeforeAll {
             }
     )
 
-    # T001 through T020. T021 cannot assert its own completion while it is running, and T022 and
-    # T023 need a person and a live connection.
+    # T001 through T020. T021 cannot assert its own completion while it is running, T022 and T023
+    # need a person and a live connection, and T024 was added after T021 had already passed.
     $script:MustBeDone = @($script:Rows | Where-Object { [int]($_.Id.Substring(1)) -le 20 })
 }
 
 Describe 'Everything green, before the live run' -Tag 'Unit' {
 
     It 'the progress table was read' {
-        $script:Rows.Count | Should -Be 23
+        $script:Rows.Count | Should -Be 24
         $script:MustBeDone.Count | Should -Be 20
     }
 

@@ -57,6 +57,48 @@ function Get-Moment {
 
 function Get-Clock { param($Timestamp) (Get-Moment -Value $Timestamp).ToString('HH:mm:ss', $invariant) }
 
+function Get-EvidenceLine {
+    <#
+    .SYNOPSIS
+        Renders one entry's evidence: a link to each file, and the text that was read beneath it.
+    .DESCRIPTION
+        The link climbs two folders, because the summary sits at .ei-session-logs/<storyId>/ and
+        the recorded paths start at the repository root. The quote goes in a fenced block at the
+        left margin: quoted source is not our prose, and the Part 3 rules skip fenced blocks.
+    #>
+    param($Entry)
+
+    # @($null) is an array of one, so a missing field has to be tested before it is wrapped.
+    $items = @((Get-Field -Owner $Entry -Name 'evidence') | Where-Object { $null -ne $_ })
+    if ($items.Count -eq 0) { return , @() }
+
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.Add('**Evidence**'); $lines.Add('')
+    foreach ($item in $items) {
+        $file = [string] (Get-Field -Owner $item -Name 'file')
+        $line = Get-Field -Owner $item -Name 'line'
+        $symbol = Get-Field -Owner $item -Name 'symbol'
+        $quote = Get-Field -Owner $item -Name 'quote'
+
+        $target = '../../' + ($file -replace '\\', '/')
+        $label = Split-Path -Leaf $file
+        if ($null -ne $line) { $target = "${target}#L$line"; $label = "${label}:$line" }
+        $bullet = "- [``$label``]($target)"
+        if ($symbol) { $bullet = "$bullet — ``$symbol``" }
+        $lines.Add($bullet)
+
+        if ($quote) {
+            $lines.Add('')
+            $lines.Add('```text')
+            foreach ($row in ([string] $quote -split '\r?\n')) { $lines.Add($row) }
+            $lines.Add('```')
+            $lines.Add('')
+        }
+    }
+    if ($lines[$lines.Count - 1] -ne '') { $lines.Add('') }
+    , $lines.ToArray()
+}
+
 if (-not $StoryId) { Write-Problem 'No -StoryId was given. Pass the story number this session belongs to.'; exit 1 }
 
 $folder = Join-Path (Resolve-Path -LiteralPath $Root).Path '.ei-session-logs' $StoryId
@@ -143,6 +185,7 @@ if (-not $concise) {
     foreach ($entry in $reasoned) {
         & $out "### $($phaseNames[$entry.phase]) — $($entry.action)"; & $out ''
         & $out "> $($entry.reasoning)"; & $out ''
+        foreach ($line in (Get-EvidenceLine -Entry $entry)) { & $out $line }
     }
 }
 

@@ -25,6 +25,7 @@ param(
     [Parameter(ParameterSetName = 'Append')] [string[]] $FilesModified,
     [Parameter(ParameterSetName = 'Append')] [string] $HumanInput,
     [Parameter(ParameterSetName = 'Append')] $ScriptOutput,
+    [Parameter(ParameterSetName = 'Append')] [object[]] $Evidence,
 
     [Parameter(ParameterSetName = 'Finalize', Mandatory = $true)] [switch] $Finalize,
     [Parameter(ParameterSetName = 'Finalize')] [Nullable[int]] $TestsRun,
@@ -81,6 +82,34 @@ function Save-Session {
     $temporary = "$Path.$([guid]::NewGuid().ToString('N')).tmp"
     [System.IO.File]::WriteAllText($temporary, $body + "`n", [System.Text.UTF8Encoding]::new($false))
     Move-Item -LiteralPath $temporary -Destination $Path -Force
+}
+
+function ConvertTo-EvidenceItem {
+    <#
+    .SYNOPSIS
+        Turns one evidence item into the four keys the schema allows, whatever shape it arrived in.
+    #>
+    param($Item, [int] $Position)
+
+    $read = { param([string] $Key)
+        if ($Item -is [System.Collections.IDictionary]) { if ($Item.Contains($Key)) { return $Item[$Key] } ; return $null }
+        if ($Item.PSObject.Properties.Name -contains $Key) { return $Item.$Key }
+        $null
+    }
+
+    $file = & $read 'file'
+    if (-not $file) {
+        Write-Problem "Evidence item $Position has no 'file'. Every piece of evidence names the file it came from. Add file, and optionally line, symbol and quote."
+        exit 1
+    }
+
+    $plain = [ordered]@{ file = [string] $file }
+    foreach ($key in @('line', 'symbol', 'quote')) {
+        $value = & $read $key
+        if ([string]::IsNullOrEmpty([string] $value)) { continue }
+        if ($key -eq 'line') { $plain[$key] = [int] $value } else { $plain[$key] = [string] $value }
+    }
+    $plain
 }
 
 $schemaPath = Join-Path $PSScriptRoot '..' 'schemas' 'session.schema.json'
@@ -159,6 +188,10 @@ if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
     if ($FilesModified) { $entry['filesModified'] = @($FilesModified) }
     if ($HumanInput) { $entry['humanInput'] = $HumanInput }
     if ($null -ne $ScriptOutput) { $entry['scriptOutput'] = $ScriptOutput }
+    if ($Evidence) {
+        $items = @(for ($i = 0; $i -lt $Evidence.Count; $i++) { ConvertTo-EvidenceItem -Item $Evidence[$i] -Position ($i + 1) })
+        $entry['evidence'] = @($items)
+    }
 
     $session['entries'] = @(@($session['entries']) + $entry)
     $written = $entry

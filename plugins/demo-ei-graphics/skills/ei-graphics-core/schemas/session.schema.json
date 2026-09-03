@@ -56,6 +56,21 @@
             "type": "array",
             "items": { "type": "string", "minLength": 1 }
           },
+          "evidence": {
+            "description": "What the reasoning rests on. Each item names a file, and may add the line, the symbol and the exact text that was read, so a reader can open the file and check the claim.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["file"],
+              "properties": {
+                "file": { "type": "string", "minLength": 1 },
+                "line": { "type": ["integer", "null"], "minimum": 1 },
+                "symbol": { "type": ["string", "null"] },
+                "quote": { "type": ["string", "null"] }
+              }
+            }
+          },
           "humanInput": { "type": ["string", "null"] },
           "scriptOutput": {
             "description": "Whatever the called script returned. Left free-form on purpose, because each script has its own output shape."

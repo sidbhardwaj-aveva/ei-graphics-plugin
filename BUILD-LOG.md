@@ -1613,8 +1613,34 @@ than being given a section of its own.
 **Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0, and
 `pwsh -NoProfile -File ./tools/Test-BuildProgress.ps1` exits 0.
 
-**Attempts:**
+**Attempts:** 2. The first render crashed inside the new renderer with "Cannot bind argument to
+parameter 'Path' because it is an empty string". The cause is an old trap seen from the other
+side: `@($null)` is an array of one, so `@(Get-Field -Owner $entry -Name 'evidence')` reported a
+count of one for every entry that had no evidence, and the loop then asked `Split-Path` for the
+leaf of an empty string. Fixed by filtering the nulls out before wrapping. The same shape appears
+four more times in this script, and is harmless there only because every one of those call sites
+happens to filter afterwards. The second run rendered, and the third full suite passed.
 
-**Decisions:**
+**Decisions:** The quote is rendered in a fenced block at the left margin, and the link text in
+backticks. Both are then invisible to the Part 3 rules, and that is the point: quoted source code
+is not our prose, and rewording it to pass a readability check would destroy the only thing that
+makes it evidence. An indented fence would have kept the bullet list intact, but the rule scanner
+only strips fences that start at column 0, so the quote would have been scanned as prose. The
+link label carries the line as `file.cs:84` rather than repeating it as prose after the link.
 
-**Result:**
+The optional keys are left out rather than written as null, matching the rule T008 already set for
+the summary: not recorded and recorded as nothing are different claims.
+
+**Two line ceilings were raised**, both in `tests/ScriptContract.Tests.ps1`, the first raise in
+this build. `Export-EiSessionSummary` went from 180 to 230, and now measures 222. It gained the
+renderer for the evidence block. `Write-EiSessionEntry` went from 200 to 230, and now measures
+219. It gained the normaliser that accepts an evidence item as either a hashtable or the object
+`ConvertFrom-Json` produces. Neither script grew for any other reason.
+
+Two counting tests moved with the plan, and both are assertions about size rather than behaviour:
+the roster for T008 went from 21 names to 22, and the progress table from 23 rows to 24.
+`plugins/demo-ei-graphics/skills/ei-graphics-core/SKILL.md` sits on its 120-line limit, so the
+note on `-Evidence` was folded into the paragraph above it rather than given one of its own.
+
+**Result:** DONE at commit pending. Full suite 517 passed, 0 failed.
+`Test-BuildProgress.ps1` exits 0 with 24 rows and no warnings.

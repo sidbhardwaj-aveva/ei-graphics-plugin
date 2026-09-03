@@ -76,6 +76,42 @@ Describe 'Export-EiSessionSummary' -Tag 'Unit' {
         (Get-Command $script:ScriptPath).Parameters.Keys | Should -Not -Contain 'Verbosity'
     }
 
+    Context 'the evidence behind the reasoning' {
+
+        It 'links the file at the line it was read, from where the summary sits' {
+            # Two folders up, because the summary lives at .ei-session-logs/<storyId>/ and the
+            # recorded path starts at the repository root.
+            $root = New-SessionRoot -Fixture 'session-verbose.json'
+            $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root).Result.path -Raw
+            $rendered | Should -Match '\*\*Evidence\*\*'
+            $rendered | Should -BeLike '*(../../Presentation/Manager/CoreConnectorManager.cs#L84)*'
+        }
+
+        It 'shows the quoted text in a fenced block, word for word' {
+            $root = New-SessionRoot -Fixture 'session-verbose.json'
+            $lines = @(Get-Content -LiteralPath (Invoke-Export -Root $root).Result.path)
+            $opened = [array]::IndexOf($lines, '```text')
+            $opened | Should -BeGreaterThan 0
+            $lines[$opened + 1] | Should -Be '// nothing to do when the shape is already there'
+            $lines[$opened + 2] | Should -Be 'if (existsInBoth) { return; }'
+            $lines[$opened + 3] | Should -Be '```'
+        }
+
+        It 'writes no evidence heading for an entry that has none' {
+            # Eight entries carry reasoning in the fixture and two carry evidence.
+            $root = New-SessionRoot -Fixture 'session-verbose.json'
+            $lines = @(Get-Content -LiteralPath (Invoke-Export -Root $root).Result.path)
+            @($lines | Where-Object { $_ -eq '**Evidence**' }).Count | Should -Be 2
+            @($lines | Where-Object { $_ -match '^### ' }).Count | Should -Be 8
+        }
+
+        It 'drops the evidence with the reasoning trail at concise' {
+            $root = New-SessionRoot -Fixture 'session-concise.json'
+            $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root).Result.path -Raw
+            $rendered | Should -Not -Match 'Evidence'
+        }
+    }
+
     It 'writes a stub for a session with no entries instead of crashing' {
         $root = New-SessionRoot -Fixture 'session-empty.json'
         $run = Invoke-Export -Root $root

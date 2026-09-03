@@ -6,12 +6,12 @@ $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $PluginsRoot = Join-Path $RepoRoot 'plugins'
 
 # The ceilings live here, not in plan.md. A ceiling may be raised once, with the script, the old
-# value, the new value and the reason recorded in that task's BUILD-LOG.md block. None has been
-# raised.
+# value, the new value and the reason recorded in that task's BUILD-LOG.md block. Two were raised
+# in T024, which added evidence to the session log and to the rendered summary.
 $LineCeilings = @{
     'Write-EiArtifact'         = 120
-    'Write-EiSessionEntry'     = 200
-    'Export-EiSessionSummary'  = 180
+    'Write-EiSessionEntry'     = 230
+    'Export-EiSessionSummary'  = 230
     'Get-EiDomainSkillCatalog' = 120
     'Test-EiScopeDrift'        = 100
     'Convert-EiAdoIntake'      = 160
@@ -48,8 +48,8 @@ BeforeAll {
 
     $script:LineCeilings = @{
         'Write-EiArtifact'         = 120
-        'Write-EiSessionEntry'     = 200
-        'Export-EiSessionSummary'  = 180
+        'Write-EiSessionEntry'     = 230
+        'Export-EiSessionSummary'  = 230
         'Get-EiDomainSkillCatalog' = 120
         'Test-EiScopeDrift'        = 100
         'Convert-EiAdoIntake'      = 160
@@ -124,15 +124,15 @@ BeforeAll {
 
 Describe 'The roster parser' -Tag 'Unit' {
 
-    It 'recovers T008 exactly, whose 21 names span three bullets' {
+    It 'recovers T008 exactly, whose 22 names span three bullets' {
         $expected = @(
-            'Action', 'BugPatternMatched', 'DomainSkillUsed', 'DurationMs', 'Finalize',
+            'Action', 'BugPatternMatched', 'DomainSkillUsed', 'DurationMs', 'Evidence', 'Finalize',
             'FilesModified', 'FilesRead', 'Help', 'HumanInput', 'HumanInteractions', 'Json',
             'Outcome', 'Phase', 'Reasoning', 'Root', 'ScriptOutput', 'SessionOutcome', 'StoryId',
             'TestsPassed', 'TestsRun', 'TokensUsed'
         ) | Sort-Object
         $actual = Get-RosterFromPlan -PlanText $script:PlanText -TaskId 'T008'
-        $actual.Count | Should -Be 21
+        $actual.Count | Should -Be 22
         ($actual -join ',') | Should -Be ($expected -join ',')
     }
 

@@ -42,9 +42,22 @@
 
 > Looking for the guard that returns before the shape is inserted.
 
+**Evidence**
+
+- [`CoreConnectorManager.cs:84`](../../Presentation/Manager/CoreConnectorManager.cs#L84) — `existsInBoth`
+
+```text
+// nothing to do when the shape is already there
+if (existsInBoth) { return; }
+```
+
 ### Implementation — apply-fix
 
 > Only return when the shape is really there. Otherwise fall through and insert it.
+
+**Evidence**
+
+- [`CoreConnectorManager.cs:84`](../../Presentation/Manager/CoreConnectorManager.cs#L84)
 
 ### Validation — run-tests
 
