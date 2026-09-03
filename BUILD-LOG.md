@@ -1860,12 +1860,18 @@ approved path as historical evidence and are not edited. The exporter stays opt-
 `EI_GRAPHICS_SHARE_PATH`.
 
 **Files touched:**
-- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`, `README.md`, `PLUGIN-INFO.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/Documents.Tests.ps1`, `tests/EverythingGreen.Tests.ps1`
 
 **Acceptance:** The T028 conditions in `plan.md` hold.
 
-**Attempts:** In progress.
+**Attempts:** 1. The focused document suite passed 14 tests. The build-progress check exited 0.
+The full Pester suite passed 537 tests with 0 failed and 0 skipped.
 
-**Decisions:** In progress.
+**Decisions:** `\\INHYDD1510\Share\ei-graphics-plugin-sessions` is the only current approved
+session-export share. The root README now gives the `EI_GRAPHICS_SHARE_PATH` command. The prior
+T026 path remains only in its append-only historical record.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE pending the T028 build commit. Document tests: 14 passed. Full suite: 537
+passed, 0 failed, 0 skipped. Progress check: exit 0.

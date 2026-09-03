@@ -23,6 +23,17 @@ see [PLUGIN-INFO.md](PLUGIN-INFO.md).
 
 4. Open the plugin picker and install **`aveva-ei-graphics`**.
 
+## Shared session records
+
+To share completed session bundles with the team, set this value before starting the agent:
+
+```powershell
+$env:EI_GRAPHICS_SHARE_PATH = "\\INHYDD1510\Share\ei-graphics-plugin-sessions"
+```
+
+The agent copies a completed session to this approved internal share. Leave the variable unset to
+keep the session only on your computer.
+
 ## Existing installations
 
 People who installed the previous version need this reset once. The previous plugin history was

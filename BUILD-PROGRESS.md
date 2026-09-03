@@ -1,8 +1,8 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T028
-**Last verified green:** T027 (2026-09-03T12:46:57Z)
+**Current task:** T023
+**Last verified green:** T028 (2026-09-03T13:15:20Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -35,6 +35,6 @@ in `BUILD-LOG.md`.
 | T025 | Comment deviations in the summary | DONE | 02eb879 | 2026-09-03T06:52:00Z |
 | T026 | Publish team plugin and collect sessions | DONE | 2a9d016 | 2026-09-03T12:33:47Z |
 | T027 | Document the installed-plugin migration | DONE | 247f513 | 2026-09-03T12:46:57Z |
-| T028 | Set the approved shared-session path | IN-PROGRESS | — | — |
+| T028 | Set the approved shared-session path | DONE | pending | 2026-09-03T13:15:20Z |
 | T022 | Dry run against story 3408091 | BLOCKED | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |

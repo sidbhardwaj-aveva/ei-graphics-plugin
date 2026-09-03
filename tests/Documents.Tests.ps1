@@ -46,6 +46,8 @@ Describe 'The documents' -Tag 'Unit' {
         $raw | Should -Match 'fetch origin'
         $raw | Should -Match 'reset --hard origin/main'
         $raw | Should -Match '(?i)new installations do not need this'
+        $raw | Should -Match 'EI_GRAPHICS_SHARE_PATH'
+        $raw | Should -Match 'INHYDD1510\\Share\\ei-graphics-plugin-sessions'
         $raw | Should -Match 'git -C.*agent-plugins.*ei-graphics-plugin.*pull'
     }
 
@@ -73,7 +75,8 @@ Describe 'The documents' -Tag 'Unit' {
     It 'PLUGIN-INFO.md explains the approved shared-session location' {
         $raw = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'PLUGIN-INFO.md') -Raw
         $raw | Should -Match 'EI_GRAPHICS_SHARE_PATH'
-        $raw | Should -Match 'INHYDD1510'
+        $raw | Should -Match 'INHYDD1510\\Share\\ei-graphics-plugin-sessions'
+        $raw | Should -Not -Match 'Siddanth'
         $raw | Should -Match 'story text, comments, interactions, and evidence'
     }
 }

@@ -49,7 +49,7 @@ paths.
 Each completed run remains in `.ei-session-logs/<story number>/` and is not committed. Set
 `EI_GRAPHICS_SHARE_PATH` to send a copy of the full completed bundle to an approved internal
 share. The standard location is
-`\\INHYDD1510\Share\Siddanth\ei-graphics-plugin-sessions`.
+`\\INHYDD1510\Share\ei-graphics-plugin-sessions`.
 
 The copy contains `ado.json`, `story-understanding.json`, `approved-files.json`, `session.json`,
 and `session-summary.md`. It can contain story text, comments, interactions, and evidence. Only

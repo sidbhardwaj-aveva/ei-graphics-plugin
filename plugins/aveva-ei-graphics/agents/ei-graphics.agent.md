@@ -55,6 +55,9 @@ It copies the completed bundle to that approved internal share. It is optional b
 contains story text, comments, interactions, and evidence. If export reports a share problem, say
 that the local bundle remains available and give the person the retry command.
 
+The only approved share is `\\INHYDD1510\Share\ei-graphics-plugin-sessions`. Do not substitute a
+different location.
+
 On the first run in a repository, add `.ei-session-logs/` to `.gitignore`.
 
 ## How to write
