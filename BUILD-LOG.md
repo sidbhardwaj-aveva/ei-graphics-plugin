@@ -1642,5 +1642,12 @@ the roster for T008 went from 21 names to 22, and the progress table from 23 row
 `plugins/demo-ei-graphics/skills/ei-graphics-core/SKILL.md` sits on its 120-line limit, so the
 note on `-Evidence` was folded into the paragraph above it rather than given one of its own.
 
-**Result:** DONE at commit pending. Full suite 517 passed, 0 failed.
+**Result:** DONE at commit dfc5fa1. Full suite 517 passed, 0 failed.
 `Test-BuildProgress.ps1` exits 0 with 24 rows and no warnings.
+
+**One thing to know about the start commit.** Seven files under `docs/presentation/` were already
+staged in the index when this task began, and they were not written by it. `git commit` writes the
+whole index, not only the paths named in the preceding `git add`, so they went into b4b4971
+alongside the plan edit. Nothing was lost and nothing was changed, but that commit is wider than
+its message says. Amending is forbidden here, so this note is the correction. Next time, check
+`git status` for a dirty index before the start commit.
