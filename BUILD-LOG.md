@@ -1822,3 +1822,25 @@ names cannot meet that prose-only rule.
 
 **Result:** DONE pending the T026 build commit. Focused export tests: 6 passed. Full suite: 537
 passed, 0 failed, 0 skipped. Progress check: exit 0.
+
+## T027 — Document the installed-plugin migration — 2026-09-03T13:00:00Z
+
+**Goal:** Explain the one-time reset required when an existing installed plugin clone cannot
+merge the replaced remote history.
+
+**Assumptions:** T026 preserved the previous remote `main` at
+`backup/pre-v3-main-20260903` before replacing it. Existing installed clones can be clean yet
+have unrelated history, so `git pull` refuses to merge. Resetting a clean installed cache to
+`origin/main` is the approved migration. New installations clone the current history and need no
+reset.
+
+**Files touched:**
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+
+**Acceptance:** The T027 conditions in `plan.md` hold.
+
+**Attempts:** In progress.
+
+**Decisions:** In progress.
+
+**Result:** IN-PROGRESS.

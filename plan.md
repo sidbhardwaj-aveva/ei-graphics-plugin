@@ -1554,6 +1554,18 @@ message. The manifest, document, no-orphan, script-contract, progress, and full 
 exit 0. The remote backup SHA is verified before `main` changes, and a post-push fetch shows the
 backup unchanged and `main` at the final T026 build commit.
 
+#### T027 — Document the installed-plugin migration
+
+**Why this task exists.** T026 replaced the target repository `main` branch with unrelated
+history. The ordinary `git pull` command cannot merge a clone of the prior plugin.
+
+**Do this.** Add a short `README.md` section for people who already installed the prior version.
+It must say the reset is needed once, show `fetch origin` followed by `reset --hard origin/main`,
+and say new installations do not need it. Keep the normal `git pull` command for later updates.
+
+**Done when.** The document test proves the README names both update paths, and the Pester suite
+and build-progress check exit 0.
+
 ---
 
 ### Phase 6 — The live run, with a human watching
@@ -1648,7 +1660,7 @@ All of the following, checked in one sitting.
 
    Of the old repo's 36, four survive as copies and 32 are dropped. The other six are written
    fresh here.
-7. `BUILD-LOG.md` has an entry for every task, T001 through T026. That includes the resolved
+7. `BUILD-LOG.md` has an entry for every task, T001 through T027. That includes the resolved
    `$V2` path from T001 and the live-run notes from T022.
 8. Every human-facing file passes the Part 3 checker, and the T022 reader test was actually run
    on a person who does not know this plugin. Their reaction is written down in `BUILD-LOG.md`,
