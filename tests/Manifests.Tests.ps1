@@ -5,7 +5,7 @@ BeforeAll {
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
     $script:ClaudePath = Join-Path $script:RepoRoot '.claude-plugin' 'marketplace.json'
     $script:GithubPath = Join-Path $script:RepoRoot '.github' 'plugin' 'marketplace.json'
-    $script:PluginJsonPath = Join-Path $script:RepoRoot 'plugins' 'demo-ei-graphics' '.github' 'plugin' 'plugin.json'
+    $script:PluginJsonPath = Join-Path $script:RepoRoot 'plugins' 'aveva-ei-graphics' '.github' 'plugin' 'plugin.json'
 
     $script:Claude = Get-Content -LiteralPath $script:ClaudePath -Raw | ConvertFrom-Json
     $script:Github = Get-Content -LiteralPath $script:GithubPath -Raw | ConvertFrom-Json
@@ -92,7 +92,7 @@ Describe 'The manifests' -Tag 'Unit' {
         It '<_> carries none of the old catalogue phrases' -ForEach @(
             '.claude-plugin/marketplace.json'
             '.github/plugin/marketplace.json'
-            'plugins/demo-ei-graphics/.github/plugin/plugin.json'
+            'plugins/aveva-ei-graphics/.github/plugin/plugin.json'
         ) {
             $raw = Get-Content -LiteralPath (Join-Path $script:RepoRoot $_) -Raw
             $raw | Should -Not -Match 'ITERATE routing'

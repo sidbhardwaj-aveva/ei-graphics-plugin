@@ -20,4 +20,4 @@ ei-bug-reproducer
 Test-EiGraphicsSpecSync
 Invoke-EiAdoIntakeStage
 EiTestPreflight
-aveva-ei-graphics
+demo-ei-graphics

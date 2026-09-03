@@ -1796,16 +1796,29 @@ manual review of a completed live session. The existing remote `main` is backed 
 can store full session bundles containing story text, comments, interactions, and evidence.
 
 **Files touched:**
-- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`, `README.md`, `PLUGIN-INFO.md`
+- `plugins/aveva-ei-graphics/` and `tests/aveva-ei-graphics/` (renamed from the prior identity)
+- `Export-EiSessionBundleToShare.ps1` and its focused Pester test
+- manifests, path-based tests, the script contract, and the forbidden-name list
 
 **Acceptance:** The T026 conditions in `plan.md` hold. In particular, the remote backup is
 verified before `main` changes, exporting handles all five completed artifacts, and all required
 Pester and build-progress checks exit 0.
 
-**Attempts:** In progress.
+**Attempts:** 3. The first focused export run found a reused test share and a missing-property
+check under strict mode. The second found the empty-object property lookup. The third passed all
+6 exporter tests. The first full suite found the planned table-count and T022 exceptions, plus
+the supplied installer text in the prose scanner. After the approved checks were updated, the
+full suite passed 537 tests with 0 failed and 0 skipped. `Test-BuildProgress.ps1` exited 0.
 
 **Decisions:** Keep `.ei-session-logs/` ignored. Export only when
 `EI_GRAPHICS_SHARE_PATH` is set. A network failure keeps the local bundle and reports how to
-retry; it does not invalidate the local completed session.
+retry; it does not invalidate the local completed session. The remote `main` SHA
+`18b666fad458b5f5d7aebcbe961967d51008df42` was copied and verified at
+`backup/pre-v3-main-20260903` before this work. The old public plugin identity is now the final
+identity, so `demo-ei-graphics` became the forbidden name. The exact marketplace installer
+README remains required, but is exempt from the prose scanner because its command and product
+names cannot meet that prose-only rule.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE pending the T026 build commit. Focused export tests: 6 passed. Full suite: 537
+passed, 0 failed, 0 skipped. Progress check: exit 0.

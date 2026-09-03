@@ -1,4 +1,4 @@
-# Build plan — demo-ei-graphics v3
+# Build plan — aveva-ei-graphics v3
 
 Give this whole file to Copilot in a new, empty repository. It is the complete build script.
 Copy it to the new repo root as `plan.md`.
@@ -23,16 +23,16 @@ you start.
 
 ### The plugin has a new name
 
-The old plugin is called `aveva-ei-graphics`. This one is called `demo-ei-graphics`.
+The old plugin is called `aveva-ei-graphics`. This one is called `aveva-ei-graphics`.
 
 That name is the plugin's identity. It appears in three places, and all three must match or the
 plugin will not load:
 
-1. the folder name — `plugins/demo-ei-graphics/`
+1. the folder name — `plugins/aveva-ei-graphics/`
 2. `plugin.json`, the `name` field
 3. `.claude-plugin/marketplace.json`, the `plugins[0].name` field and its `source` path
 
-The test folder matches too: `tests/demo-ei-graphics/`.
+The test folder matches too: `tests/aveva-ei-graphics/`.
 
 **The old name still appears in this plan, and that is correct.** It is the name of the folder
 you copy *from*. Every source path keeps it. Every destination path uses the new name. If you
@@ -128,20 +128,20 @@ say "same path". Read the destination column. Do not guess it from the source.
 |---|---|---|
 | T001 | `latest-plan.md` | `docs/architecture-v3.md` |
 | T003 | `tests/Invoke-PesterTests.ps1` | `tests/Invoke-PesterTests.ps1` |
-| T004 | `plugins/aveva-ei-graphics/skills/ei-workflow-state/schemas/ado.schema.json` | `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/ado.schema.json` |
-| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` | `plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` |
-| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1` | `plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1` |
-| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1` | `plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1` |
-| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1` | `plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1` |
-| T013 | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.Tests.ps1` | `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.Tests.ps1` |
-| T013 | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-123456.json` | `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-123456.json` |
-| T013 | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-789012.json` | `tests/demo-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-789012.json` |
-| T014 | `plugins/aveva-ei-graphics/skills/ei-layer-guard/SKILL.md` | `plugins/demo-ei-graphics/skills/ei-layer-guard/SKILL.md` |
-| T014 | `plugins/aveva-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1` | `plugins/demo-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1` |
-| T014 | `tests/aveva-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.Tests.ps1` | `tests/demo-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.Tests.ps1` |
-| T015 | `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md` | `plugins/demo-ei-graphics/skills/termination-drawing/SKILL.md`, then split |
+| T004 | `plugins/aveva-ei-graphics/skills/ei-workflow-state/schemas/ado.schema.json` | `plugins/aveva-ei-graphics/skills/ei-graphics-core/schemas/ado.schema.json` |
+| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` |
+| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1` | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1` |
+| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1` | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1` |
+| T013 | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1` | `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1` |
+| T013 | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.Tests.ps1` | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.Tests.ps1` |
+| T013 | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-123456.json` | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-123456.json` |
+| T013 | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-789012.json` | `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/fixtures/work-item-789012.json` |
+| T014 | `plugins/aveva-ei-graphics/skills/ei-layer-guard/SKILL.md` | `plugins/aveva-ei-graphics/skills/ei-layer-guard/SKILL.md` |
+| T014 | `plugins/aveva-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1` | `plugins/aveva-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1` |
+| T014 | `tests/aveva-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.Tests.ps1` | `tests/aveva-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.Tests.ps1` |
+| T015 | `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md` | `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md`, then split |
 | T015 | `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md` | `tests/fixtures/termination-drawing-v2-SKILL.md` (the before picture) |
-| T017 | `plugins/aveva-ei-graphics/.github/plugin/plugin.json` | read only — write a fresh one at `plugins/demo-ei-graphics/.github/plugin/plugin.json` |
+| T017 | `plugins/aveva-ei-graphics/.github/plugin/plugin.json` | read only — write a fresh one at `plugins/aveva-ei-graphics/.github/plugin/plugin.json` |
 | T017 | `.claude-plugin/marketplace.json` at the **old repo root** | read only — write a fresh one at the same place in the new repo |
 | T017 | `.github/plugin/marketplace.json` at the **old repo root** | read only — write a fresh one at the same place in the new repo |
 
@@ -162,7 +162,7 @@ levels is still right.
 $script:ScriptPath = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills' ...
 ```
 
-Change `aveva-ei-graphics` to `demo-ei-graphics` in both copied test files. Without this they
+Change `aveva-ei-graphics` to `aveva-ei-graphics` in both copied test files. Without this they
 point at a folder that does not exist, and T019 fails them anyway for using a banned name.
 
 This is why those two test files are **not** in the hash list. See T020.
@@ -257,8 +257,8 @@ good enough. This is:
 
 - the rendered `session-summary.md`
 - `agents/ei-graphics.agent.md`
-- `plugins/demo-ei-graphics/skills/ei-graphics-core/SKILL.md`
-- `plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` (T013 rewrites it, so it
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md`
+- `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` (T013 rewrites it, so it
   counts as ours)
 - the root `README.md`, the plugin `README.md`, `PLUGIN-INFO.md`, `INSTRUCTIONS.md`
 - `skills/ei-graphics-core/references/rnd-delegation.md` and `checkpoint-templates.md`
@@ -309,7 +309,7 @@ Build them in T001 and T002, before anything else.
 The single source of truth. A table with exactly these columns:
 
 ```markdown
-# Build Progress — demo-ei-graphics v3
+# Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
 **Current task:** T007
@@ -357,8 +357,8 @@ Only ever append. Never edit an old entry. One block per task attempt:
 **Assumptions:** Test-Json -Schema works on the installed PowerShell 7; canonical JSON uses
   sorted keys and no trailing whitespace.
 **Files touched:**
-- plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.ps1 (new)
-- tests/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.Tests.ps1 (new)
+- plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.ps1 (new)
+- tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.Tests.ps1 (new)
 
 **Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1 -Path ...` exits 0
 **Attempts:** 2 (first failed: Test-Json needs -SchemaFile on 7.4 and later)
@@ -391,7 +391,7 @@ resumable, so the task has not really passed.
 ### Paste this into a fresh Copilot session
 
 ```
-Resume the demo-ei-graphics v3 build.
+Resume the aveva-ei-graphics v3 build.
 
 1. Read plan.md, all of it.
 2. Read BUILD-PROGRESS.md and the last 3 entries of BUILD-LOG.md.
@@ -462,8 +462,8 @@ ei-graphics-plugin-v3/
 │   └── architecture-v3.md             # copy of latest-plan.md  (T001), never edited
 ├── tools/
 │   └── Test-BuildProgress.ps1         # progress checker        (T002)
-├── plugins/demo-ei-graphics/
-│   ├── .github/plugin/plugin.json     # "name": "demo-ei-graphics"  (T017)
+├── plugins/aveva-ei-graphics/
+│   ├── .github/plugin/plugin.json     # "name": "aveva-ei-graphics"  (T017)
 │   ├── README.md                      #                         (T018)
 │   ├── INSTRUCTIONS.md                #                         (T018)
 │   ├── agents/
@@ -511,23 +511,23 @@ ei-graphics-plugin-v3/
     │   ├── termination-drawing-v2-SKILL.md
     │   └── ado-intake-stdout.json
     ├── tools/Test-BuildProgress.Tests.ps1
-    └── demo-ei-graphics/skills/<skill>/scripts/*.Tests.ps1
+    └── aveva-ei-graphics/skills/<skill>/scripts/*.Tests.ps1
 ```
 
-**The test folder matches the plugin name.** It is `tests/demo-ei-graphics/`, not the old name.
+**The test folder matches the plugin name.** It is `tests/aveva-ei-graphics/`, not the old name.
 The copied test files come from the old name and land under the new one.
 
 ### Why the two marketplace files sit at the repo root
 
 They use different bases, and this trips people up:
 
-- `.claude-plugin/marketplace.json` sets `"source": "./plugins/demo-ei-graphics"`. That path is
+- `.claude-plugin/marketplace.json` sets `"source": "./plugins/aveva-ei-graphics"`. That path is
   **relative to the repo root**.
 - `.github/plugin/marketplace.json` sets `"pluginRoot": "./plugins"` and then
-  `"source": "demo-ei-graphics"`. The `pluginRoot` is relative to the repo root, but the
+  `"source": "aveva-ei-graphics"`. The `pluginRoot` is relative to the repo root, but the
   `source` is **relative to `pluginRoot`**, not to the root.
 
-Moving either file under `plugins/demo-ei-graphics/` breaks its paths. `plugin.json` stays
+Moving either file under `plugins/aveva-ei-graphics/` breaks its paths. `plugin.json` stays
 inside the plugin folder.
 
 ### One difference from the old repo
@@ -1026,7 +1026,7 @@ Add fixture-driven test cases using `-CliWorkItemJson` with the two copied fixtu
 
 **Two edits you must make:**
 
-1. In the copied test file, change `aveva-ei-graphics` to `demo-ei-graphics` on the line that
+1. In the copied test file, change `aveva-ei-graphics` to `aveva-ei-graphics` on the line that
    builds `$script:ScriptPath`.
 2. Rewrite `SKILL.md`. It is a lifecycle-era document, with 12 banned-term hits in a "Lifecycle
    stage" section. Keep its script usage content. Drop every stage and workflow reference. It
@@ -1059,7 +1059,7 @@ A test shows the full chain — intake stdout, then `Convert-EiAdoIntake.ps1`, t
 been checked and contains zero banned identifiers, so it needs no rewrite. It is already a clean
 pass/fail gate.
 
-**The test file needs one edit.** Change `aveva-ei-graphics` to `demo-ei-graphics` on line 7,
+**The test file needs one edit.** Change `aveva-ei-graphics` to `aveva-ei-graphics` on line 7,
 where it builds `$script:ScriptPath`. Without this it points at a folder that does not exist.
 
 Check that the guard still returns `pass`, `blocked` or `needs-manual-review`, and still honours
@@ -1229,15 +1229,15 @@ exits 0.
 
 - `.claude-plugin/marketplace.json` at the **repo root**
 - `.github/plugin/marketplace.json` at the **repo root**
-- `plugins/demo-ei-graphics/.github/plugin/plugin.json` inside the plugin
+- `plugins/aveva-ei-graphics/.github/plugin/plugin.json` inside the plugin
 
 **The three name fields must agree:**
 
-- `plugin.json` gets `"name": "demo-ei-graphics"`
-- `.claude-plugin/marketplace.json` gets `plugins[0].name` of `demo-ei-graphics` and
-  `plugins[0].source` of `./plugins/demo-ei-graphics`
+- `plugin.json` gets `"name": "aveva-ei-graphics"`
+- `.claude-plugin/marketplace.json` gets `plugins[0].name` of `aveva-ei-graphics` and
+  `plugins[0].source` of `./plugins/aveva-ei-graphics`
 - the marketplace file's own top-level `name` is the catalogue entry, and is
-  `demo-ei-graphics-plugin`
+  `aveva-ei-graphics-plugin`
 
 **The old repo uses the old name in all of these. Do not copy those values across.**
 Descriptions describe v3 only.
@@ -1246,7 +1246,7 @@ Descriptions describe v3 only.
 
 - In `.claude-plugin/marketplace.json`, `source` resolves from the **repo root**.
 - In `.github/plugin/marketplace.json`, `pluginRoot` resolves from the repo root, but `source`
-  resolves from **`pluginRoot`**. So its `source` is the bare name `demo-ei-graphics`, with no
+  resolves from **`pluginRoot`**. So its `source` is the bare name `aveva-ei-graphics`, with no
   `./plugins/` prefix.
 
 **`plugin.json` keeps the folder-pointer form:** `"skills": "skills/"`, `"agents": "agents/"`.
@@ -1262,7 +1262,7 @@ Manifests must never list individual skill names, or adding a skill becomes a ma
   not empty
 - neither marketplace file has a `skillPath` key — do not assert one
 - `plugin.json`'s `name` equals the name of the **plugin folder** — the folder that directly
-  contains `.github/`, which is `plugins/demo-ei-graphics`. Get it by walking up from
+  contains `.github/`, which is `plugins/aveva-ei-graphics`. Get it by walking up from
   `plugin.json`: its own folder is `plugin`, then `.github`, then the plugin folder. Take the leaf
   name of that third folder. It must also equal `plugins[0].name` in
   `.claude-plugin/marketplace.json`.
@@ -1282,9 +1282,9 @@ here. `$P` exits 0.
 
 - root `README.md` — what this is, the prerequisites checklist from `docs/architecture-v3.md`,
   how to run it, how to read a session summary, and the manual skill-improvement loop
-- `plugins/demo-ei-graphics/README.md` — the skills table, the folder tree, the artifacts table
+- `plugins/aveva-ei-graphics/README.md` — the skills table, the folder tree, the artifacts table
 - root `PLUGIN-INFO.md`
-- `plugins/demo-ei-graphics/INSTRUCTIONS.md`
+- `plugins/aveva-ei-graphics/INSTRUCTIONS.md`
 - `.github/copilot-instructions.md` — the per-task loop from Part 5, the machines-decide rule,
   the PowerShell conventions, and the OneDrive and git traps
 
@@ -1528,7 +1528,7 @@ review depends on that evidence. This task does not change either status.
 without force and verify it points at the captured remote `main` SHA. Replace `main` only with
 `--force-with-lease` against that captured SHA.
 
-Rename the plugin from `demo-ei-graphics` to `aveva-ei-graphics`. The plugin folder,
+Rename the plugin from `aveva-ei-graphics` to `aveva-ei-graphics`. The plugin folder,
 `plugin.json`, and both marketplace manifests must agree. Update every current test, document,
 path, ported-file hash, and forbidden-name reference. Do not rewrite old `BUILD-LOG.md` entries.
 
@@ -1540,6 +1540,8 @@ Write `Export-EiSessionBundleToShare.ps1` beside the core session scripts. When
 It copies `ado.json`, `story-understanding.json`, `approved-files.json`, `session.json`, and
 `session-summary.md` into a unique completed folder below the configured share. The standard
 share is `\\INHYDD1510\Share\Siddanth\ei-graphics-plugin-sessions`.
+
+**Parameters, exactly these 5:** `-StoryId`, `-Root`, `-SharePath`, `-Json`, `-Help`.
 
 The share is a controlled internal location. Full session bundles can contain story text,
 comments, interaction records, and evidence. Do not export when the variable is absent. An
@@ -1744,7 +1746,7 @@ reorganise them in T015. Their words belong to the original author. Judging them
 would mean rewriting technical prose we were told to preserve, and one of
 `termination-drawing`'s critical rules already contains a word on the jargon list.
 
-**The plugin is renamed to `demo-ei-graphics`.** The old one is `aveva-ei-graphics`. This is a
+**The plugin is renamed to `aveva-ei-graphics`.** The old one is `aveva-ei-graphics`. This is a
 demo and testing build in a fresh repo, so the new name is the plugin's real identity, not a
 label.
 

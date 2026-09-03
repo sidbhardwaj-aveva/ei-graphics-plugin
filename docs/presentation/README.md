@@ -19,7 +19,7 @@ hands review, commit and PR to `aveva-rnd`. Every step is appended to a session 
 flowchart LR
     Dev["Developer"]
 
-    subgraph Plugin["demo-ei-graphics plugin"]
+    subgraph Plugin["aveva-ei-graphics plugin"]
         Agent["EI Graphics agent"]
         Skills["Core and domain skills"]
     end

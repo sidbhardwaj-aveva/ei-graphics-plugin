@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Name | `demo-ei-graphics` |
-| Catalogue entry | `demo-ei-graphics-plugin` |
+| Name | `aveva-ei-graphics` |
+| Catalogue entry | `aveva-ei-graphics-plugin` |
 | Version | 1.0.0 |
 | Agent | `ei-graphics` |
 | Skills | 4 |
@@ -29,9 +29,9 @@ drift and leaves the decision to you.
 
 ## Where things live
 
-- The agent: `plugins/demo-ei-graphics/agents/ei-graphics.agent.md`
-- The scripts: `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/`
-- The schemas: `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/`
+- The agent: `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- The scripts: `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/`
+- The schemas: `plugins/aveva-ei-graphics/skills/ei-graphics-core/schemas/`
 - What a run produces: `.ei-session-logs/<story number>/`, not committed
 
 ## Installing it
@@ -43,3 +43,15 @@ The two files use different bases, which is worth knowing if you ever move them.
 source path is relative to the repository root. In the second, the plugin root is relative to the
 repository root, but the source is relative to the plugin root. Moving either file breaks its
 paths.
+
+## Shared session records
+
+Each completed run remains in `.ei-session-logs/<story number>/` and is not committed. Set
+`EI_GRAPHICS_SHARE_PATH` to send a copy of the full completed bundle to an approved internal
+share. The standard location is
+`\\INHYDD1510\Share\Siddanth\ei-graphics-plugin-sessions`.
+
+The copy contains `ado.json`, `story-understanding.json`, `approved-files.json`, `session.json`,
+and `session-summary.md`. It can contain story text, comments, interactions, and evidence. Only
+people authorized for that material should use the share. If the share is unavailable, the local
+bundle stays in place and can be exported again later.

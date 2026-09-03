@@ -13,6 +13,7 @@ $LineCeilings = @{
     'Write-EiArtifact'         = 120
     'Write-EiSessionEntry'     = 250
     'Export-EiSessionSummary'  = 240
+    'Export-EiSessionBundleToShare' = 120
     'Get-EiDomainSkillCatalog' = 120
     'Test-EiScopeDrift'        = 100
     'Convert-EiAdoIntake'      = 160
@@ -23,6 +24,7 @@ $OwningTask = @{
     'Write-EiArtifact'         = 'T007'
     'Write-EiSessionEntry'     = 'T008'
     'Export-EiSessionSummary'  = 'T009'
+    'Export-EiSessionBundleToShare' = 'T026'
     'Get-EiDomainSkillCatalog' = 'T010'
     'Test-EiScopeDrift'        = 'T011'
     'Convert-EiAdoIntake'      = 'T012'
@@ -51,6 +53,7 @@ BeforeAll {
         'Write-EiArtifact'         = 120
         'Write-EiSessionEntry'     = 250
         'Export-EiSessionSummary'  = 240
+        'Export-EiSessionBundleToShare' = 120
         'Get-EiDomainSkillCatalog' = 120
         'Test-EiScopeDrift'        = 100
         'Convert-EiAdoIntake'      = 160
@@ -59,6 +62,7 @@ BeforeAll {
         'Write-EiArtifact'         = 'T007'
         'Write-EiSessionEntry'     = 'T008'
         'Export-EiSessionSummary'  = 'T009'
+        'Export-EiSessionBundleToShare' = 'T026'
         'Get-EiDomainSkillCatalog' = 'T010'
         'Test-EiScopeDrift'        = 'T011'
         'Convert-EiAdoIntake'      = 'T012'
@@ -183,9 +187,9 @@ Describe 'Script contract' -Tag 'Unit' {
             { Resolve-Script -Name $_ } | Should -Not -Throw
         }
 
-        It 'the total count is 12 or fewer, and is 10 today' -TestCases @(@{ Count = $FoundNames.Count }) {
+        It 'the total count is 12 or fewer, and is 11 today' -TestCases @(@{ Count = $FoundNames.Count }) {
             $Count | Should -BeLessOrEqual 12
-            $Count | Should -Be 10
+            $Count | Should -Be 11
         }
     }
 
@@ -242,12 +246,12 @@ Describe 'Script contract' -Tag 'Unit' {
             $names.Count | Should -Be 6
 
             $expected = @(
-                'plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/ado.schema.json'
-                'plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1'
-                'plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1'
-                'plugins/demo-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1'
-                'plugins/demo-ei-graphics/skills/ei-layer-guard/SKILL.md'
-                'plugins/demo-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1'
+                'plugins/aveva-ei-graphics/skills/ei-graphics-core/schemas/ado.schema.json'
+                'plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1'
+                'plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiWorkItemReference.ps1'
+                'plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/helpers/EiAdoTimestamp.ps1'
+                'plugins/aveva-ei-graphics/skills/ei-layer-guard/SKILL.md'
+                'plugins/aveva-ei-graphics/skills/ei-layer-guard/scripts/Invoke-EiLayerGuard.ps1'
             )
             (($names | Sort-Object) -join "`n") | Should -Be (($expected | Sort-Object) -join "`n")
         }
@@ -266,7 +270,7 @@ Describe 'Script contract' -Tag 'Unit' {
     Context 'the registry is complete in both directions' {
         It 'every skill folder is either registered or on the allowlist' {
             $allow = @('ei-graphics-core', 'ei-azure-devops-cli-intake', 'ei-layer-guard')
-            $pluginFolder = Join-Path $script:PluginsRoot 'demo-ei-graphics'
+            $pluginFolder = Join-Path $script:PluginsRoot 'aveva-ei-graphics'
             $registryPath = Join-Path $pluginFolder 'skills' 'ei-graphics-core' 'references' 'domain-skill-registry.json'
             $registered = @((Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json).domains | ForEach-Object { $_.id })
 
@@ -281,7 +285,7 @@ Describe 'Script contract' -Tag 'Unit' {
         }
 
         It 'every registered skillPath resolves to a file that exists' {
-            $pluginFolder = Join-Path $script:PluginsRoot 'demo-ei-graphics'
+            $pluginFolder = Join-Path $script:PluginsRoot 'aveva-ei-graphics'
             $registryPath = Join-Path $pluginFolder 'skills' 'ei-graphics-core' 'references' 'domain-skill-registry.json'
             foreach ($domain in @((Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json).domains)) {
                 Test-Path -LiteralPath (Join-Path $pluginFolder $domain.skillPath) |

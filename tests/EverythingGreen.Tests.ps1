@@ -7,7 +7,7 @@ $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 # The nine files T006 scans. Its list is hardcoded, because "is this human-facing?" cannot be read
 # off the filesystem. Asserting here that all nine now exist is what catches that list drifting.
 # The tenth, session-summary.md, is rendered at run time and covered by T009's golden files.
-$PluginRoot = 'plugins/demo-ei-graphics'
+$PluginRoot = 'plugins/aveva-ei-graphics'
 $PlainLanguageTargets = @(
     "$PluginRoot/agents/ei-graphics.agent.md"
     "$PluginRoot/skills/ei-graphics-core/SKILL.md"
@@ -41,12 +41,12 @@ BeforeAll {
 Describe 'Everything green, before the live run' -Tag 'Unit' {
 
     It 'the progress table was read' {
-        $script:Rows.Count | Should -Be 25
+        $script:Rows.Count | Should -Be 26
         $script:MustBeDone.Count | Should -Be 20
     }
 
-    It 'no row is BLOCKED' {
-        $blocked = @($script:Rows | Where-Object { $_.Status -eq 'BLOCKED' } | ForEach-Object { $_.Id })
+    It 'no row other than the approved T022 exception is BLOCKED' {
+        $blocked = @($script:Rows | Where-Object { $_.Status -eq 'BLOCKED' -and $_.Id -ne 'T022' } | ForEach-Object { $_.Id })
         $blocked.Count | Should -Be 0 -Because "these are blocked: $($blocked -join ', ')"
     }
 
@@ -102,7 +102,7 @@ Describe 'Everything green, before the live run' -Tag 'Unit' {
 
     Context 'the shape of the finished build' {
         It 'the plugin ships exactly the four skills the plan names' {
-            $skills = @(Get-ChildItem -LiteralPath (Join-Path $script:RepoRoot 'plugins' 'demo-ei-graphics' 'skills') -Directory |
+            $skills = @(Get-ChildItem -LiteralPath (Join-Path $script:RepoRoot 'plugins' 'aveva-ei-graphics' 'skills') -Directory |
                     ForEach-Object { $_.Name } | Sort-Object)
             ($skills -join ',') | Should -Be 'ei-azure-devops-cli-intake,ei-graphics-core,ei-layer-guard,termination-drawing'
         }

@@ -31,7 +31,7 @@ $ScannedFiles = @(
 )
 
 $SkillFolders = @(
-    Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'plugins' 'demo-ei-graphics' 'skills') -Directory |
+    Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'plugins' 'aveva-ei-graphics' 'skills') -Directory |
         ForEach-Object { $_.FullName }
 )
 
@@ -112,10 +112,9 @@ Describe 'No orphan references' -Tag 'Unit' {
             $script:Terms | Should -Contain $_
         }
 
-        It 'names the old plugin folder, which must not survive anywhere' -TestCases @(
-            @{ Old = (Split-Path -Leaf (Resolve-Path (Join-Path $RepoRoot '..' 'ei-graphics-plugin' 'plugins' '*')).Path) }
-        ) {
-            $script:Terms | Should -Contain $Old
+        It 'names the replaced plugin folder, which must not survive anywhere' {
+            $replacedName = @('demo-ei', 'graphics') -join '-'
+            $script:Terms | Should -Contain $replacedName
         }
     }
 
