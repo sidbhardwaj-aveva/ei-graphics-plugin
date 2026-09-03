@@ -34,6 +34,6 @@ in `BUILD-LOG.md`.
 | T024 | Evidence behind the reasoning | DONE | dfc5fa1 | 2026-09-03T05:59:24Z |
 | T025 | Comment deviations in the summary | DONE | 02eb879 | 2026-09-03T06:52:00Z |
 | T026 | Publish team plugin and collect sessions | DONE | 2a9d016 | 2026-09-03T12:33:47Z |
-| T027 | Document the installed-plugin migration | DONE | pending | 2026-09-03T12:46:57Z |
+| T027 | Document the installed-plugin migration | DONE | 247f513 | 2026-09-03T12:46:57Z |
 | T022 | Dry run against story 3408091 | BLOCKED | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |
