@@ -40,16 +40,16 @@ Appends one entry to the session log, and creates the log on the first call.
 **To append an entry:** `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`,
 `-TokensUsed`, `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`, `-Evidence`.
 **To close the session:** `-Finalize`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
-`-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`.
+`-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`, `-CommentDeviations`.
 
 The two sets are mutually exclusive. Passing one from each is an error, not a partial write.
 `-SessionOutcome` is not called `-Outcome` because the entry and the summary both hold a field
-named `outcome`, and one parameter cannot mean two things. `-Evidence` is a list of hashtables,
-each naming a `file` and optionally a `line`, a `symbol` and a `quote` of the text you read. An
-item with no `file` is an error, and the summary renders each one under its reasoning.
+named `outcome`, and one parameter cannot mean two things. `-Evidence` names a `file` and
+optionally a `line`, a `symbol` and a `quote`; `-CommentDeviations` names a `commentId` and its
+`effect`. Both are lists of hashtables, a missing key is an error, and both surface in the summary.
 
 `-Finalize` works out `completedAt`, `totalDurationMs`, `totalTokens` and `filesModified` from the
-entries already written. You supply the other six.
+entries already written. You supply the rest.
 
 **Writes:** `.ei-session-logs/<storyId>/session.json`, through a temporary file, so a second
 append cannot truncate it.

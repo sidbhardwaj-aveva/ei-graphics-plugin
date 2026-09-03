@@ -260,12 +260,13 @@ Describe 'ei-graphics-core schemas' -Tag 'Unit' {
             $schema.properties.verbosity.default | Should -Be 'verbose'
         }
 
-        It 'declares all ten summary fields' {
+        It 'declares all eleven summary fields' {
             $schema = Get-Content -LiteralPath (Join-Path $script:SchemaDir 'session.schema.json') -Raw | ConvertFrom-Json
             $declared = $schema.properties.summary.properties.PSObject.Properties.Name
             $expected = @('completedAt', 'totalDurationMs', 'totalTokens', 'filesModified', 'testsRun',
-                'testsPassed', 'humanInteractions', 'outcome', 'domainSkillUsed', 'bugPatternMatched')
-            $declared | Should -HaveCount 10
+                'testsPassed', 'humanInteractions', 'outcome', 'domainSkillUsed', 'bugPatternMatched',
+                'commentDeviations')
+            $declared | Should -HaveCount 11
             foreach ($field in $expected) { $declared | Should -Contain $field }
         }
 

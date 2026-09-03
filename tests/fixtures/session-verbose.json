@@ -130,6 +130,9 @@
     "humanInteractions": 2,
     "outcome": "fixed",
     "domainSkillUsed": "termination-drawing",
-    "bugPatternMatched": "Core Connector Update"
+    "bugPatternMatched": "Core Connector Update",
+    "commentDeviations": [
+      { "commentId": "7", "effect": "The change goes in the settings dialog, not the toolbar." }
+    ]
   }
 }

@@ -1,8 +1,8 @@
 # Build Progress — demo-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T025
-**Last verified green:** T009 (2026-09-02T09:52:00Z)
+**Current task:** T022
+**Last verified green:** T025 (2026-09-03T06:52:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -32,6 +32,6 @@ in `BUILD-LOG.md`.
 | T020 | The script contract check | DONE | 4e68ec1 | 2026-08-31T21:20:00Z |
 | T021 | Everything green, before the live run | DONE | 2abf97f | 2026-08-31T21:32:00Z |
 | T024 | Evidence behind the reasoning | DONE | dfc5fa1 | 2026-09-03T05:59:24Z |
-| T025 | Comment deviations in the summary | IN-PROGRESS | — | — |
+| T025 | Comment deviations in the summary | DONE | pending | 2026-09-03T06:52:00Z |
 | T022 | Dry run against story 4965976 | TODO | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |

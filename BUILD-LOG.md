@@ -1668,3 +1668,48 @@ than an empty line, matching the T024 rule that "not recorded" and "recorded as 
 different claims. The maintainer section renders at both verbosity settings, so the new line does
 too. Both scripts sit near their T024-raised ceilings, so a further small raise is expected and
 recorded below.
+
+**Files touched:**
+- `plan.md` (T025 added, T008 roster extended to 23, summary fields to 11)
+- `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/schemas/session.schema.json`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.ps1`
+- `plugins/demo-ei-graphics/skills/ei-graphics-core/SKILL.md`
+- `tests/fixtures/session-verbose.json`, `tests/fixtures/session-summary-verbose.md`,
+  `tests/fixtures/session-summary-concise.md`
+- the four test files that hold the roster count, the summary-field count, the two script suites,
+  and `tests/EverythingGreen.Tests.ps1`, which counts the rows in the live table
+
+**Acceptance:** `pwsh -NoProfile -File ./tests/Invoke-PesterTests.ps1` exits 0, and
+`pwsh -NoProfile -File ./tools/Test-BuildProgress.ps1` exits 0.
+
+**Attempts:** 2. The task-only subset passed first time at 143 tests. The first full-suite run
+then failed on one assertion in `tests/EverythingGreen.Tests.ps1`: "Expected 24, but got 25".
+That is the T021 green-guard, which counts the rows in the live `BUILD-PROGRESS.md`, and adding
+the T025 row moved it from 24 to 25. This is a size assertion, not a behaviour one, and it moves
+with the plan the same way the T008 roster count and the progress-table count did in T024. Raised
+it to 25 and extended its comment to name T025. The second full run passed at 523.
+
+**Decisions:** The absent case renders as `None recorded.` rather than an empty line, so a summary
+with no overrides makes a positive statement instead of a silent gap. The renderer filters nulls
+before wrapping the field in an array, avoiding the `@($null)` trap that bit T024: a missing
+optional field reads back as `@($null)`, which has a count of one, so an unfiltered wrap would
+have rendered a phantom `comment ``:`` ` line. The concise golden file carries the `None recorded.`
+line to prove the maintainer section, and this line with it, renders at both verbosity settings.
+
+**Two line ceilings were raised**, both in `tests/ScriptContract.Tests.ps1`, and both in the two
+copies of the ceiling table it keeps. `Write-EiSessionEntry` went from 230 to 250, and now
+measures 246. It gained `ConvertTo-CommentDeviation`, the normaliser that accepts a comment
+override as either a hashtable or the object `ConvertFrom-Json` produces. `Export-EiSessionSummary`
+went from 230 to 240, and now measures 233. It gained the "Comment corrections" line and the small
+loop that renders each override. Neither script grew for any other reason.
+
+Two counting tests moved with the plan, both size assertions rather than behaviour: the roster for
+T008 went from 22 names to 23, and `session.schema.json`'s summary declares 11 fields instead of
+10. `plugins/demo-ei-graphics/skills/ei-graphics-core/SKILL.md` sits on its 120-line limit, so the
+note on `-CommentDeviations` was folded into the surrounding Evidence block rather than given a line
+of its own.
+
+**Result:** DONE at commit pending. Full suite 523 passed, 0 failed.
+`Test-BuildProgress.ps1` exits 0 with 25 rows and no warnings.

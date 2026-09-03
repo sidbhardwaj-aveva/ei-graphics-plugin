@@ -33,7 +33,8 @@ param(
     [Parameter(ParameterSetName = 'Finalize')] [Nullable[int]] $HumanInteractions,
     [Parameter(ParameterSetName = 'Finalize')] [string] $SessionOutcome,
     [Parameter(ParameterSetName = 'Finalize')] [string] $DomainSkillUsed,
-    [Parameter(ParameterSetName = 'Finalize')] [string] $BugPatternMatched
+    [Parameter(ParameterSetName = 'Finalize')] [string] $BugPatternMatched,
+    [Parameter(ParameterSetName = 'Finalize')] [object[]] $CommentDeviations
 )
 
 Set-StrictMode -Version Latest
@@ -112,6 +113,28 @@ function ConvertTo-EvidenceItem {
     $plain
 }
 
+function ConvertTo-CommentDeviation {
+    <#
+    .SYNOPSIS
+        Turns one comment deviation into the two keys the schema allows, whatever shape it arrived in.
+    #>
+    param($Item, [int] $Position)
+
+    $read = { param([string] $Key)
+        if ($Item -is [System.Collections.IDictionary]) { if ($Item.Contains($Key)) { return $Item[$Key] } ; return $null }
+        if ($Item.PSObject.Properties.Name -contains $Key) { return $Item.$Key }
+        $null
+    }
+
+    $commentId = & $read 'commentId'
+    $effect = & $read 'effect'
+    if ([string]::IsNullOrEmpty([string] $commentId) -or [string]::IsNullOrEmpty([string] $effect)) {
+        Write-Problem "Comment deviation $Position needs both 'commentId' and 'effect'. Each records which comment changed the story, and what it changed."
+        exit 1
+    }
+    [ordered]@{ commentId = [string] $commentId; effect = [string] $effect }
+}
+
 $schemaPath = Join-Path $PSScriptRoot '..' 'schemas' 'session.schema.json'
 if (-not (Test-Path -LiteralPath $schemaPath)) {
     Write-Problem "session.schema.json is missing. Expected it at: $schemaPath"
@@ -161,6 +184,10 @@ if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
     if ($SessionOutcome) { $summary['outcome'] = $SessionOutcome }
     if ($DomainSkillUsed) { $summary['domainSkillUsed'] = $DomainSkillUsed }
     if ($BugPatternMatched) { $summary['bugPatternMatched'] = $BugPatternMatched }
+    if ($CommentDeviations) {
+        $items = @(for ($i = 0; $i -lt $CommentDeviations.Count; $i++) { ConvertTo-CommentDeviation -Item $CommentDeviations[$i] -Position ($i + 1) })
+        $summary['commentDeviations'] = @($items)
+    }
     $session['summary'] = $summary
     $written = $summary
 } else {

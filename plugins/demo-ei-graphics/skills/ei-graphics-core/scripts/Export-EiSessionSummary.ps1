@@ -193,6 +193,16 @@ $coverage = 'No domain skill was recorded. If this story belongs to a domain, it
 if ($domain -and $pattern) { $coverage = "The ``$domain`` skill was used. It matched the bug pattern named $pattern." }
 elseif ($domain) { $coverage = "The ``$domain`` skill was used. No bug pattern matched, so this may be new ground for that skill." }
 
+$corrections = @((Get-Field -Owner $summary -Name 'commentDeviations') | Where-Object { $null -ne $_ })
+$correctionLine = 'None recorded.'
+if ($corrections.Count -gt 0) {
+    $parts = $corrections | ForEach-Object {
+        $id = [string] (Get-Field -Owner $_ -Name 'commentId')
+        "comment ``$id``: $([string] (Get-Field -Owner $_ -Name 'effect'))"
+    }
+    $correctionLine = $parts -join ' '
+}
+
 $opportunity = 'No source file was read, so there is nothing to compare against the skill.'
 if ($sourceRead.Count -gt 0) {
     $named = ($sourceRead | ForEach-Object { "``$_``" }) -join ', '
@@ -210,6 +220,7 @@ if ($null -ne $testsRun -and $null -ne $testsPassed) {
 
 & $out '## For the maintainer'; & $out ''
 & $out "- **Skill coverage:** $coverage"
+& $out "- **Comment corrections:** $correctionLine"
 & $out "- **Improvement opportunity:** $opportunity"
 & $out "- **Human wait time:** $wait"
 & $out "- **Agent efficiency:** $efficiency"

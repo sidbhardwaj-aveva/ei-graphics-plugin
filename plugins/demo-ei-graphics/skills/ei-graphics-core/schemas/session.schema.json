@@ -95,7 +95,20 @@
         "humanInteractions": { "type": "integer", "minimum": 0 },
         "outcome": { "type": "string", "minLength": 1 },
         "domainSkillUsed": { "type": ["string", "null"] },
-        "bugPatternMatched": { "type": ["string", "null"] }
+        "bugPatternMatched": { "type": ["string", "null"] },
+        "commentDeviations": {
+          "description": "Comments that overrode the story description, copied from the confirmed understanding. Each names the comment and what it changed, so a reviewer sees a correction the description alone would hide.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["commentId", "effect"],
+            "properties": {
+              "commentId": { "type": "string", "minLength": 1 },
+              "effect": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
       }
     }
   }

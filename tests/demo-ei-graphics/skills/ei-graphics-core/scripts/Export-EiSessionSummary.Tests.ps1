@@ -148,6 +148,18 @@ Describe 'Export-EiSessionSummary' -Tag 'Unit' {
         $rendered | Should -Match '\*\*Human wait time:\*\* 2m 21s, across 1 pause\.'
     }
 
+    It 'reports a comment that overrode the story, and which comment it was' {
+        $root = New-SessionRoot -Fixture 'session-verbose.json'
+        $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root).Result.path -Raw
+        $rendered | Should -Match '(?m)^- \*\*Comment corrections:\*\* comment `7`: '
+    }
+
+    It 'says none plainly when the summary records no comment deviations' {
+        $root = New-SessionRoot -Fixture 'session-concise.json'
+        $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root).Result.path -Raw
+        $rendered | Should -Match '(?m)^- \*\*Comment corrections:\*\* None recorded\.'
+    }
+
     It 'passes the four plain-language rules at <_>' -ForEach @('session-verbose.json', 'session-concise.json', 'session-empty.json') {
         # The golden files live under tests/, which the T006 scanner skips, so this artifact has
         # to check itself.

@@ -215,6 +215,48 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
             Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
             @((Get-Session -Root $script:Root | ConvertFrom-Json).entries).Count | Should -Be 2
         }
+
+        It 'records the comment deviations it is given, and validates' {
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Finalize = $true; SessionOutcome = 'fixed'
+                CommentDeviations = @(
+                    @{ commentId = '7'; effect = 'The change goes in the settings dialog.' }
+                )
+            })
+            $run.ExitCode | Should -Be 0
+
+            $raw = Get-Session -Root $script:Root
+            $raw | Test-Json -Schema $script:SchemaText | Should -BeTrue
+
+            $summary = ($raw | ConvertFrom-Json).summary
+            @($summary.commentDeviations).Count | Should -Be 1
+            $summary.commentDeviations[0].commentId | Should -Be '7'
+            $summary.commentDeviations[0].effect | Should -Be 'The change goes in the settings dialog.'
+        }
+
+        It 'stays an array when only one comment deviation is given' {
+            Invoke-Entry -Splat ($script:Base + @{
+                Finalize = $true; SessionOutcome = 'fixed'
+                CommentDeviations = @(@{ commentId = '7'; effect = 'Use the settings dialog.' })
+            }) | Out-Null
+            (Get-Session -Root $script:Root) | Should -Match '"commentDeviations":\s*\[\s*\{'
+        }
+
+        It 'rejects a comment deviation that names no effect, and adds no summary' {
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Finalize = $true; SessionOutcome = 'fixed'
+                CommentDeviations = @(@{ commentId = '7' })
+            })
+            $run.ExitCode | Should -Be 1
+            (Get-Session -Root $script:Root | ConvertFrom-Json).PSObject.Properties.Name |
+                Should -Not -Contain 'summary'
+        }
+
+        It 'leaves the summary with no commentDeviations key when none is given' {
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+            $summary = (Get-Session -Root $script:Root | ConvertFrom-Json).summary
+            $summary.PSObject.Properties.Name | Should -Not -Contain 'commentDeviations'
+        }
     }
 
     Context '-Finalize tells a measured zero from no measurement at all' {

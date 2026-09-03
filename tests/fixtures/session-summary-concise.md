@@ -19,6 +19,7 @@
 ## For the maintainer
 
 - **Skill coverage:** The `termination-drawing` skill was used. It matched the bug pattern named Core Connector Update.
+- **Comment corrections:** None recorded.
 - **Improvement opportunity:** The agent read 1 source file. Check it against the Key Files table in the skill, and add any that are missing: `Presentation/Manager/CoreConnectorManager.cs`.
 - **Human wait time:** 2m 21s, across 1 pause.
 - **Agent efficiency:** 1 file read, 1 file changed, and 12 of 12 tests passed.
