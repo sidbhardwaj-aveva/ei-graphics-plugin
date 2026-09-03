@@ -43,6 +43,9 @@ Describe 'The documents' -Tag 'Unit' {
         $raw | Should -Match 'AVEVA-Copilot-Access/aveva-agent-plugins'
         $raw | Should -Match 'sidbhardwaj-aveva/ei-graphics-plugin'
         $raw | Should -Match 'aveva-ei-graphics'
+        $raw | Should -Match 'fetch origin'
+        $raw | Should -Match 'reset --hard origin/main'
+        $raw | Should -Match '(?i)new installations do not need this'
         $raw | Should -Match 'git -C.*agent-plugins.*ei-graphics-plugin.*pull'
     }
 

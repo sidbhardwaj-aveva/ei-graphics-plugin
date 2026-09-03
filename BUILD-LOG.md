@@ -1835,12 +1835,17 @@ have unrelated history, so `git pull` refuses to merge. Resetting a clean instal
 reset.
 
 **Files touched:**
-- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`, `README.md`
+- `tests/Documents.Tests.ps1`, `tests/EverythingGreen.Tests.ps1`
 
 **Acceptance:** The T027 conditions in `plan.md` hold.
 
-**Attempts:** In progress.
+**Attempts:** 1. The focused document suite passed 14 tests. The build-progress check exited 0.
+The full Pester suite passed 537 tests with 0 failed and 0 skipped.
 
-**Decisions:** In progress.
+**Decisions:** Keep `git pull` for updates after migration. The one-time path runs `fetch origin`
+before `reset --hard origin/main`, which replaces tracked cache files but does not remove
+untracked files. The README says new installations do not need the reset.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE pending the T027 build commit. Document tests: 14 passed. Full suite: 537
+passed, 0 failed, 0 skipped. Progress check: exit 0.

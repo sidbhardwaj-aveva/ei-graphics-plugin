@@ -23,6 +23,20 @@ see [PLUGIN-INFO.md](PLUGIN-INFO.md).
 
 4. Open the plugin picker and install **`aveva-ei-graphics`**.
 
+## Existing installations
+
+People who installed the previous version need this reset once. The previous plugin history was
+replaced, so `git pull` cannot merge it with the current plugin. This replaces tracked files in
+the installed plugin cache. It does not remove untracked files.
+
+```powershell
+git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" fetch origin
+git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" reset --hard origin/main
+```
+
+Then press **`Ctrl+Shift+P`** → **Developer: Reload Window**. New installations do not need this
+reset.
+
 ## Keeping the plugin up to date
 
 VS Code installs the plugin into `~/.vscode/agent-plugins/`. That clone does not auto-update.
