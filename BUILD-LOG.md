@@ -1740,6 +1740,41 @@ result and fresh-reader response recorded here.
 
 **Result:** IN-PROGRESS.
 
+## T030 — completion — 2026-09-07T11:45:26Z
+
+**Assumptions:** The approved fourth focused attempt resumes the same T030 task. The blocked commit
+remains in history as an honest checkpoint and is not amended or removed.
+
+**Files touched:**
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/README.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-doctor/SKILL.md`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`
+- `docs/presentation/README.md`
+- `tests/EverythingGreen.Tests.ps1`, `tests/PlainLanguage.Tests.ps1`
+- `tests/ScriptContract.Tests.ps1`
+- `tests/aveva-ei-graphics/skills/ei-graphics-doctor/Skill.Tests.ps1`
+
+**Acceptance:** The doctor-focused suite passed 22 tests with 0 failed and 0 skipped. It exercised
+the default and JSON output modes. `Test-BuildProgress.ps1` exited 0 with 30 rows, 27 done, 0
+errors and 0 warnings while T030 was in progress. The full suite passed 572 tests with 0 failed
+and 0 skipped.
+
+**Attempts:** Four focused attempts were made. The first three and their diagnosis are recorded in
+the blocked entry above. The person approved a fourth attempt, which passed 22 of 22. Two full
+suite attempts followed: the first passed 570 and failed 2 on plain-language and agent line-count
+checks; the second passed all 572.
+
+**Decisions:** Kept the 680-line doctor script unchanged and assigned it a 700-line contract
+ceiling. Registered it as a repository-owned T030 script and allowlisted its skill as a tool, not
+a domain. Added its concise 57-line skill document to plain-language coverage. Updated the plugin
+shape to five skills and 12 scripts. Folded first-run guidance into the agent's Intake section to
+keep that file at 79 lines.
+
+**Result:** DONE pending the T030 build commit. Focused suite: 22 passed. Full suite: 572 passed,
+0 failed, 0 skipped. Progress check: exit 0.
+
 ## T030 — blocked after three focused attempts — 2026-09-07T11:38:19Z
 
 **Assumptions:** The three-attempt limit applies to repeated runs of the focused doctor test
@@ -1758,6 +1793,17 @@ multiline mode, for example `(?m)^---\s*$`, then rerun the focused test. Do not 
 
 **Result:** BLOCKED. Integration changes are preserved in the blocked commit. Ask a person before
 making the test correction or running a fourth focused attempt.
+
+## T030 — resumed with approval — 2026-09-07T11:42:44Z
+
+**Assumptions:** The person approved a fourth focused attempt after reading the blocked diagnosis.
+The remaining change is limited to correcting the frontmatter assertion; the doctor script and
+skill content remain unchanged.
+
+**Decision:** Resume T030 as `IN-PROGRESS`, change the assertion to multiline mode, and rerun the
+same focused command before any wider gate.
+
+**Result:** IN-PROGRESS.
 
 ## T029 — completion — 2026-09-07T00:00:00Z
 

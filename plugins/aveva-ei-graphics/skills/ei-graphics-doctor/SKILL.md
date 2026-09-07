@@ -10,7 +10,7 @@ allowedTools:
   - powershell
 ---
 
-# EI Graphics Doctor
+# Electrical and Instrumentation (EI) Graphics Doctor
 
 Run the bundled read-only diagnostic. Do not install tools, authenticate, change configuration, or repair files.
 

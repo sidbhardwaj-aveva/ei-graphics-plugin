@@ -218,7 +218,7 @@ Describe 'Invoke-EiGraphicsDoctor.ps1' -Tag 'Unit' {
         
         It 'Doctor SKILL.md has required frontmatter' {
             $content = Get-Content -LiteralPath $skillPath -Raw
-            $content | Should -Match '^---\s*$'
+            $content | Should -Match '(?m)^---\s*$'
             $content | Should -Match 'name:\s*ei-graphics-doctor'
             $content | Should -Match 'description:'
         }
