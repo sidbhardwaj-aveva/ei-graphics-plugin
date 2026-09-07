@@ -1775,6 +1775,13 @@ keep that file at 79 lines.
 **Result:** DONE pending the T030 build commit. Focused suite: 22 passed. Full suite: 572 passed,
 0 failed, 0 skipped. Progress check: exit 0.
 
+## T030 — build commit recorded — 2026-09-07T11:46:18Z
+
+**Assumptions:** The completed T030 implementation is commit `bd4c04c`. The earlier blocked commit
+`a989a94` remains part of the honest task history.
+
+**Result:** Recorded build commit `bd4c04c` in `BUILD-PROGRESS.md`.
+
 ## T030 — blocked after three focused attempts — 2026-09-07T11:38:19Z
 
 **Assumptions:** The three-attempt limit applies to repeated runs of the focused doctor test
