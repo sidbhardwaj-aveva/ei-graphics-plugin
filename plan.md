@@ -1620,6 +1620,26 @@ The plain-language rules in Part 3 do not apply here. This skill is copied conte
 **Done when.** `$P` exits 0 after the edit, and `BUILD-LOG.md` has a T023 block listing the gaps
 found, or an explicit "none found".
 
+#### T029 — Agent reasoning escalation
+
+**Why this task exists.** An agent that lacks evidence, repeats an unsuccessful reasoning path, or
+cannot ground a claim should ask for context instead of spending more tokens on guesses.
+
+**Do this.** Add a short stop rule to `agents/ei-graphics.agent.md` covering insufficient or
+conflicting evidence, repeated reasoning that adds no evidence, and unsupported claims. The agent
+must state what is uncertain, name the missing context, and ask one focused question before it
+continues. Explain the same behavior in `INSTRUCTIONS.md`, add reusable wording to
+`references/rnd-delegation.md`, and add text-contract tests in `Agent.Tests.ps1`.
+
+Use the existing human checkpoint and `humanInput` session fields. Do not add a new session schema
+phase, failure field, or summary renderer behavior. Keep the agent file under 80 lines and keep
+all wording plain and specific. Treat "hallucination" as an ungrounded claim that must not be
+presented as fact.
+
+**Done when.** The focused agent tests prove the stop rule names weak or conflicting evidence,
+repetition, unsupported claims, and a focused request for context. `Test-BuildProgress.ps1` and
+the full Pester suite both exit 0 with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong

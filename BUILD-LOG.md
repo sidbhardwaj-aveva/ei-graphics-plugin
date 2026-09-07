@@ -1875,3 +1875,25 @@ T026 path remains only in its append-only historical record.
 
 **Result:** DONE pending the T028 build commit. Document tests: 14 passed. Full suite: 537
 passed, 0 failed, 0 skipped. Progress check: exit 0.
+
+## T029 — Agent reasoning escalation — 2026-09-07T00:00:00Z
+
+**Goal:** Make the agent stop and ask for focused context when it cannot reason reliably, rather
+than repeating itself or presenting an unsupported claim as fact.
+
+**Assumptions:** The existing human checkpoint and `humanInput` session fields are enough to record
+this pause. No new session schema phase, failure field, or summary renderer behavior is needed.
+The task will keep the agent file under 80 lines and will use plain, testable wording.
+
+**Files touched:** To be determined after the focused implementation.
+
+**Acceptance:** The agent guidance, user instructions, reusable delegation guidance and focused
+tests all describe the stop-and-ask behavior. The progress checker and full Pester suite exit 0.
+
+**Attempts:** In progress.
+
+**Decisions:** Use a focused request for the missing file, expected behavior, constraint, error
+output or decision. Treat an unsupported or unverifiable claim as something to pause on, not as a
+claim the agent can safely make.
+
+**Result:** IN-PROGRESS.
