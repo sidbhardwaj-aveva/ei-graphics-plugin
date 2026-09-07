@@ -2,7 +2,19 @@
 
 For full documentation — prerequisites, usage, repository layout, tests, and contribution notes —
 see [PLUGIN-INFO.md](PLUGIN-INFO.md).
+## Existing installations
 
+People who installed the previous version need this reset once. The previous plugin history was
+replaced, so `git pull` cannot merge it with the current plugin. This replaces tracked files in
+the installed plugin cache. It does not remove untracked files.
+
+```powershell
+git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" fetch origin
+git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" reset --hard origin/main
+```
+
+Then press **`Ctrl+Shift+P`** → **Developer: Reload Window**. New installations do not need this
+reset.
 ## Installation
 
 1. Press **`Ctrl+Shift+P`** and type **`Preferences: Open User Settings (JSON)`**, then press Enter.
@@ -34,19 +46,7 @@ $env:EI_GRAPHICS_SHARE_PATH = "\\INHYDD1510\Share\ei-graphics-plugin-sessions"
 The agent copies a completed session to this approved internal share. Leave the variable unset to
 keep the session only on your computer.
 
-## Existing installations
 
-People who installed the previous version need this reset once. The previous plugin history was
-replaced, so `git pull` cannot merge it with the current plugin. This replaces tracked files in
-the installed plugin cache. It does not remove untracked files.
-
-```powershell
-git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" fetch origin
-git -C "$env:USERPROFILE\.vscode\agent-plugins\github.com\sidbhardwaj-aveva\ei-graphics-plugin" reset --hard origin/main
-```
-
-Then press **`Ctrl+Shift+P`** → **Developer: Reload Window**. New installations do not need this
-reset.
 
 ## Keeping the plugin up to date
 
