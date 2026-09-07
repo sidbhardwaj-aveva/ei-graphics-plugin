@@ -1762,6 +1762,10 @@ DONE-to-SHA commit gap.
 **Result:** DONE pending the T029 build commit. Focused agent tests: 30 passed. Focused language
 tests: 53 passed. Full suite: 539 passed, 0 failed, 0 skipped. Progress check: exit 0.
 
+## T029 — build commit recorded — 2026-09-07T00:00:00Z
+
+**Result:** The implementation was committed as `3deb23f`. The progress row now records that SHA.
+
 ### T022 continuation result — 2026-09-03
 
 The live intake succeeded for story 3408091. `ado.json` records three comments and no images.
