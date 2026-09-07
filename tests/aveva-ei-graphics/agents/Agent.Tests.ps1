@@ -60,6 +60,15 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:AgentFlat | Should -Match '(?i)never fetch the story from ADO again'
     }
 
+    It 'stops and asks for context when reasoning is not grounded' {
+        $script:AgentFlat | Should -Match '(?i)evidence is missing or conflicts'
+        $script:AgentFlat | Should -Match '(?i)repeated reasoning adds no evidence'
+        $script:AgentFlat | Should -Match '(?i)claim cannot be grounded'
+        $script:AgentFlat | Should -Match '(?i)name the missing context'
+        $script:AgentFlat | Should -Match '(?i)ask one focused question'
+        $script:AgentFlat | Should -Match '(?i)unverified claim as fact'
+    }
+
     It 'tells the agent never to invent a domain identifier' {
         $script:AgentFlat | Should -Match '(?i)never invent a domain'
     }
@@ -105,6 +114,14 @@ Describe 'the agent reference files' -Tag 'Unit' {
         $script:Delegation | Should -Match '(?m)^### No matching domain skill\s*$'
         $script:Delegation | Should -Match '(?i)What this means'
         $script:Delegation | Should -Match '(?i)What would help me'
+    }
+
+    It 'rnd-delegation.md carries the reasoning escalation block' {
+        $script:Delegation | Should -Match '(?m)^## When reasoning is not grounded\s*$'
+        $script:Delegation | Should -Match '(?i)repeated reasoning adds no evidence'
+        $script:Delegation | Should -Match '(?i)name the missing context'
+        $script:Delegation | Should -Match '(?i)ask one focused question'
+        $script:Delegation | Should -Match '(?i)unverified claim as fact'
     }
 
     It 'checkpoint-templates.md carries the four Checkpoint 2 headings' {

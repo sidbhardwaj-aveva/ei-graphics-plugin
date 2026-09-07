@@ -34,6 +34,13 @@ If no domain skill covers the area, the agent says so plainly rather than guessi
 you which files matter and whether there are rules it should follow. Answering well is worth the
 minute it takes, because the answer can then be written into a skill.
 
+## When reasoning is stuck
+
+The agent stops and asks for context when evidence is missing or conflicts. It also stops when
+repeated reasoning adds no evidence or when it cannot support a claim. It will say what is uncertain, name the missing
+context, and ask one focused question. Give it the relevant file, expected behavior, constraint,
+error output, or decision. This is better than letting it guess or spend tokens repeating itself.
+
 ## After the run
 
 Read `.ei-session-logs/<story number>/session-summary.md`. The last section is written for you.

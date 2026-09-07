@@ -47,3 +47,10 @@ I checked the available domain skills and none cover this area.
 - Which source files matter for this story?
 - Are there architecture rules I should follow?
 - Any patterns or conventions for this area?
+
+## When reasoning is not grounded
+
+If evidence is missing or conflicts, repeated reasoning adds no evidence, or a claim cannot be
+supported, stop and say what is uncertain. Name the missing context and ask one focused question.
+Do not guess, repeat the same path, or present an unverified claim as fact. Ask for the relevant
+file, expected behavior, constraint, error output, or decision before continuing.

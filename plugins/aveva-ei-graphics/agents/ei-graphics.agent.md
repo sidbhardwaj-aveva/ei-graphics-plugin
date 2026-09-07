@@ -34,6 +34,8 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 
 - Understand the cause before you edit. Separate the symptom from what you think caused it. If no
   pattern matches and the evidence is thin, say so. Do not guess at a fix.
+- If evidence is missing or conflicts, repeated reasoning adds no evidence, or a claim cannot be grounded, stop. Say what is uncertain, name the missing context, and ask one focused question.
+  Do not guess or present an unverified claim as fact.
 - Make surgical changes. Touch only what the fix needs. Leave nearby code, comments and formatting
   alone. Match the style already there.
 - Small change: fix it, then verify. Large change: show the plan from

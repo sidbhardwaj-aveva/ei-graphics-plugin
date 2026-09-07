@@ -1740,6 +1740,28 @@ result and fresh-reader response recorded here.
 
 **Result:** IN-PROGRESS.
 
+## T029 — completion — 2026-09-07T00:00:00Z
+
+**Files touched:**
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `plugins/aveva-ei-graphics/INSTRUCTIONS.md`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/references/rnd-delegation.md`
+- `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
+- `tests/EverythingGreen.Tests.ps1`
+
+**Attempts:** 3 focused repairs. The first agent check caught the 80-line ceiling. The next
+focused run caught stale wording and the line count again. The full suite then caught the new row
+count and one 26-word sentence. No check failed three times.
+
+**Decisions:** The runtime rule covers missing or conflicting evidence, repeated reasoning that
+adds no evidence, and claims that cannot be grounded. It asks for one focused piece of context and
+does not add a new session schema phase. The progress row uses `pending` only during the required
+DONE-to-SHA commit gap.
+
+**Result:** DONE pending the T029 build commit. Focused agent tests: 30 passed. Focused language
+tests: 53 passed. Full suite: 539 passed, 0 failed, 0 skipped. Progress check: exit 0.
+
 ### T022 continuation result — 2026-09-03
 
 The live intake succeeded for story 3408091. `ado.json` records three comments and no images.
