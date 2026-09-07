@@ -12,6 +12,7 @@ $PlainLanguageTargets = @(
     "$PluginRoot/agents/ei-graphics.agent.md"
     "$PluginRoot/skills/ei-graphics-core/SKILL.md"
     "$PluginRoot/skills/ei-azure-devops-cli-intake/SKILL.md"
+    "$PluginRoot/skills/ei-graphics-doctor/SKILL.md"
     "$PluginRoot/skills/ei-graphics-core/references/rnd-delegation.md"
     "$PluginRoot/skills/ei-graphics-core/references/checkpoint-templates.md"
     "$PluginRoot/README.md"
@@ -41,7 +42,7 @@ BeforeAll {
 Describe 'Everything green, before the live run' -Tag 'Unit' {
 
     It 'the progress table was read' {
-        $script:Rows.Count | Should -Be 29
+        $script:Rows.Count | Should -Be 30
         $script:MustBeDone.Count | Should -Be 20
     }
 
@@ -94,17 +95,17 @@ Describe 'Everything green, before the live run' -Tag 'Unit' {
             Test-Path -LiteralPath (Join-Path $RepoRoot $_) | Should -BeTrue
         }
 
-        It 'all nine are present, not merely most of them' -TestCases @(@{ Paths = $PlainLanguageTargets }) {
-            $Paths.Count | Should -Be 9
-            @($Paths | Where-Object { Test-Path -LiteralPath (Join-Path $script:RepoRoot $_) }).Count | Should -Be 9
+        It 'all ten are present, not merely most of them' -TestCases @(@{ Paths = $PlainLanguageTargets }) {
+            $Paths.Count | Should -Be 10
+            @($Paths | Where-Object { Test-Path -LiteralPath (Join-Path $script:RepoRoot $_) }).Count | Should -Be 10
         }
     }
 
     Context 'the shape of the finished build' {
-        It 'the plugin ships exactly the four skills the plan names' {
+        It 'the plugin ships exactly the five skills the plan names' {
             $skills = @(Get-ChildItem -LiteralPath (Join-Path $script:RepoRoot 'plugins' 'aveva-ei-graphics' 'skills') -Directory |
                     ForEach-Object { $_.Name } | Sort-Object)
-            ($skills -join ',') | Should -Be 'ei-azure-devops-cli-intake,ei-graphics-core,ei-layer-guard,termination-drawing'
+            ($skills -join ',') | Should -Be 'ei-azure-devops-cli-intake,ei-graphics-core,ei-graphics-doctor,ei-layer-guard,termination-drawing'
         }
 
         It 'the script count under plugins is 12 or fewer' {

@@ -1699,13 +1699,13 @@ All of the following, checked in one sitting.
 3. `git status --porcelain` is empty.
 4. `git log --oneline` shows the three-commit group per task, in order — `build(T0NN): start`,
    then `build(T0NN):`, then `chore(T0NN): record commit sha`. T001 is the exception with two.
-5. `plugins/aveva-ei-graphics/skills/` contains exactly four skills: `ei-graphics-core`,
-   `ei-azure-devops-cli-intake`, `ei-layer-guard`, `termination-drawing`.
+5. `plugins/aveva-ei-graphics/skills/` contains exactly five skills: `ei-graphics-core`,
+   `ei-azure-devops-cli-intake`, `ei-graphics-doctor`, `ei-layer-guard`, `termination-drawing`.
 
    This is a snapshot of the finished build, not a permanent cap. Adding domain skills later is
    expected.
-6. The `.ps1` count under `plugins/` is 12 or fewer. Expected 10: six core, three ADO, one layer
-   guard.
+6. The `.ps1` count under `plugins/` is 12 or fewer. Expected 12: seven core, three ADO, one layer
+  guard and one doctor.
 
    Of the old repo's 36, four survive as copies and 32 are dropped. The other six are written
    fresh here.

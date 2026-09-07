@@ -107,7 +107,7 @@ sequenceDiagram
 
 ## 4. Components and ownership — what the plugin owns vs delegates
 
-The plugin ships one agent and four skills. Review, commit and PR are read directly from
+The plugin ships one agent and five skills. Review, commit and PR are read directly from
 `aveva-rnd` rather than wrapped, which keeps the surface small.
 
 ```mermaid
@@ -118,6 +118,7 @@ flowchart TB
         subgraph SkillSet["Skills"]
             Intake["ei-azure-devops-cli-intake"]
             Core["ei-graphics-core: six scripts"]
+            Doctor["ei-graphics-doctor"]
             Guard["ei-layer-guard"]
             Domain["termination-drawing domain"]
         end

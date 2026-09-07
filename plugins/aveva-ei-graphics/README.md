@@ -1,6 +1,26 @@
 # aveva-ei-graphics
 
-The plugin itself. One agent and four skills.
+The plugin itself. One agent and five skills.
+
+## Quick Start
+
+**First time? Verify your setup is ready:**
+
+```powershell
+pwsh -NoProfile -File ./plugins/aveva-ei-graphics/skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1
+```
+
+The doctor checks:
+- PowerShell 7.0+ is installed
+- Azure DevOps CLI and authentication are working
+- Plugin files are complete and not truncated
+- Skill registry and schemas are valid
+- Session artifacts directory is writable
+- Git is configured for safe OneDrive sync
+
+**Status:** `Ready` = all systems go | `ManualReview` = warnings (can proceed) | `Blocked` = fix required
+
+For automated checks, add the `-Json` flag.
 
 ## Skills
 
@@ -8,10 +28,11 @@ The plugin itself. One agent and four skills.
 |---|---|---|
 | `ei-graphics-core` | The six scripts that write and read the artifacts, plus their schemas | Whenever the agent needs to write or read an artifact |
 | `ei-azure-devops-cli-intake` | Fetching a story, its images and its discussion | At the start of a run |
+| `ei-graphics-doctor` | Checking that the plugin and its dependencies are ready | Before the first story or when setup is unclear |
 | `ei-layer-guard` | A pass or fail check on architecture rules | Before committing |
 | `termination-drawing` | What is known about the termination drawing code | When the story is about that area |
 
-`termination-drawing` is a domain skill. The other three are tools. Only domain skills appear in
+`termination-drawing` is a domain skill. The other four are tools. Only domain skills appear in
 `domain-skill-registry.json`.
 
 ## Folder tree
@@ -33,6 +54,9 @@ aveva-ei-graphics/
     │   ├── SKILL.md
     │   └── scripts/          the intake script and its two helpers
     ├── ei-layer-guard/
+    │   ├── SKILL.md
+    │   └── scripts/
+    ├── ei-graphics-doctor/
     │   ├── SKILL.md
     │   └── scripts/
     └── termination-drawing/

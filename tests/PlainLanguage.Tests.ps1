@@ -4,15 +4,15 @@ Set-StrictMode -Version Latest
 # Discovery-time state. Pester needs -ForEach data before any BeforeAll block runs.
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 
-# Part 3 names ten files a person reads. session-summary.md is rendered at run time into a
-# gitignored folder, so it is never on disk to scan. T009 checks that one with golden files.
-# This list is closed. Nothing in this build adds an eleventh entry. T021 asserts all nine exist
-# by then, which is what catches this hardcoded list drifting away from the repository.
+# session-summary.md is rendered at run time into a gitignored folder, so it is never on disk to
+# scan. T009 checks that one with golden files. T021 and T030 keep this list aligned with the files
+# a person or agent reads.
 $PluginRoot = 'plugins/aveva-ei-graphics'
 $CoveredPaths = @(
     "$PluginRoot/agents/ei-graphics.agent.md"
     "$PluginRoot/skills/ei-graphics-core/SKILL.md"
     "$PluginRoot/skills/ei-azure-devops-cli-intake/SKILL.md"
+    "$PluginRoot/skills/ei-graphics-doctor/SKILL.md"
     "$PluginRoot/skills/ei-graphics-core/references/rnd-delegation.md"
     "$PluginRoot/skills/ei-graphics-core/references/checkpoint-templates.md"
     "$PluginRoot/README.md"

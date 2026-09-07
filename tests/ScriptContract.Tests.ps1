@@ -17,6 +17,7 @@ $LineCeilings = @{
     'Get-EiDomainSkillCatalog' = 120
     'Test-EiScopeDrift'        = 100
     'Convert-EiAdoIntake'      = 160
+    'Invoke-EiGraphicsDoctor'  = 700
 }
 
 # Which task in plan.md owns each of our scripts.
@@ -28,6 +29,7 @@ $OwningTask = @{
     'Get-EiDomainSkillCatalog' = 'T010'
     'Test-EiScopeDrift'        = 'T011'
     'Convert-EiAdoIntake'      = 'T012'
+    'Invoke-EiGraphicsDoctor'  = 'T030'
 }
 
 # Copied from the old repository and never edited. Hardcoded, as the plan requires.
@@ -57,6 +59,7 @@ BeforeAll {
         'Get-EiDomainSkillCatalog' = 120
         'Test-EiScopeDrift'        = 100
         'Convert-EiAdoIntake'      = 160
+        'Invoke-EiGraphicsDoctor'  = 700
     }
     $script:OwningTask = @{
         'Write-EiArtifact'         = 'T007'
@@ -66,6 +69,7 @@ BeforeAll {
         'Get-EiDomainSkillCatalog' = 'T010'
         'Test-EiScopeDrift'        = 'T011'
         'Convert-EiAdoIntake'      = 'T012'
+        'Invoke-EiGraphicsDoctor'  = 'T030'
     }
     $script:CopiedScripts = @(
         'Invoke-EiAdoCliIntake.ps1'
@@ -187,13 +191,13 @@ Describe 'Script contract' -Tag 'Unit' {
             { Resolve-Script -Name $_ } | Should -Not -Throw
         }
 
-        It 'the total count is 12 or fewer, and is 11 today' -TestCases @(@{ Count = $FoundNames.Count }) {
+        It 'the total count is 12 or fewer, and is 12 today' -TestCases @(@{ Count = $FoundNames.Count }) {
             $Count | Should -BeLessOrEqual 12
-            $Count | Should -Be 11
+            $Count | Should -Be 12
         }
     }
 
-    Context 'our six scripts' {
+    Context 'our eight scripts' {
         It '<_> follows the full contract' -ForEach $OurScripts {
             $raw = Get-Content -LiteralPath (Resolve-Script -Name $_) -Raw
             $raw | Should -Match '(?m)^#Requires -Version 7\.0\s*$'
@@ -269,7 +273,7 @@ Describe 'Script contract' -Tag 'Unit' {
 
     Context 'the registry is complete in both directions' {
         It 'every skill folder is either registered or on the allowlist' {
-            $allow = @('ei-graphics-core', 'ei-azure-devops-cli-intake', 'ei-layer-guard')
+            $allow = @('ei-graphics-core', 'ei-azure-devops-cli-intake', 'ei-graphics-doctor', 'ei-layer-guard')
             $pluginFolder = Join-Path $script:PluginsRoot 'aveva-ei-graphics'
             $registryPath = Join-Path $pluginFolder 'skills' 'ei-graphics-core' 'references' 'domain-skill-registry.json'
             $registered = @((Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json).domains | ForEach-Object { $_.id })

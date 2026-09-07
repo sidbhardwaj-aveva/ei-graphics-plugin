@@ -1740,6 +1740,25 @@ result and fresh-reader response recorded here.
 
 **Result:** IN-PROGRESS.
 
+## T030 — blocked after three focused attempts — 2026-09-07T11:38:19Z
+
+**Assumptions:** The three-attempt limit applies to repeated runs of the focused doctor test
+command. A fourth run requires a person to approve continuing from this blocked state.
+
+**Attempts:** Attempt 1 discovered 22 tests; 1 passed and 21 failed because path variables were
+initialized during Pester discovery and were null at run time. Attempt 2 passed 9 and failed 13
+because the paths resolved into the mirrored test tree instead of the plugin tree. Attempt 3
+passed 21 and failed 1. The remaining assertion uses `^---\s*$` against the whole file read with
+`-Raw`; without multiline mode, it cannot match valid opening frontmatter followed by content.
+
+**Diagnosis:** The doctor implementation has not failed. The remaining failure is in
+`tests/aveva-ei-graphics/skills/ei-graphics-doctor/Skill.Tests.ps1`. Change the assertion to use
+multiline mode, for example `(?m)^---\s*$`, then rerun the focused test. Do not change
+`SKILL.md` to satisfy the broken expression; its two frontmatter fences are valid.
+
+**Result:** BLOCKED. Integration changes are preserved in the blocked commit. Ask a person before
+making the test correction or running a fourth focused attempt.
+
 ## T029 — completion — 2026-09-07T00:00:00Z
 
 **Files touched:**
