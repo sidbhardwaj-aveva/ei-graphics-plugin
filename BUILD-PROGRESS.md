@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T023
+**Current task:** T030
 **Last verified green:** T028 (2026-09-03T13:15:20Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -37,5 +37,6 @@ in `BUILD-LOG.md`.
 | T027 | Document the installed-plugin migration | DONE | 247f513 | 2026-09-03T12:46:57Z |
 | T028 | Set the approved shared-session path | DONE | d9e79e4 | 2026-09-03T13:15:20Z |
 | T029 | Agent reasoning escalation | DONE | 3deb23f | 2026-09-07T00:00:00Z |
+| T030 | Integrate the EI Graphics doctor | IN-PROGRESS | — | — |
 | T022 | Dry run against story 3408091 | BLOCKED | — | — |
 | T023 | Read the summary, improve the skill | TODO | — | — |

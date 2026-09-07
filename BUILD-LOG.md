@@ -1923,3 +1923,32 @@ output or decision. Treat an unsupported or unverifiable claim as something to p
 claim the agent can safely make.
 
 **Result:** IN-PROGRESS.
+
+## T030 — Integrate the EI Graphics doctor — 2026-09-07T11:33:39Z
+
+**Goal:** Integrate the existing read-only EI Graphics doctor into the plugin and make every
+repository gate pass.
+
+**Assumptions:** The doctor implementation already exists in the working tree and must not be
+recreated. Its uncommitted state is the result of a missed workflow, not evidence that the work
+started correctly. This entry records the miss after it was discovered. T030 owns the recovery,
+including the existing skill, script, tests, README guidance and first-run agent guidance. The
+doctor is a tool skill, so it belongs on the tool-skill allowlist and not in the domain registry.
+The current six full-suite failures are the integration baseline: the four-skill shape check, the
+README acronym check, the unowned doctor script, the stale script count, the unlisted tool skill,
+and the agent's 80-line limit.
+
+**Files touched:** Existing uncommitted doctor and documentation files, plus the plan, progress,
+log and contract tests required to integrate them. The exact final list will be recorded at
+completion.
+
+**Acceptance:** The focused doctor tests, progress checker and full Pester suite exit 0 with no
+skipped tests. Both doctor output modes run without a fatal error.
+
+**Attempts:** In progress. The first full-suite baseline was 538 passed, 6 failed and 0 skipped.
+
+**Decisions:** Preserve the existing doctor behavior. Repair repository ownership and tests around
+it rather than rewriting the doctor. Record this recovery as a new task instead of editing an old
+append-only log entry or pretending the required start commit happened earlier.
+
+**Result:** IN-PROGRESS.

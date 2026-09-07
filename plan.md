@@ -1640,6 +1640,23 @@ presented as fact.
 repetition, unsupported claims, and a focused request for context. `Test-BuildProgress.ps1` and
 the full Pester suite both exit 0 with no skipped tests.
 
+#### T030 — Integrate the EI Graphics doctor
+
+**Why this task exists.** The doctor skill, script, tests, README guidance and first-run agent
+guidance were created before a task was added to this plan. No start record or start commit was
+made. This task records that miss honestly and integrates the existing work without recreating it.
+
+**Do this.** Keep the existing read-only doctor behavior. Bring its skill document, script, tests,
+plugin README and agent guidance under the repository contracts. Add the doctor as a tool skill,
+not a domain skill. Update filesystem-driven expectations, the script ownership contract and the
+plain-language checks. Keep `ei-graphics.agent.md` under 80 lines and `SKILL.md` concise.
+
+**Parameters, exactly these 3:** `-Root`, `-Json`, `-Help`.
+
+**Done when.** The doctor-focused tests pass with no skipped tests. The default and JSON commands
+run without a fatal error. `Test-BuildProgress.ps1` and the full Pester suite both exit 0 with no
+skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong
