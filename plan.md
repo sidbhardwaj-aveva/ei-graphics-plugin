@@ -1860,6 +1860,33 @@ In `tests/ScriptContract.Tests.ps1`, add `Complete-EiSession` to `$LineCeilings`
 manifests check, the T019 no-orphan check, the T020 script contract check, and the T021 global
 green check all still pass.
 
+#### T037 — Fix doctor crash when the registry or `.git` is missing
+
+**Why this task exists.** Running the doctor with `-Root` pointed at a repository that has no
+`plugins/aveva-ei-graphics` tree at all crashed with `The property 'DomainsResolvable' cannot be
+found on this object.` `Test-SkillRegistry`'s two early-return paths (registry file missing,
+registry not valid JSON) returned an empty `$details` hashtable, and `Test-GitConfiguration`'s
+early return (no `.git`) did the same. Under `Set-StrictMode -Version Latest` the report renderer
+reads `DomainsResolvable`, `DomainsRegistered`, `SchemasLoaded`, `SchemasChecked`, `UserConfigured`
+and `GcAutoValue` unconditionally, so a missing key throws instead of the doctor reporting
+`blocked` with real findings.
+
+**Do this.** In `Invoke-EiGraphicsDoctor.ps1`, initialize every detail key the renderer reads
+(`DomainsRegistered`, `DomainsResolvable`, `DomainsNotFound`, `SchemasChecked`, `SchemasLoaded`,
+`SchemasNotFound` in `Test-SkillRegistry`; `UserName`, `UserConfigured`, `UserEmail`,
+`EmailConfigured`, `GcAutoValue`, `GcAutoSet` in `Test-GitConfiguration`) at the top of each
+function, before any early return. Do not change the read-only diagnostic behavior or the
+six-check structure.
+
+Add two regression tests to the doctor's Pester suite: running the script with `-Root` pointed
+at a `$TestDrive` folder with no `plugins/` tree exits 0 or 1 without throwing, and its `-Json`
+output has `checkDetails.SkillRegistryAndSchemas.DomainsResolvable -eq 0`; a `$TestDrive` folder
+with a plugin tree but no `.git` behaves the same way, with
+`checkDetails.GitConfiguration.UserConfigured -eq $false`.
+
+**Done when.** The doctor-focused tests pass with no skipped tests, including the two new
+regression cases. `Test-BuildProgress.ps1` and the full Pester suite both exit 0.
+
 ---
 
 ## Part 8 — When things go wrong

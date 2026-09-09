@@ -2452,4 +2452,37 @@ bundle when `EI_GRAPHICS_SHARE_PATH` is unset, runs and exports the bundle when 
 exits 1 with the failing step named when finalize or summary fails, and warns-but-still-
 exits-0 when the share export fails.
 
+## T037 — Fix doctor crash when the registry or .git is missing — 2026-09-09T09:00:00Z
+
+**Goal:** Running `Invoke-EiGraphicsDoctor.ps1 -Root <repo with no plugin tree>` crashed with
+`The property 'DomainsResolvable' cannot be found on this object.` instead of reporting a
+`blocked` status, breaking the pre-intake readiness check for a repository that has not yet
+received the plugin files.
+
+**Assumptions:** `Test-SkillRegistry`'s two early-return paths (registry file missing, registry
+not valid JSON) and `Test-GitConfiguration`'s early-return path (no `.git`) returned a `$details`
+hashtable missing keys the report renderer reads unconditionally (`DomainsResolvable`,
+`DomainsRegistered`, `SchemasLoaded`, `SchemasChecked`, `UserConfigured`, `GcAutoValue`). Under
+`Set-StrictMode -Version Latest`, reading a hashtable key that was never assigned throws
+`PropertyNotFoundException` rather than returning `$null`. The fix is to default every key a
+function's caller reads at the top of the function, before any early return, so every code path
+returns a complete object. This is a read-only diagnostic script; no repair or install behavior
+changes.
+
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`
+  (`Test-SkillRegistry`, `Test-GitConfiguration`)
+- `tests/aveva-ei-graphics/skills/ei-graphics-doctor/Skill.Tests.ps1` (two new regression tests)
+- `plan.md` (new `#### T037` section)
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+
+**Acceptance:** The doctor-focused Pester tests pass with no skipped tests, including a
+`$TestDrive` root with no `plugins/` tree (exits without throwing, `DomainsResolvable -eq 0` in
+JSON output) and a `$TestDrive` root with a plugin tree but no `.git` (exits without throwing,
+`UserConfigured -eq $false` in JSON output). `Test-BuildProgress.ps1` and the full Pester suite
+both exit 0.
+
+**Attempts:**
+
 

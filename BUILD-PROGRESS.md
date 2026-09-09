@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T036
+**Current task:** T037
 **Last verified green:** T028 (2026-09-03T13:15:20Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -46,3 +46,4 @@ in `BUILD-LOG.md`.
 | T034 | Verbatim-quote enforcement in Write-EiSessionEntry.ps1 | DONE | d7dbce7 | 2026-09-09T06:59:41Z |
 | T035 | Informational status lane for session entries | DONE | 270d05c | 2026-09-09T07:11:25Z |
 | T036 | Wrapper script Complete-EiSession.ps1 | DONE | 5c0126c | 2026-09-09T08:39:47Z |
+| T037 | Fix doctor crash when the registry or .git is missing | IN-PROGRESS | — | — |
