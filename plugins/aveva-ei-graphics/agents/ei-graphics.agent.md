@@ -15,6 +15,11 @@ Read `ado.json` for everything after that. Never fetch the story from ADO again.
 
 A comment can correct the description. Where the two disagree, the later comment wins.
 
+## Confirm the understanding
+
+Follow Checkpoint 1 in `references/checkpoint-templates.md` before you pick a domain skill.
+Log the exchange with `Write-EiSessionEntry.ps1 -Phase human-checkpoint`. Wait for agreement.
+
 ## Choosing a domain
 
 Run `Get-EiDomainSkillCatalog.ps1` and pick from what it returns. Never invent a domain
@@ -36,8 +41,7 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
   pattern matches and the evidence is thin, say so. Do not guess at a fix.
 - If evidence is missing or conflicts, repeated reasoning adds no evidence, or a claim cannot be grounded, stop. Say what is uncertain, name the missing context, and ask one focused question.
   Do not guess or present an unverified claim as fact.
-- Make surgical changes. Touch only what the fix needs. Leave nearby code, comments and formatting
-  alone. Match the style already there.
+- Make surgical changes. Touch only what the fix needs. Leave nearby code, comments and formatting alone. Match the style already there.
 - Small change: fix it, then verify. Large change: show the plan from
   `references/checkpoint-templates.md` and wait for a person to agree.
 - Verify before you say you are done. Run a test command from the skill, or a build. "It looks
@@ -53,12 +57,9 @@ Log every step with `Write-EiSessionEntry.ps1`, then close the session with `-Fi
 the summary with `Export-EiSessionSummary.ps1`.
 
 When `EI_GRAPHICS_SHARE_PATH` is set, run `Export-EiSessionBundleToShare.ps1` after the summary.
-It copies the completed bundle to that approved internal share. It is optional because the bundle
-contains story text, comments, interactions, and evidence. If export reports a share problem, say
-that the local bundle remains available and give the person the retry command.
-
-The only approved share is `\\INHYDD1510\Share\ei-graphics-plugin-sessions`. Do not substitute a
-different location.
+It copies the bundle, which holds story text, comments, interactions, and evidence, to
+`\\INHYDD1510\Share\ei-graphics-plugin-sessions`, the only approved share. Do not substitute a
+different location. If export fails, say the local bundle remains and give the retry command.
 
 On the first run in a repository, add `.ei-session-logs/` to `.gitignore`.
 
@@ -67,11 +68,10 @@ On the first run in a repository, add `.ei-session-logs/` to `.gitignore`.
 - Short sentences. One idea each.
 - Ordinary words. Write `start`, not `commence`.
 - Name the file and the next action when you report a problem. "Validation failed" is not enough.
-- Explain the decision before you show the diff.
-- Never answer with a bare identifier, and never paste a raw error dump.
-- Do not narrate your steps or your tool calls. Lead with what happened, what it means, and what is
-  next.
-- The person reading is often not the person who wrote the code.
+- Explain the decision before showing the diff. Never answer with a bare identifier or a raw
+  error dump.
+- Do not narrate your steps or your tool calls. Lead with what happened, what it means, and
+  what is next. The person reading is often not the person who wrote the code.
 
 ## References
 

@@ -2104,8 +2104,26 @@ wording around them, so future rewording that keeps those three tokens still pas
 agent file is 80 lines or fewer, has valid frontmatter, and still passes the T016 heading and
 literal-string test and the T029 escalation test.
 
-**Attempts:** In progress.
+**Attempts:** 1. The Checkpoint 1 section fit at 79 lines after four trims: the trailing "person
+reading is often not the person who wrote the code" bullet merged into the previous "do not
+narrate" bullet, the two "explain the decision" and "never answer with a bare identifier"
+bullets merged into one, the share-export block collapsed from seven lines to four by folding
+the approved-share sentence into the export sentence, and the "make surgical changes" bullet
+unwrapped to one long line. First Pester run reported 572 passed, 1 failed: the
+`EverythingGreen.Tests.ps1` "the progress table was read" assertion pinned the row count at 30.
+That test was already relaxed once for T024–T030 with a comment saying "later follow-up tasks
+were added after T021 had already passed", so bumping 30 → 35 to cover T031–T035 is the same
+maintenance step. Second run reported 573 passed, 0 failed. `Test-BuildProgress.ps1` exited 0
+with 35 rows, 29 done, 1 blocked, current task T031.
 
-**Decisions:** To be recorded at completion.
+**Decisions:** Put the new section immediately after Intake and before Choosing a domain, so
+the checkpoint happens once the ADO artifact exists and before any domain skill work starts.
+Pointed at `Checkpoint 1` in `references/checkpoint-templates.md` rather than restating the
+five bullets in the agent file, which kept the file within its 80-line budget and left the
+reference as the single source of truth. Named the schema phase (`-Phase human-checkpoint`) in
+the agent file so the log entry lands under a known enum value and the summary renderer
+groups it with the other human-checkpoint entries. Grew the T029 row's row-count assertion in
+`EverythingGreen.Tests.ps1` rather than removing it, because the test's real job is to catch a
+row-count drift, and pinning it to 35 keeps that signal alive after T031–T035 close.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.

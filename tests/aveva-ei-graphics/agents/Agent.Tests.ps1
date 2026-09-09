@@ -77,6 +77,12 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:AgentFlat | Should -Match '(?i)comment can correct the description'
     }
 
+    It 'wires Checkpoint 1 into the intake path' {
+        $script:Agent | Should -Match '(?m)^##\s+Confirm the understanding\s*$'
+        $script:AgentFlat | Should -Match '(?i)Checkpoint 1'
+        $script:AgentFlat | Should -Match '-Phase human-checkpoint'
+    }
+
     It 'names nothing this build dropped' {
         # The list is read from tests/data/forbidden-identifiers.txt. Writing the names here would
         # make this file fail T019's own scan.
