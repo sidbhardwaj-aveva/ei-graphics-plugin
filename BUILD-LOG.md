@@ -2303,3 +2303,56 @@ the fixture stays valid without further work.
 
 **Result:** DONE.
 
+## T035 — Informational status lane for session entries — 2026-09-09T07:03:33Z
+
+**Goal:** Give the writer and the renderer a first-class lane for session entries that carry a
+note rather than a pass-or-fail outcome. Today the schema forces every entry to look like a
+step in the pass/fail flow. Real sessions record decisions, rediscoveries, and hand-offs for
+the next maintainer; they need somewhere honest to sit.
+
+**Assumptions:** The three existing session fixtures (`session-verbose.json`,
+`session-concise.json`, `session-empty.json`) carry no top-level `status` field on any entry
+(the string `"status"` inside those fixtures appears only inside a `scriptOutput` value, which
+is a free-form object). Adding an optional `status` enum to `entries[]` therefore keeps the
+existing fixtures valid without any change. The renderer already emits Timeline as `all
+entries` and Reasoning Trail as `entries with reasoning`; T035 adds a third lens, `entries with
+status = informational`, rendered under a new `## Informational notes` heading. Informational
+entries are excluded from the Timeline table so the pass/fail signal there stays clean; they
+still appear in the Reasoning Trail if they carry reasoning, matching how Timeline and
+Reasoning Trail already overlap for reasoned entries. The plan.md T035 text mentioned an `####`
+heading; that is out of step with the file's existing `##` section levels (`## Timeline`, `##
+Agent Reasoning Trail`, `## For the maintainer`), so this task uses `## Informational notes`
+and updates the plan.md text so the two agree. The writer's `-Status` parameter is validated in
+the script body (not with `[ValidateSet]`) so a bad value emits the plain-language "use one of:
+pass, fail, informational" message and exits 1, matching how `-Phase` is validated today.
+Adding `-Status` grows the T008 roster from 23 to 24; plan.md T008 and the
+`ScriptContract.Tests.ps1` "recovers T008 exactly" test are updated together. No line ceiling
+is raised in this task; the writer's 275-line ceiling from T034 has headroom.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plan.md` (T008 roster 23→24, T035 heading level correction)
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/schemas/session.schema.json`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.ps1`
+- `tests/fixtures/session-with-informational.json` (new)
+- `tests/fixtures/session-summary-with-informational.md` (new, golden)
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.Tests.ps1`
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.Tests.ps1`
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/schemas/Schemas.Tests.ps1` (if needed for enum coverage)
+- `tests/ScriptContract.Tests.ps1` (T008 roster expectation 23→24)
+
+**Acceptance:** `$P` exits 0 including three new writer tests (accepts each of `pass`, `fail`,
+`informational`; rejects a fourth value) and one new renderer test (informational entry lands
+under the new heading and does not appear in the Timeline table). `Test-BuildProgress.ps1`
+exits 0. The three existing session fixtures still validate, and their golden files still
+match the renderer's output byte-for-byte. The T019 no-orphan check still passes.
+
+**Attempts:** In progress.
+
+**Decisions:** To be recorded at completion.
+
+**Result:** IN-PROGRESS.
+
+
