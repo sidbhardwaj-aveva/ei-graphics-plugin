@@ -1961,6 +1961,33 @@ confirmed: `git -C "C:\Git\dabacon-products\Engineering\Modules\EI\Source" rev-p
 --show-toplevel` resolves to `C:\Git\dabacon-products`, and the doctor and the intake wrapper
 both report clean against that resolved root.
 
+#### T041 — Resolve the git root inside the doctor, not only in agent prose
+
+**Why this task exists.** T040 fixed the normal agent workflow, but a direct invocation of
+`Invoke-EiGraphicsDoctor.ps1 -Root <subfolder>` — bypassing the agent's Intake step entirely —
+still reports `Blocked` for a subfolder of a real repository, because the git-root resolution
+only existed as agent prose, not in the script. Comparing against `aveva-agent-plugins`'
+`prerequisite-validator` skill (`skills/shared/helpers/PathHelpers.ps1`) showed the same problem
+solved once, in code, with a try/catch around `git rev-parse --show-toplevel` and a graceful
+fallback — reliable regardless of which caller invokes the script.
+
+**Do this.** In `Invoke-EiGraphicsDoctor.ps1`'s `Main` section, after resolving `-Root`, ask git
+for the real top level (`git -C $rootPath rev-parse --show-toplevel`) and use it if git succeeds;
+on any failure (not a repository, git missing), keep `$rootPath` exactly as given, so a genuinely
+missing `.git` still reports truthfully rather than silently walking to an unrelated repository.
+Normalize `/` to `\` on Windows only. Update `targetRoot` in `-Json` output to reflect the
+resolved path, not the literal `-Root` argument.
+
+Add a regression test: a `$TestDrive` git repository with a subfolder several levels deep;
+running the script with `-Root` pointed at the subfolder must resolve `targetRoot` to the real
+repository root and report `GitRepoExists -eq $true`.
+
+**Done when.** The doctor-focused tests pass with no skipped tests, including the new regression
+case. `Test-BuildProgress.ps1` and the full Pester suite both exit 0. Manually confirmed: running
+the script directly (no agent involved) with `-Root` pointed at
+`C:\Git\dabacon-products\Engineering\Modules\EI\Source` resolves `targetRoot` to
+`C:\Git\dabacon-products` and reports zero `Block` findings.
+
 ---
 
 ## Part 8 — When things go wrong

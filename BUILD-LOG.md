@@ -2689,3 +2689,63 @@ condition instead of reporting it.
 
 **Result:** DONE. Full suite 627/0/0. `Test-BuildProgress.ps1` exits 0. Agent file 79 lines.
 
+## T041 — Resolve the git root inside the doctor, not only in agent prose — 2026-09-09T11:30:00Z
+
+**Goal:** A direct invocation of `Invoke-EiGraphicsDoctor.ps1 -Root <subfolder>` — run outside
+the agent's Intake step, bypassing its git-root resolution entirely — still reported `Blocked`
+for a subfolder of a real repository (`Source` under `dabacon-products`). T040's fix lives only
+in `agents/ei-graphics.agent.md`'s prose, so any caller that doesn't go through the agent's
+Intake step never benefits from it.
+
+**Assumptions:** Comparing this doctor against `aveva-agent-plugins`'s `prerequisite-validator`
+skill (`skills/shared/helpers/PathHelpers.ps1`, function around line 102-145) showed the same
+root-finding problem solved once, in code: a try/catch around `git rev-parse --show-toplevel`,
+Windows-only `/` to `\` normalization, and a silent fallback to the given path if git fails.
+**This corrects a decision recorded in T038's log**, which argued that auto-resolving inside the
+script would make the "no `.git`" negative test ambiguous by "silently walking up to a parent
+repository." On reflection, and following the `aveva-rnd` precedent, that concern doesn't hold:
+resolving to the git top level of the *same* directory tree the caller pointed at is not walking
+to an unrelated repository, and a path with no repository anywhere in its ancestry still fails
+`git rev-parse --show-toplevel` and correctly falls through to reporting `.git` missing at the
+given path. The T037 regression test (empty `$TestDrive` folder, no git anywhere) already proves
+that negative case still works after this change.
+
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`
+  (git-top-level resolution in `Main`, before `$pluginRoot` is computed; `.DESCRIPTION` updated)
+- `plugins/aveva-ei-graphics/skills/ei-graphics-doctor/SKILL.md` (new Gotchas bullet)
+- `tests/aveva-ei-graphics/skills/ei-graphics-doctor/Skill.Tests.ps1` (new regression test:
+  `$TestDrive` git repo with a nested subfolder, `-Root` pointed at the subfolder)
+- `tests/ScriptContract.Tests.ps1` (line ceiling for `Invoke-EiGraphicsDoctor` 730→750, both maps)
+- `plan.md` (new `#### T041` section)
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+
+**Acceptance:** The doctor-focused Pester tests pass with no skipped tests, including the new
+regression case (a git repo initialized in `$TestDrive`, subfolder five levels deep, `-Root`
+pointed at the subfolder resolves `targetRoot` to the repo root and reports
+`GitRepoExists -eq $true`). `Test-BuildProgress.ps1` and the full Pester suite both exit 0.
+Manually confirmed: running the script directly against
+`C:\Git\dabacon-products\Engineering\Modules\EI\Source` (no agent involved) now resolves
+`targetRoot` to `C:\Git\dabacon-products` and reports zero `Block` findings.
+
+**Attempts:** One for the code, two for the test file. First attempt at raising the
+`ScriptContract.Tests.ps1` line ceiling (730→750) used a `replace_string_in_file` `oldString`
+that accidentally spanned from the `$LineCeilings = @{` opening brace down to the ceiling line
+being changed, deleting the opening brace and every entry above it in both copies of the map —
+caught immediately by `get_errors` finding nothing (a false negative; the real problem showed up
+re-reading the file, which had `'Invoke-EiGraphicsDoctor' = 750` as the first line of the
+`param()`-adjacent block with no `$LineCeilings = @{` above it). Restored both blocks in full
+before re-running. Manually verified against `dabacon-products\...\Source` first (targetRoot
+resolved correctly, zero `Block`s), then ran the focused suite (30/0/0), then the full suite,
+which failed once on the line ceiling, then passed at 628/0/0 after both fixes.
+
+**Decisions:** Kept the fallback silent (no `Info` finding) when git resolution fails, matching
+the existing pattern where `Test-AzureDevOpsCli`'s similar `try/catch` blocks are also silent on
+expected failure paths. Did not touch `Invoke-EiStoryIntake.ps1`, `Convert-EiAdoIntake.ps1`, or
+`Write-EiArtifact.ps1` — this task is scoped to the doctor only; the same idea could apply to the
+intake chain's session-log path, but that's a separate task if wanted, not folded in here.
+
+**Result:** DONE. Focused doctor suite 30/0/0. Full suite 628/0/0. `Test-BuildProgress.ps1`
+exits 0.
+

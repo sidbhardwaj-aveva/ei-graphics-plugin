@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T040
+**Current task:** T041
 **Last verified green:** T028 (2026-09-03T13:15:20Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -50,3 +50,4 @@ in `BUILD-LOG.md`.
 | T038 | Stop conflating the plugin's own root with the target repository | DONE | fa68c71 | 2026-09-09T09:42:18Z |
 | T039 | Fix the broken piped intake invocation | DONE | 93b3d87 | 2026-09-09T10:37:52Z |
 | T040 | Resolve the real git root before intake, not the working directory | DONE | 66cbf0b | 2026-09-09T10:55:18Z |
+| T041 | Resolve the git root inside the doctor, not only in agent prose | IN-PROGRESS | — | — |
