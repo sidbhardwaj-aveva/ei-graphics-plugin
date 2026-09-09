@@ -2592,4 +2592,51 @@ item 1303269 (`C:\Git\dabacon-products`, organization `AVEVA-VSTS`): zero `Block
 remain, only the two expected `ManualReview` items (session logs not yet created, `gc.auto`
 unset).
 
+## T039 — Fix the broken piped intake invocation — 2026-09-09T10:10:00Z
+
+**Goal:** Using the documented intake sequence to unblock work item 1303269 failed:
+`$intake | & Convert-EiAdoIntake.ps1 -StoryId ...` errored with "the input object cannot be
+bound to any parameters for the command either because the command does not take pipeline
+input." The documented sequence was unusable as written.
+
+**Assumptions:** `Convert-EiAdoIntake.ps1`'s `-IntakeJson` and `Write-EiArtifact.ps1`'s
+`-InputObject`/`-InputJson` carry no `[Parameter(ValueFromPipeline)]`; piping into either never
+worked, reproduced live with a mock payload. `agents/ei-graphics.agent.md` (T016, before
+`Invoke-EiStoryIntake.ps1` existed) and `ei-azure-devops-cli-intake/SKILL.md`'s `### Canonical
+invocation` (T032, written the same day as T033 but not updated after it landed) both told the
+agent to pipe. `Invoke-EiStoryIntake.ps1` (T033) already passes each step's output explicitly
+with `-join` and works; the fix is to point the agent and the reader at it, and correct the
+SKILL.md's own example, not to change any script's parameter contract.
+
+**Files touched:**
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md` (Intake section names
+  `Invoke-EiStoryIntake.ps1` instead of describing a pipe)
+- `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` (`What happens next`
+  prose and the `### Canonical invocation` code fence, both corrected)
+- `plan.md` (new `#### T039` section)
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+
+**Acceptance:** The full Pester suite exits 0 with no skipped tests, including the existing
+`Agent.Tests.ps1` literal-string checks (`Convert-EiAdoIntake`, `report the failure and stop`,
+`` without an `ado.json` ``) and the existing intake skill test that requires exactly one
+`powershell` fence naming all three scripts plus `-ArtifactType ado`. `Test-BuildProgress.ps1`
+exits 0. The agent file stays at 80 lines or fewer.
+
+**Attempts:** One. Rewrote the agent file's Intake section to name `Invoke-EiStoryIntake.ps1`
+while keeping every literal string `Agent.Tests.ps1` requires (checked the test file first,
+since the section was already at the file's line ceiling with one line of headroom); the
+rewrite is line-for-line the same length. Rewrote the SKILL.md prose to say neither script
+accepts pipeline input, and replaced the canonical code fence with the wrapper call plus the
+three explicit (non-piped) calls it makes internally — confirmed against the existing test that
+only checks for the three script names and `-ArtifactType ado` inside one fence, not for the
+pipe operator, so no test change was needed. Full suite ran once after both edits: 627/0/0.
+
+**Decisions:** Fixed the agent file and the SKILL.md doc, not the scripts, because
+`Invoke-EiStoryIntake.ps1` already has the correct, tested, non-piped contract — the bug was
+that nothing told the agent to use it. Kept the explicit three-script form in the SKILL.md
+alongside the wrapper, so a reader who needs to run one step in isolation (as this session did,
+debugging) still has a working example instead of only a black-box wrapper call.
+
+**Result:** DONE. Full suite 627/0/0. `Test-BuildProgress.ps1` exits 0.
 

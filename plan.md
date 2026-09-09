@@ -1920,6 +1920,26 @@ cases. `Test-BuildProgress.ps1` and the full Pester suite both exit 0. A manual 
 real target repository with a configured Azure DevOps organization reports no `Block` findings
 for the plugin's own files or for Azure DevOps CLI authentication.
 
+#### T039 — Fix the broken piped intake invocation
+
+**Why this task exists.** Using the documented intake sequence to unblock a real story showed
+`Convert-EiAdoIntake.ps1`'s `-IntakeJson` and `Write-EiArtifact.ps1`'s `-InputObject`/`-InputJson`
+carry no `[Parameter(ValueFromPipeline)]`. Piping into either fails with "the input object cannot
+be bound to any parameters ... does not take pipeline input." Both `agents/ei-graphics.agent.md`
+(T016) and `ei-azure-devops-cli-intake/SKILL.md`'s `### Canonical invocation` (T032) instructed
+exactly that broken piped form. `Invoke-EiStoryIntake.ps1` (T033) already runs the sequence
+correctly, passing each step's output explicitly, but nothing pointed the agent or a reader at it.
+
+**Do this.** Rewrite the agent file's Intake section and the SKILL.md's `### Canonical
+invocation` section to describe `Invoke-EiStoryIntake.ps1` as the way to run the sequence, and
+fix the SKILL.md's example code to pass output explicitly instead of piping. Keep every literal
+string `Agent.Tests.ps1` and the intake skill's own tests already require. Do not change any
+script's parameter contract; `Invoke-EiStoryIntake.ps1` already works.
+
+**Done when.** `$P` exits 0 with no new failures. `Test-BuildProgress.ps1` exits 0. The agent
+file stays at 80 lines or fewer. The intake skill's existing `Canonical invocation` tests still
+pass against the corrected example.
+
 ---
 
 ## Part 8 — When things go wrong
