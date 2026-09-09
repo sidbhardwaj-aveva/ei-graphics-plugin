@@ -2242,3 +2242,42 @@ so a broken shim proves the wrapper reports the right step number without needin
 machine.
 
 **Result:** DONE.
+
+## T034 — Verbatim-quote enforcement in `Write-EiSessionEntry.ps1` — 2026-09-09T06:40:48Z
+
+**Goal:** Turn `evidence[].quote` from a documentation slot into a verified citation. When an
+agent claims to have read a piece of text from a file, `Write-EiSessionEntry.ps1` must confirm
+the claim by finding that exact text in the named file, before it writes anything.
+
+**Assumptions:** No production session log carries a `quote` today: the only fixture with a
+quote is `tests/fixtures/session-verbose.json`, and it feeds only `Export-EiSessionSummary.ps1`,
+which never re-runs the writer. So enforcement inside the writer breaks no historical data.
+Only one existing test uses `quote` (`Write-EiSessionEntry.Tests.ps1`, `Context '-Evidence'`,
+`It 'records what the reasoning rests on'`), and it names a fabricated path `src/A.cs`; that
+test will be updated to write a real `src/A.cs` under the per-test root in its own body before
+recording the evidence. The rule is stricter than the schema and does not require a schema
+change: `session.schema.json` still describes storage; the writer adds a runtime check on top.
+The check runs BEFORE the file exists on disk on the very first call, so it must resolve
+`file` under `(Resolve-Path -LiteralPath $Root).Path`, which the script already computes at
+the top. CRLF and LF are normalised on both sides before the substring test so a repo with
+mixed line endings does not fail spuriously. When `quote` is absent, behaviour is unchanged
+end-to-end. No sub-script, no wrapper, no schema, and no plan.md line count moves for this
+task; the change is contained to `Write-EiSessionEntry.ps1` and its own test file.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1`
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.Tests.ps1`
+
+**Acceptance:** `$P` exits 0 including three new tests inside `Context '-Evidence'` (matching
+quote passes, mismatched quote fails, missing file fails) and the one updated existing test.
+`Test-BuildProgress.ps1` exits 0. `session-verbose.json` still validates against the schema and
+`Export-EiSessionSummary.Tests.ps1` continues to consume it unchanged.
+
+**Attempts:** In progress.
+
+**Decisions:** To be recorded at completion.
+
+**Result:** IN-PROGRESS.
+
