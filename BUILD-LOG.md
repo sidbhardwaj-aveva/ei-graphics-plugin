@@ -2174,3 +2174,46 @@ test lives in its own `Skill.Tests.ps1` next to the skill's other test folders, 
 `AdoIntakeChain.Tests.ps1`, which is scoped to the copied helper scripts and their hash guard.
 
 **Result:** DONE.
+
+## T033 — Wrapper script `Invoke-EiStoryIntake.ps1` — 2026-09-09T06:26:00Z
+
+**Goal:** Give the agent one command for the three-step story-intake sequence
+(`Invoke-EiAdoCliIntake.ps1` → `Convert-EiAdoIntake.ps1` → `Write-EiArtifact.ps1 -ArtifactType
+ado`) so it no longer rediscovers the sequence on every run, without changing what those three
+scripts do.
+
+**Assumptions:** The wrapper is pure orchestration. It does not open, parse, filter, re-shape,
+or re-serialise the JSON that flows between the three sub-scripts, so every attachment URL,
+every comment, every markdown hyperlink already collected by the underlying pipeline survives
+end-to-end. Stderr from every sub-script is forwarded to the parent's stderr unaltered, so a
+failed download or a comments-request-failed message is still visible. `-WorkItem` accepts the
+same forms `Invoke-EiAdoCliIntake.ps1` already accepts (URL, markdown link, "Bug 12345 -
+...", bare integer). A bare positive integer is forwarded as `-WorkItemId`; anything else is
+forwarded as `-WorkItemUrl`, matching the split the underlying script's reference parser
+expects. `Convert-EiAdoIntake.ps1` owns the attachment download; the wrapper does not
+duplicate it or short-circuit it. `Write-EiArtifact.ps1 -ArtifactType ado` owns the schema
+check and the final write; the wrapper does not stamp its own hash. The T036 companion,
+`Complete-EiSession.ps1`, is out of scope and lives in its own task. This task raises the
+script count cap in `tests/ScriptContract.Tests.ps1` from 12 to 13; T036 will raise it to 14.
+The `ei-graphics-core/SKILL.md` count of core scripts moves from seven to eight in this task,
+and T036 will move it to nine.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Invoke-EiStoryIntake.ps1` (new)
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md`
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Invoke-EiStoryIntake.Tests.ps1` (new)
+- `tests/ScriptContract.Tests.ps1`
+
+**Acceptance:** `$P` exits 0 including the new tests. `Test-BuildProgress.ps1` exits 0. The
+T017 manifests check, the T019 no-orphan check, the T020 script contract check (including the
+roster match against T033's `**Parameters, exactly these 5:**` marker) and the T021 global
+green check all still pass. The `.ps1` count cap in `ScriptContract.Tests.ps1` is raised
+12 → 13, recorded here.
+
+**Attempts:** In progress.
+
+**Decisions:** To be recorded at completion.
+
+**Result:** IN-PROGRESS.
