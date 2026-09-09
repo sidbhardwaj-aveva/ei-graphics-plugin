@@ -39,4 +39,4 @@ in `BUILD-LOG.md`.
 | T029 | Agent reasoning escalation | DONE | 3deb23f | 2026-09-07T00:00:00Z |
 | T030 | Integrate the EI Graphics doctor | DONE | bd4c04c | 2026-09-07T11:45:26Z |
 | T022 | Dry run against story 3408091 | BLOCKED | — | — |
-| T023 | Read the summary, improve the skill | DONE | pending | 2026-09-09T05:30:10Z |
+| T023 | Read the summary, improve the skill | DONE | b3d5edb | 2026-09-09T05:30:10Z |
