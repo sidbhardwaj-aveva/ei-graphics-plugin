@@ -204,6 +204,32 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
         }
     }
 
+    Context '-Status' {
+
+        It 'accepts <_>' -ForEach @('pass', 'fail', 'informational') {
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'; Status = $_
+            })
+            $run.ExitCode | Should -Be 0
+            $entry = @((Get-Session -Root $script:Root | ConvertFrom-Json).entries)[0]
+            $entry.status | Should -Be $_
+        }
+
+        It 'rejects a fourth value, and writes nothing' {
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'; Status = 'skipped'
+            })
+            $run.ExitCode | Should -Be 1
+            Test-Path -LiteralPath (Join-Path $script:Root '.ei-session-logs' '4965976' 'session.json') | Should -BeFalse
+        }
+
+        It 'leaves the entry with no status key when none is given' {
+            Invoke-Entry -Splat ($script:Base + @{ Phase = 'ado-intake'; Action = 'a'; Outcome = 'b' }) | Out-Null
+            $entry = @((Get-Session -Root $script:Root | ConvertFrom-Json).entries)[0]
+            $entry.PSObject.Properties.Name | Should -Not -Contain 'status'
+        }
+    }
+
     Context '-Finalize' {
         BeforeEach {
             Invoke-Entry -Splat ($script:Base + @{

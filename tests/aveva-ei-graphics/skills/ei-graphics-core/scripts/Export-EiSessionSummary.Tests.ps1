@@ -175,6 +175,26 @@ Describe 'Export-EiSessionSummary' -Tag 'Unit' {
         $run.Result.path | Should -Be (Join-Path $root '.ei-session-logs' '4965976' 'session-summary.md')
     }
 
+    Context 'the informational status lane' {
+
+        It 'matches the golden file with an informational entry' {
+            $root = New-SessionRoot -Fixture 'session-with-informational.json' -StoryId '1234567'
+            $run = Invoke-Export -Root $root -StoryId '1234567'
+            $run.ExitCode | Should -Be 0
+            $rendered = (Get-Content -LiteralPath $run.Result.path -Raw) -replace "`r`n", "`n"
+            $rendered | Should -Be (Get-Golden -Name 'session-summary-with-informational.md')
+        }
+
+        It 'puts the informational entry under its own heading and out of the Timeline' {
+            $root = New-SessionRoot -Fixture 'session-with-informational.json' -StoryId '1234567'
+            $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root -StoryId '1234567').Result.path -Raw
+            $rendered | Should -Match '(?m)^## Informational notes$'
+            $rendered | Should -Match 'note-related-file'
+            # The informational entry's outcome text must not appear in the Timeline table row.
+            $rendered | Should -Not -Match '\| Understanding \| Also saw'
+        }
+    }
+
     Context 'the improvement opportunity names source files only' {
         BeforeEach {
             # A session that read one real source file, its own artifact and its own skill.

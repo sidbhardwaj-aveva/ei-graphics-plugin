@@ -12,7 +12,7 @@ $PluginsRoot = Join-Path $RepoRoot 'plugins'
 $LineCeilings = @{
     'Write-EiArtifact'         = 120
     'Write-EiSessionEntry'     = 275
-    'Export-EiSessionSummary'  = 240
+    'Export-EiSessionSummary'  = 250
     'Export-EiSessionBundleToShare' = 120
     'Get-EiDomainSkillCatalog' = 120
     'Test-EiScopeDrift'        = 100
@@ -56,7 +56,7 @@ BeforeAll {
     $script:LineCeilings = @{
         'Write-EiArtifact'         = 120
         'Write-EiSessionEntry'     = 275
-        'Export-EiSessionSummary'  = 240
+        'Export-EiSessionSummary'  = 250
         'Export-EiSessionBundleToShare' = 120
         'Get-EiDomainSkillCatalog' = 120
         'Test-EiScopeDrift'        = 100
@@ -137,15 +137,15 @@ BeforeAll {
 
 Describe 'The roster parser' -Tag 'Unit' {
 
-    It 'recovers T008 exactly, whose 23 names span three bullets' {
+    It 'recovers T008 exactly, whose 24 names span three bullets' {
         $expected = @(
             'Action', 'BugPatternMatched', 'CommentDeviations', 'DomainSkillUsed', 'DurationMs',
             'Evidence', 'Finalize', 'FilesModified', 'FilesRead', 'Help', 'HumanInput',
             'HumanInteractions', 'Json', 'Outcome', 'Phase', 'Reasoning', 'Root', 'ScriptOutput',
-            'SessionOutcome', 'StoryId', 'TestsPassed', 'TestsRun', 'TokensUsed'
+            'SessionOutcome', 'Status', 'StoryId', 'TestsPassed', 'TestsRun', 'TokensUsed'
         ) | Sort-Object
         $actual = Get-RosterFromPlan -PlanText $script:PlanText -TaskId 'T008'
-        $actual.Count | Should -Be 23
+        $actual.Count | Should -Be 24
         ($actual -join ',') | Should -Be ($expected -join ',')
     }
 

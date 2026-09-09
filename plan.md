@@ -787,15 +787,16 @@ create the envelope: `schemaVersion`, `storyId`, `startedAt`, `agent`, `verbosit
 
 Appending must be atomic. Write a temporary file, then move it.
 
-**Parameters, exactly these 23, in two mutually exclusive sets.**
+**Parameters, exactly these 24, in two mutually exclusive sets.**
 
 - Shared by both (4): `-StoryId`, `-Root`, `-Json`, `-Help`
-- Append set (11): `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`, `-TokensUsed`,
-  `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`, `-Evidence`
+- Append set (12): `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`, `-TokensUsed`,
+  `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`, `-Evidence`, `-Status`
 - Finalize set (8): `-Finalize`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
   `-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`, `-CommentDeviations`
 
-`-Evidence` arrived in T024. Read that task before changing it.
+`-Evidence` arrived in T024. Read that task before changing it. `-Status` arrived in T035 and
+must match the `session.schema.json` enum (`pass`, `fail`, `informational`).
 
 **`-SessionOutcome` is deliberately not called `-Outcome`.** In JSON, the entry field and the
 summary field are both named `outcome`. One PowerShell parameter cannot carry two meanings.
@@ -1800,9 +1801,8 @@ Passing `-Status` alongside `-Finalize` is an error, matching the existing rule 
 parameter sets are mutually exclusive.
 
 Extend `Export-EiSessionSummary.ps1` so entries with `status = informational` render under a
-distinct sub-heading named `#### Informational notes`, and do not appear in the pass/fail
-sections. Entries without a `status` render exactly as they do today, so no existing rendered
-summary changes.
+distinct heading named `## Informational notes`, and do not appear in the Timeline. Entries
+without a `status` render exactly as they do today, so no existing rendered summary changes.
 
 Add coverage: in `Write-EiSessionEntry.Tests.ps1`, three new tests that the parameter accepts
 each of the three values and rejects a fourth. In `Export-EiSessionSummary.Tests.ps1`, one new

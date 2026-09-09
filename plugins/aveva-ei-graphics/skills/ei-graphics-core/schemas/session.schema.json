@@ -74,6 +74,11 @@
           "humanInput": { "type": ["string", "null"] },
           "scriptOutput": {
             "description": "Whatever the called script returned. Left free-form on purpose, because each script has its own output shape."
+          },
+          "status": {
+            "description": "The lane this entry belongs to. 'pass' and 'fail' are for steps in the pass/fail flow. 'informational' is for a decision, a rediscovery, or a note the next maintainer needs. Absent means the writer did not classify the entry, which is what every earlier session did.",
+            "type": "string",
+            "enum": ["pass", "fail", "informational"]
           }
         }
       }

@@ -26,6 +26,7 @@ param(
     [Parameter(ParameterSetName = 'Append')] [string] $HumanInput,
     [Parameter(ParameterSetName = 'Append')] $ScriptOutput,
     [Parameter(ParameterSetName = 'Append')] [object[]] $Evidence,
+    [Parameter(ParameterSetName = 'Append')] [string] $Status,
 
     [Parameter(ParameterSetName = 'Finalize', Mandatory = $true)] [switch] $Finalize,
     [Parameter(ParameterSetName = 'Finalize')] [Nullable[int]] $TestsRun,
@@ -219,6 +220,11 @@ if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
     }
     if (-not $Action) { Write-Problem 'No -Action was given. Say in a few words what this step did.'; exit 1 }
     if (-not $Outcome) { Write-Problem 'No -Outcome was given. Say what came of the step.'; exit 1 }
+    $validStatus = @('pass', 'fail', 'informational')
+    if ($Status -and $validStatus -notcontains $Status) {
+        Write-Problem "'$Status' is not a status this writer knows. Use one of: $($validStatus -join ', ')."
+        exit 1
+    }
 
     $entry = [ordered]@{
         timestamp  = Get-UtcStamp
@@ -241,6 +247,7 @@ if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
         $items = @(for ($i = 0; $i -lt $Evidence.Count; $i++) { ConvertTo-EvidenceItem -Item $Evidence[$i] -Position ($i + 1) -ResolvedRoot $resolvedRoot })
         $entry['evidence'] = @($items)
     }
+    if ($Status) { $entry['status'] = $Status }
 
     $session['entries'] = @(@($session['entries']) + $entry)
     $written = $entry

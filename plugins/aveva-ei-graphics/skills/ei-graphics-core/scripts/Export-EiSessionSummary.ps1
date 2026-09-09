@@ -161,10 +161,14 @@ if ($domain) { $domainText = "``$domain``" }
 & $out "**Outcome:** $(Get-Text $outcome)"
 & $out ''; & $out '## Timeline'; & $out ''
 
-$shown = $entries
+# Informational entries have their own section and do not carry the Timeline's pass/fail signal,
+# so they are filtered out here.
+$forTimeline = @($entries | Where-Object { (Get-Field -Owner $_ -Name 'status') -ne 'informational' })
+
+$shown = $forTimeline
 if ($concise) {
     # One row per phase, showing the last entry of that phase, in the order the phases first ran.
-    $shown = @($entries | Group-Object -Property phase | ForEach-Object { $_.Group[-1] } |
+    $shown = @($forTimeline | Group-Object -Property phase | ForEach-Object { $_.Group[-1] } |
         Sort-Object -Property timestamp)
 }
 
@@ -177,6 +181,15 @@ if ($shown.Count -eq 0) {
     }
 }
 & $out ''
+
+$informational = @($entries | Where-Object { (Get-Field -Owner $_ -Name 'status') -eq 'informational' })
+if ($informational.Count -gt 0) {
+    & $out '## Informational notes'; & $out ''
+    foreach ($entry in $informational) {
+        & $out "- **$(Get-Clock $entry.timestamp) — $($entry.action):** $($entry.outcome)"
+    }
+    & $out ''
+}
 
 if (-not $concise) {
     & $out '## Agent Reasoning Trail'; & $out ''

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "storyId": "1234567",
+  "startedAt": "2026-09-01T10:00:00Z",
+  "agent": "ei-graphics",
+  "verbosity": "verbose",
+  "entries": [
+    {
+      "timestamp": "2026-09-01T10:00:00Z",
+      "phase": "implementation",
+      "action": "add-null-check",
+      "reasoning": null,
+      "outcome": "Added the null check.",
+      "durationMs": 1000,
+      "tokensUsed": 100
+    },
+    {
+      "timestamp": "2026-09-01T10:05:00Z",
+      "phase": "understanding",
+      "action": "note-related-file",
+      "reasoning": null,
+      "outcome": "Also saw a related code path in Foo.cs, but did not read it.",
+      "durationMs": null,
+      "tokensUsed": null,
+      "status": "informational"
+    }
+  ]
+}
