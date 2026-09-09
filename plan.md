@@ -1940,6 +1940,27 @@ script's parameter contract; `Invoke-EiStoryIntake.ps1` already works.
 file stays at 80 lines or fewer. The intake skill's existing `Canonical invocation` tests still
 pass against the corrected example.
 
+#### T040 — Resolve the real git root before intake, not the working directory
+
+**Why this task exists.** A live run against work item 3735081 ran the doctor with `-Root
+"$PWD"` while the agent's shell was open in `Engineering\Modules\EI\Source`, a subfolder of the
+real repository `dabacon-products`. The doctor correctly reported `Blocked` (no `.git` there),
+but the agent had never been told to find the real repository root — it trusted its own working
+directory. Nothing in `agents/ei-graphics.agent.md` said otherwise, and both
+`Invoke-EiGraphicsDoctor.ps1` and `Invoke-EiStoryIntake.ps1` default `-Root` to `.` without
+checking whether that is actually a repository's top level.
+
+**Do this.** Add one instruction to the agent file's Intake section: before running the doctor
+or the intake wrapper, resolve the repository root with `git rev-parse --show-toplevel` and pass
+that path as `-Root` to both. Never assume the current directory is the root. Keep every literal
+string `Agent.Tests.ps1` already requires and stay at 80 lines or fewer. Keep every sentence
+within the plain-language word limit.
+
+**Done when.** `$P` exits 0 with no new failures. `Test-BuildProgress.ps1` exits 0. Manually
+confirmed: `git -C "C:\Git\dabacon-products\Engineering\Modules\EI\Source" rev-parse
+--show-toplevel` resolves to `C:\Git\dabacon-products`, and the doctor and the intake wrapper
+both report clean against that resolved root.
+
 ---
 
 ## Part 8 — When things go wrong

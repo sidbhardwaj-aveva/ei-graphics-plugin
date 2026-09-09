@@ -2641,3 +2641,50 @@ debugging) still has a working example instead of only a black-box wrapper call.
 
 **Result:** DONE. Full suite 627/0/0. `Test-BuildProgress.ps1` exits 0.
 
+## T040 — Resolve the real git root before intake, not the working directory — 2026-09-09T11:00:00Z
+
+**Goal:** A live run against work item 3735081 reported the doctor `Blocked` on missing `.git`.
+The user had given the agent only the work item; the agent ran the doctor with `-Root "$PWD"`,
+and the shell's working directory was `Engineering\Modules\EI\Source`, a subfolder of the real
+repository `dabacon-products`. The doctor's report was correct — no `.git` exists in `Source` —
+but nothing had told the agent to check whether its working directory was the repository root
+before trusting it.
+
+**Assumptions:** Neither `Invoke-EiGraphicsDoctor.ps1` nor `Invoke-EiStoryIntake.ps1` verifies
+that `-Root` (or its default `.`) is a repository's top level; both take the path as given, by
+design, since T038 already made `-Root` mean "the target repository" explicitly. The gap is the
+agent never resolving that path correctly before calling either script. `git rev-parse
+--show-toplevel` is the standard way to find the real root from any subfolder; adding one
+instruction to the agent file closes the gap without touching either script's contract.
+
+**Files touched:**
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md` (Intake section names
+  `git rev-parse --show-toplevel` and passes the result as `-Root` to both scripts)
+- `plan.md` (new `#### T040` section)
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+
+**Acceptance:** The full Pester suite exits 0 with no skipped tests, including
+`Agent.Tests.ps1`'s literal-string checks and `PlainLanguage.Tests.ps1`'s sentence-length check
+against the rewritten Intake section. `Test-BuildProgress.ps1` exits 0. The agent file stays at
+80 lines or fewer. Manually confirmed `git -C
+"C:\Git\dabacon-products\Engineering\Modules\EI\Source" rev-parse --show-toplevel` resolves to
+`C:\Git\dabacon-products`, and both the doctor and the intake wrapper report clean against that
+resolved root.
+
+**Attempts:** One. The Intake section was already at the file's one-line headroom (79/80), so
+the new instruction was folded into the existing sentences rather than added as new lines,
+keeping the physical line count unchanged. Each new sentence was counted by hand against the
+25-word plain-language limit before running the suite, since `agents/ei-graphics.agent.md` is
+one of the files `PlainLanguage.Tests.ps1` checks and is not exempt from the sentence-length
+rule (only the copied `termination-drawing` skill is). Full suite ran once: 627/0/0.
+
+**Decisions:** Fixed this at the agent-instruction level, not by adding root-resolution logic to
+`Invoke-EiGraphicsDoctor.ps1` or `Invoke-EiStoryIntake.ps1`, because both scripts already do the
+right thing once given the right path — proven twice now in this session against real target
+repositories. Auto-resolving inside the scripts would also make the "no `.git`" negative-test
+scenario ambiguous: silently walking up to a parent repository would hide a genuine missing-repo
+condition instead of reporting it.
+
+**Result:** DONE. Full suite 627/0/0. `Test-BuildProgress.ps1` exits 0. Agent file 79 lines.
+
