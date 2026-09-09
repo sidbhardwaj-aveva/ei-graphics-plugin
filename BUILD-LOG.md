@@ -2024,3 +2024,39 @@ it rather than rewriting the doctor. Record this recovery as a new task instead 
 append-only log entry or pretending the required start commit happened earlier.
 
 **Result:** IN-PROGRESS.
+
+## T023 — Read the summary, improve the skill — 2026-09-09T05:30:10Z
+
+**Goal:** Close the manual improvement loop for the `termination-drawing` skill by reading a real
+session summary, listing the coverage gaps its maintainer section names, and patching the skill
+so the next run does not have to rediscover the same files.
+
+**Assumptions:** The one completed live session available is story 3774939, whose bundle sits at
+`C:\Git\dabacon-products\Engineering\Modules\EI\Source\.ei-session-logs\3774939\` and whose
+`session-summary.md` maintainer section lists ten files the agent read that are not in the skill's
+Key Files table. The story was an inventory-style request about termination diagram settings, not
+a defect, so the gap is a settings and configuration surface the skill never described. T023's
+scope is exactly what `plan.md` says: patch `termination-drawing/SKILL.md` or one of its reference
+files and log the gaps found. It does not extend to changing the agent file, adding new wrapper
+scripts, or tightening the session-entry evidence contract, even though the same session review
+surfaced those as separate concerns. Those would be new tasks proposed after T023 closes. T022
+remains `BLOCKED` from its earlier BUILD-LOG entries; T023 does not unblock it. The plain-language
+rules in Part 3 are exempt for termination-drawing content, so terms already used in the skill,
+such as LOC, tstrip, IOM and ferrule, may appear verbatim. The added rows go in
+`references/architecture.md` because they belong in the Key Files table, which lives there rather
+than in `SKILL.md`. No heading is removed or duplicated by this edit.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/skills/termination-drawing/references/architecture.md`
+
+**Acceptance:** The T023 conditions in `plan.md` hold: `$P` exits 0 after the edit, and this
+block lists the gaps found. `tools/Test-BuildProgress.ps1` exits 0. The v2 heading test in T015
+continues to pass because no heading is removed and none is duplicated.
+
+**Attempts:** In progress.
+
+**Decisions:** To be recorded at completion.
+
+**Result:** IN-PROGRESS.
