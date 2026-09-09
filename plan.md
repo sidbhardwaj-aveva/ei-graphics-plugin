@@ -1657,6 +1657,166 @@ plain-language checks. Keep `ei-graphics.agent.md` under 80 lines and `SKILL.md`
 run without a fatal error. `Test-BuildProgress.ps1` and the full Pester suite both exit 0 with no
 skipped tests.
 
+#### T031 — Confirm the understanding, wired into the agent file
+
+**Why this task exists.** Review of the first live session (story 3774939) showed the agent went
+straight from intake to domain selection and code changes without confirming the story
+understanding with a person. `references/checkpoint-templates.md` already describes Checkpoint 1
+in full, but `agents/ei-graphics.agent.md` never tells the agent to run it. Story reviews should
+never rediscover the same missing checkpoint.
+
+**Do this.** Add a short "Confirm the understanding" section to
+`plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`, placed after the Intake section and
+before "Choosing a domain". It must instruct the agent to present the five Checkpoint 1 bullets
+from `references/checkpoint-templates.md`, wait for the person to agree, and log the exchange
+with `Write-EiSessionEntry.ps1 -Phase human-checkpoint`. Do not restate the five bullets in the
+agent file; point at the reference.
+
+The agent file has an 80-line ceiling and is at 79 today. Make room by tightening existing
+sentences. Do not remove any of the T016 required literal strings (`skill-first`, `Stop when
+done`, `.ei-session-logs/`, the two reference pointers, "short sentences", "next action") and do
+not remove the T029 escalation paragraph. The T016 heading test and the T029 escalation test
+must both still pass.
+
+Add one Pester test in `tests/aveva-ei-graphics/agents/Agent.Tests.ps1` that asserts the agent
+file contains the literal heading `Confirm the understanding`, the literal string `Checkpoint 1`,
+and the literal string `-Phase human-checkpoint`.
+
+**Done when.** `$P` exits 0 including the new test. `Test-BuildProgress.ps1` exits 0. The agent
+file is 80 lines or fewer and still has valid frontmatter.
+
+#### T032 — Canonical intake invocation in `ei-azure-devops-cli-intake/SKILL.md`
+
+**Why this task exists.** The same session review found the agent had to reason out the pipe
+between the three intake scripts because no worked example exists in the skill document. A
+copy-pasteable block removes that rediscovery.
+
+**Do this.** Add a `### Canonical invocation` subsection to
+`plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md`. Under it, put one fenced
+`powershell` code block that shows piping `Invoke-EiAdoCliIntake.ps1` through
+`Convert-EiAdoIntake.ps1` and then through `Write-EiArtifact.ps1 -ArtifactType ado`, matching
+the sequence the agent file already describes. Keep the block to two or three lines. Do not
+narrate the block before or after it; the code says what it does.
+
+Add one Pester test in the skill's existing tests folder that asserts the heading and all three
+script names appear in the file, and that the three script names appear inside one fenced
+`powershell` code block.
+
+**Done when.** `$P` exits 0 including the new test. `Test-BuildProgress.ps1` exits 0. The T017
+manifests and T018 documents checks still pass, and Part 3's plain-language check still passes
+for that file (the skill is exempt for jargon, but sentence length and next-action rules apply
+to any new prose).
+
+#### T033 — Wrapper scripts `Invoke-EiStoryIntake.ps1` and `Complete-EiSession.ps1`
+
+**Why this task exists.** The agent runs a fixed sequence of scripts to start a story
+(intake → convert → write ado) and another fixed sequence to finish a session (finalize →
+render summary → optional share export). Wrapping each sequence removes rediscovery and cuts the
+terminal-command count in T022's live-run acceptance.
+
+**Do this.** Add two scripts under
+`plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/`.
+
+`Invoke-EiStoryIntake.ps1`. Parameters: `-WorkItem`, `-StoryId`, `-Root`, `-Json`, `-Help`.
+Calls `Invoke-EiAdoCliIntake.ps1`, pipes the result to `Convert-EiAdoIntake.ps1`, then to
+`Write-EiArtifact.ps1 -ArtifactType ado`. Returns one JSON object on stdout with the artifact
+path and its hash. On any step's non-zero exit, name the step that failed on stderr and exit 1.
+
+`Complete-EiSession.ps1`. Parameters: `-StoryId`, `-SessionOutcome`, `-Root`, `-Json`, `-Help`.
+Calls `Write-EiSessionEntry.ps1 -Finalize`, then `Export-EiSessionSummary.ps1`. When
+`EI_GRAPHICS_SHARE_PATH` is set, then also calls `Export-EiSessionBundleToShare.ps1`. Returns
+one JSON object on stdout with the summary path, and the bundle path when the share export ran.
+A failure in finalize or summary exits 1. A share-export failure is a warning on stderr, not a
+fatal, so the local bundle stays usable.
+
+Both scripts follow the standard header: `#Requires -Version 7.0`, `Set-StrictMode -Version
+Latest`, `$ErrorActionPreference = 'Stop'`. Paths resolve from `$PSScriptRoot`. JSON goes to
+stdout, messages to stderr. Nothing prompts. `-Help` prints the synopsis and exits 0. Running
+twice is safe.
+
+Add Pester tests under `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/` for each: the
+happy path against fixtures or mocked sub-scripts, the `-Help` behaviour, the exit-1 branch of a
+sub-script failure, and for `Complete-EiSession.ps1` the environment-variable branch (share
+export ran vs skipped).
+
+Update the script list in `plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md` to name
+the two new scripts. Update any line in that file, or in `plan.md` Part 6, that says the count
+of core scripts is seven.
+
+**Done when.** `$P` exits 0 including the new tests. `Test-BuildProgress.ps1` exits 0. The T017
+manifests check, the T019 no-orphan check, the T020 script contract check, and the T021 global
+green check all still pass. The `.ps1` count cap in T020 still holds.
+
+#### T034 — Verbatim-quote enforcement in `Write-EiSessionEntry.ps1`
+
+**Why this task exists.** The session-review found the agent recorded evidence quotes that were
+paraphrased or invented rather than copied from the named file. Today the writer stores whatever
+string is passed for `quote`, so nothing catches the drift. A runtime check that the quote
+appears in its file makes the whole evidence chain trustworthy.
+
+**Do this.** In `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1`,
+inside `ConvertTo-EvidenceItem`, when the item carries a non-empty `quote`: resolve `file`
+against `(Resolve-Path -LiteralPath $Root).Path`, read the file as raw UTF-8 text, normalise
+CRLF to LF on both sides, and confirm `quote` is a substring. On a mismatch, or when the file
+cannot be resolved, call `Write-Problem` with a message that names the file and the first 60
+characters of the quote it looked for, then exit 1. Write nothing on failure. When `quote` is
+absent, keep today's behaviour.
+
+Do not change `session.schema.json`. This is a runtime rule stricter than the schema, and the
+schema stays as the storage contract.
+
+Update the two existing `-Evidence` tests in
+`tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.Tests.ps1` that
+name `src/A.cs`. Write a small real file at that path under the per-test root in `BeforeEach`,
+and make the asserted quote a real substring of that file. `session-verbose.json` is not
+touched: only the summary renderer consumes it, and the renderer does not call this writer, so
+the fixture stays valid.
+
+Add three new tests inside the `-Evidence` context: (1) a quote that matches the named file →
+exit 0 and the entry is written; (2) a quote that differs from the file by one character → exit
+1 and no session file exists; (3) a quote whose named file does not exist under `-Root` → exit 1
+and no session file exists.
+
+**Done when.** `$P` exits 0 including all three new tests and the two updated existing tests.
+`Test-BuildProgress.ps1` exits 0. All existing session fixtures still validate against the
+schema, and the summary-renderer tests that consume them still pass.
+
+#### T035 — `informational` status lane for session entries
+
+**Why this task exists.** The current schema forces every entry into pass or fail via its
+`outcome` text, but many session steps are neither: they record a decision, a rediscovery, or a
+note for the next maintainer. A first-class informational lane keeps the pass/fail signal clean
+and gives the summary renderer a place to group notes.
+
+**Do this.** Add an optional `status` property to `entries[]` in
+`plugins/aveva-ei-graphics/skills/ei-graphics-core/schemas/session.schema.json`. Its enum is
+`pass`, `fail`, `informational`. Absent means "not stated" and existing entries continue to
+validate.
+
+Extend `Write-EiSessionEntry.ps1` with an optional `-Status` parameter that accepts only those
+three values. On any other value, exit 1 with a message that lists the three permitted values.
+Passing `-Status` alongside `-Finalize` is an error, matching the existing rule that the two
+parameter sets are mutually exclusive.
+
+Extend `Export-EiSessionSummary.ps1` so entries with `status = informational` render under a
+distinct sub-heading named `#### Informational notes`, and do not appear in the pass/fail
+sections. Entries without a `status` render exactly as they do today, so no existing rendered
+summary changes.
+
+Add coverage: in `Write-EiSessionEntry.Tests.ps1`, three new tests that the parameter accepts
+each of the three values and rejects a fourth. In `Export-EiSessionSummary.Tests.ps1`, one new
+test that a fixture with an informational entry renders it under the informational heading and
+does not repeat it elsewhere.
+
+Add a new fixture `tests/fixtures/session-with-informational.json` carrying at least one
+informational entry, alongside a golden `tests/fixtures/session-summary-with-informational.md`
+if the renderer tests already use golden files (check first; do not introduce a golden system
+where none exists).
+
+**Done when.** `$P` exits 0 including all new tests. `Test-BuildProgress.ps1` exits 0. The three
+existing session fixtures (`session-verbose.json`, `session-concise.json`, `session-empty.json`)
+still validate. The T019 no-orphan check still passes.
+
 ---
 
 ## Part 8 — When things go wrong
