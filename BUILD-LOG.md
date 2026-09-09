@@ -2378,3 +2378,56 @@ still match. `-Status pass|fail|informational` are accepted; `-Status skipped` e
 with the writer's plain-language message.
 
 
+
+## T036 — Wrapper script Complete-EiSession.ps1 — 2026-09-09T08:32:36Z
+
+**Goal:** Give the agent one command to close a session honestly. Today it must remember to run
+`Write-EiSessionEntry.ps1 -Finalize`, then `Export-EiSessionSummary.ps1`, then, when the share
+is configured, `Export-EiSessionBundleToShare.ps1`. Missing the summary leaves a maintainer
+without a rendered read; missing the share leaves the team without the bundle. A wrapper closes
+that rediscovery gap the same way T033 closes it for intake.
+
+**Assumptions:** The wrapper does not add its own session entries, does not rewrite artifacts,
+and does not touch `ado.json` or `story-understanding.json`. Stderr from every sub-script is
+forwarded unaltered. Finalize and summary failures exit 1 with the failing step named on
+stderr. A share-export failure is a warning on stderr, not fatal, so the local bundle stays
+usable and the operator can retry with `Export-EiSessionBundleToShare.ps1` directly. Share
+export runs only when `EI_GRAPHICS_SHARE_PATH` is set in the environment; when it is unset,
+the wrapper reports `bundlePath = $null` and exits 0. The wrapper resolves its three
+dependencies from `$PSScriptRoot` so a sandbox that copies the wrapper into a mocked folder
+layout can shim all three sub-scripts, matching how T033 tests `Invoke-EiStoryIntake.ps1`.
+This task grows the plugin script count 13→14 and the core-script count 8→9. Six count sites
+move together: two `$LineCeilings`/`$OwningTask` maps in `ScriptContract.Tests.ps1`, one
+`Context 'our nine scripts'` block name in the same file (→ 'our ten scripts'), one
+`Should -Be 13` / `-BeLessOrEqual 13` pair in `ScriptContract.Tests.ps1`, one
+`Should -BeLessOrEqual 13` in `EverythingGreen.Tests.ps1`, and the `CoreScripts` /
+`-ForEach` list in `Skill.Tests.ps1`. The SKILL.md frontmatter says "eight core scripts" and
+the opening line says "Eight scripts, all in `scripts/`"; both become "nine". The SKILL.md
+130-line ceiling has headroom for one more `## Complete-EiSession.ps1` section (roughly ten
+lines); no ceiling is raised here.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Complete-EiSession.ps1` (new)
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md` (8→9 script count, new section)
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Complete-EiSession.Tests.ps1` (new)
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/Skill.Tests.ps1` (CoreScripts + names list)
+- `tests/ScriptContract.Tests.ps1` (LineCeilings ×2, OwningTask ×2, 13→14, 'nine'→'ten')
+- `tests/EverythingGreen.Tests.ps1` (13→14)
+
+**Acceptance:** `$P` exits 0 including the new Complete-EiSession tests: `-Help` prints
+synopsis and exits 0; the happy path runs all three sub-scripts against shims and returns the
+summary and bundle paths; `EI_GRAPHICS_SHARE_PATH` unset skips the share export; a finalize or
+summary shim that fails exits 1 with the step named on stderr; a share-export shim that fails
+warns on stderr but still exits 0. `Test-BuildProgress.ps1` exits 0. The T017 manifests check,
+the T019 no-orphan check, the T020 script contract check, and the T021 global green check all
+still pass.
+
+**Attempts:** In progress.
+
+**Decisions:** To be recorded at completion.
+
+**Result:** IN-PROGRESS.
+
+
