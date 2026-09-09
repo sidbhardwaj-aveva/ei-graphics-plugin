@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T037
+**Current task:** T038
 **Last verified green:** T028 (2026-09-03T13:15:20Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -47,3 +47,4 @@ in `BUILD-LOG.md`.
 | T035 | Informational status lane for session entries | DONE | 270d05c | 2026-09-09T07:11:25Z |
 | T036 | Wrapper script Complete-EiSession.ps1 | DONE | 5c0126c | 2026-09-09T08:39:47Z |
 | T037 | Fix doctor crash when the registry or .git is missing | DONE | 47c2862 | 2026-09-09T09:14:02Z |
+| T038 | Stop conflating the plugin's own root with the target repository | IN-PROGRESS | — | — |

@@ -1887,6 +1887,39 @@ with a plugin tree but no `.git` behaves the same way, with
 **Done when.** The doctor-focused tests pass with no skipped tests, including the two new
 regression cases. `Test-BuildProgress.ps1` and the full Pester suite both exit 0.
 
+#### T038 — Stop conflating the plugin's own root with the target repository
+
+**Why this task exists.** A live run against a real target repository showed the doctor is
+unusable as designed: Checks 3 and 4 look for `plugins/aveva-ei-graphics/...` **under `-Root`**,
+but `-Root` is meant to be the story's own codebase repository, which never contains a copy of
+the plugin. Every real target repository therefore reported spurious `Block` findings. The same
+run also surfaced three narrower bugs in the checks that did run: `az devops -v` is not a valid
+command and always errors; `az devops configure -l` ignores `--output json` and always prints
+INI text, so a configured default organization was reported as missing; and the frontmatter
+regexes lacked `(?m)`, so `^`/`$` anchored to the whole file instead of each line, making every
+domain skill report a missing opening `---` regardless of its real content.
+
+**Do this.** Derive the plugin's own root once, from this script's install location
+(`$PSScriptRoot/../../..`), and pass it to `Test-PluginFileStructure`, `Test-SkillRegistry`, and
+the schema lookup inside `Test-SessionArtifacts`. `-Root` keeps its existing meaning — the target
+repository, defaulting to the current directory — for `.ei-session-logs` and git configuration
+only. Surface both `targetRoot` and `pluginRoot` in the `-Json` output. Replace `az devops -v`
+with `az extension show --name azure-devops` for the installed-CLI check. Parse
+`az devops configure -l` as line-oriented text (`organization = ...`), not JSON. Add `(?m)` to
+the three frontmatter regexes. Lower the truncation floor for
+`references/domain-skill-registry.json` only, since its content is already schema-validated in
+Check 4 and a single-domain registry is legitimately under 500 bytes.
+
+Add regression tests: a `-Root` with no `plugins/` tree still finds the plugin's own files; the
+JSON output carries both `targetRoot` and `pluginRoot`; the script never calls the invalid
+`az devops -v` form or `--output json` on `az devops configure -l`; and the frontmatter regexes
+use `(?m)`.
+
+**Done when.** The doctor-focused tests pass with no skipped tests, including the new regression
+cases. `Test-BuildProgress.ps1` and the full Pester suite both exit 0. A manual run against a
+real target repository with a configured Azure DevOps organization reports no `Block` findings
+for the plugin's own files or for Azure DevOps CLI authentication.
+
 ---
 
 ## Part 8 — When things go wrong
