@@ -2613,6 +2613,7 @@ SKILL.md's own example, not to change any script's parameter contract.
   `Invoke-EiStoryIntake.ps1` instead of describing a pipe)
 - `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` (`What happens next`
   prose and the `### Canonical invocation` code fence, both corrected)
+- `tests/EverythingGreen.Tests.ps1` (row count 38→39)
 - `plan.md` (new `#### T039` section)
 - `BUILD-PROGRESS.md`
 - `BUILD-LOG.md`

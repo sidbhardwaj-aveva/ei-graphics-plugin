@@ -141,10 +141,12 @@ out again must reformat rather than cast. `scripts/helpers/EiAdoTimestamp.ps1` o
 
 This script only retrieves. It writes nothing to disk.
 
-Pipe its output into `Convert-EiAdoIntake.ps1`, which turns it into the shape
-`ado.schema.json` wants and downloads the images. Then pipe that into
-`Write-EiArtifact.ps1 -ArtifactType ado`, which checks it against the schema and writes
-`ado.json`. Both live in the `ei-graphics-core` skill.
+Its output feeds `Convert-EiAdoIntake.ps1`, which turns it into the shape `ado.schema.json`
+wants and downloads the images. That result feeds `Write-EiArtifact.ps1 -ArtifactType ado`,
+which checks it against the schema and writes `ado.json`. Both live in the `ei-graphics-core`
+skill. Neither accepts pipeline input: pass each step's output explicitly, as the invocation
+below does. `Invoke-EiStoryIntake.ps1` runs all three steps in one call and is the recommended
+way to do this.
 
 If either of those two exits with a code other than 0, stop and report it. Never carry on to
 understanding the story without an `ado.json`.
@@ -152,7 +154,11 @@ understanding the story without an `ado.json`.
 ### Canonical invocation
 
 ```powershell
+# One command (recommended):
+& ./plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Invoke-EiStoryIntake.ps1 -WorkItem $Url -StoryId $StoryId
+
+# The three steps it runs, shown explicitly. Neither script takes pipeline input.
 $intake = & ./plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1 -WorkItemUrl $Url
-$ado    = $intake | & ./plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.ps1 -StoryId $StoryId
-$ado    | & ./plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.ps1 -ArtifactType ado -StoryId $StoryId
+$ado    = & ./plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.ps1 -IntakeJson ($intake -join "`n") -StoryId $StoryId
+& ./plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.ps1 -ArtifactType ado -StoryId $StoryId -InputJson ($ado -join "`n")
 ```

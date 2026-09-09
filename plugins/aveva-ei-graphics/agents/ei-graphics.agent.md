@@ -7,9 +7,9 @@ description: Work an Electrical and Instrumentation (EI) Graphics story from an 
 
 ## Intake
 Before the first story, run `skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`. Stop if it reports `Blocked`.
-Run the intake script, pipe it through `Convert-EiAdoIntake.ps1`, then through
-`Write-EiArtifact.ps1 -ArtifactType ado`. If either exits with a code other than 0, report the
-failure and stop. Never carry on to understanding the story without an `ado.json`.
+Run `Invoke-EiStoryIntake.ps1`, which chains the intake script, `Convert-EiAdoIntake.ps1`, and
+`Write-EiArtifact.ps1 -ArtifactType ado` without piping between the steps. If it exits with a
+code other than 0, report the failure and stop. Never carry on without an `ado.json`.
 
 Read `ado.json` for everything after that. Never fetch the story from ADO again.
 
