@@ -8,9 +8,11 @@
     skill registry & schemas, session artifacts, and git configuration.
     
     -Root names the target repository a story is worked in (defaults to the current directory):
-    session artifacts and git configuration are checked there. The plugin's own files are always
-    resolved from this script's install location, never from -Root, because the target repository
-    does not contain a copy of the plugin.
+    session artifacts and git configuration are checked there. -Root need not be the repository's
+    top level; the script asks git for the real top level and uses that instead when -Root is
+    somewhere underneath it. The plugin's own files are always resolved from this script's install
+    location, never from -Root, because the target repository does not contain a copy of the
+    plugin.
     
     Returns status: pass | blocked | needs-manual-review
     Exit code: 0 if status is "pass", 1 if "blocked" or "needs-manual-review".
@@ -575,6 +577,21 @@ function Test-GitConfiguration {
 # ============================================================================
 
 $rootPath = (Resolve-Path -LiteralPath $Root).Path
+
+# -Root may be a subfolder of the real repository (e.g. a project folder several levels under
+# the actual git root), so ask git for the top level before trusting the given path literally.
+# A path with no repository anywhere in its ancestry leaves $rootPath unchanged, so Check 6
+# still reports the missing .git truthfully instead of silently walking to an unrelated repo.
+try {
+    $gitTop = git -C $rootPath rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -eq 0 -and $gitTop) {
+        $gitTop = $gitTop.Trim()
+        if ($IsWindows) { $gitTop = $gitTop -replace '/', '\' }
+        $rootPath = (Resolve-Path -LiteralPath $gitTop).Path
+    }
+} catch {
+    # git not on PATH, or not a repository at all: keep $rootPath as given.
+}
 
 # The plugin's own files live beside this script, not necessarily under -Root: -Root is the
 # target repository a story is being worked in, which never contains a copy of the plugin.

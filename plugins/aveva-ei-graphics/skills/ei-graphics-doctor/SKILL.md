@@ -56,5 +56,8 @@ Read `status`, `violations`, `reviewFlags`, `requiredActions`, and `checkDetails
   It is never the plugin's own install location. The plugin's files are always resolved from
   where this script is installed, because the target repository does not contain a copy of
   the plugin.
+- `-Root` does not have to be the repository's top level. The script asks git for the real
+  top level and uses that instead, so a subfolder several levels deep still resolves
+  correctly. Read `targetRoot` in `-Json` output to see the path actually checked.
 - The doctor is diagnostic only. Never execute its suggested repair commands without the user's approval.
 - Do not treat skipped checks or missing evidence as a pass.

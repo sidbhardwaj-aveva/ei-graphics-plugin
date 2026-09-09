@@ -289,6 +289,25 @@ Describe 'Invoke-EiGraphicsDoctor.ps1' -Tag 'Unit' {
             $json.targetRoot | Should -Be $repoRoot
             $json.pluginRoot | Should -Be $pluginRoot
         }
+        
+        It 'A -Root under a repository subfolder resolves to the real git top level' {
+            $gitRoot = Join-Path $TestDrive 'nested-git-root'
+            $subfolder = Join-Path $gitRoot 'Engineering' 'Modules' 'EI' 'Source'
+            New-Item -ItemType Directory -Path $subfolder -Force | Out-Null
+            Push-Location -LiteralPath $gitRoot
+            try {
+                git init -q
+                git -c gc.auto=0 config --local user.name 'Test'
+                git -c gc.auto=0 config --local user.email 'test@example.com'
+            } finally {
+                Pop-Location
+            }
+            
+            $output = & pwsh -NoProfile -File $scriptPath -Root $subfolder -Json 2>$null
+            $json = $output -join "`n" | ConvertFrom-Json
+            $json.targetRoot | Should -Be (Resolve-Path -LiteralPath $gitRoot).Path
+            $json.checkDetails.GitConfiguration.GitRepoExists | Should -Be $true
+        }
     }
     
     Context 'Regression - Azure DevOps CLI check uses valid commands' {

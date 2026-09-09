@@ -2717,6 +2717,7 @@ that negative case still works after this change.
 - `tests/aveva-ei-graphics/skills/ei-graphics-doctor/Skill.Tests.ps1` (new regression test:
   `$TestDrive` git repo with a nested subfolder, `-Root` pointed at the subfolder)
 - `tests/ScriptContract.Tests.ps1` (line ceiling for `Invoke-EiGraphicsDoctor` 730→750, both maps)
+- `tests/EverythingGreen.Tests.ps1` (row count 40→41)
 - `plan.md` (new `#### T041` section)
 - `BUILD-PROGRESS.md`
 - `BUILD-LOG.md`
