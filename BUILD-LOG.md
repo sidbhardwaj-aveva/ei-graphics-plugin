@@ -2055,8 +2055,23 @@ than in `SKILL.md`. No heading is removed or duplicated by this edit.
 block lists the gaps found. `tools/Test-BuildProgress.ps1` exits 0. The v2 heading test in T015
 continues to pass because no heading is removed and none is duplicated.
 
-**Attempts:** In progress.
+**Attempts:** 1. The patch went in on the first try. `$P` reported 572 passed, 0 failed, 0
+skipped. `tools/Test-BuildProgress.ps1` reported the file valid with 28 done rows, 1 blocked
+(T022), and current task T023, exit 0.
 
-**Decisions:** To be recorded at completion.
+**Decisions:** Added a new `### Settings & Configuration Surface` subsection under Key Files
+rather than extending the existing table, because the ten files form a distinct concern — the
+settings and configuration entry points — and mixing them into the general Key Files rows
+would blur what that first table means. The new subsection is a ten-row markdown table listing
+`TerminationDrawingSettings.cs`, its view model, six XAML views (including the intentional
+`TerminationgDrawingCableSettings.xaml` typo, which is called out as matching the shipping
+source), `AdvancedSettingsService.cs`, and `TerminationDrawingSettingsTest.cs`. A lead
+paragraph explains why the section exists; a trailing paragraph notes that some settings are
+symbol-controlled rather than user-controlled. Nine other improvements surfaced during the
+session review — Checkpoint 1 wiring in `agents/ei-graphics.agent.md`, a canonical intake
+invocation example, `Invoke-EiStoryIntake.ps1` and `Complete-EiSession.ps1` wrapper scripts, a
+verbatim-quote check inside `Write-EiSessionEntry.ps1`, and an `informational` status lane in
+`SKILL.md` — are deferred as future tasks. They are outside T023's scope and each needs its
+own row.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.
