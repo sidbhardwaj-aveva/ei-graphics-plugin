@@ -89,8 +89,13 @@ function ConvertTo-EvidenceItem {
     <#
     .SYNOPSIS
         Turns one evidence item into the four keys the schema allows, whatever shape it arrived in.
+    .DESCRIPTION
+        When the item carries a non-empty 'quote', the writer confirms the quote appears
+        verbatim in the named file, after normalising CRLF to LF on both sides. A missing file
+        or a mismatch exits 1 and writes nothing, so a citation in the session log always
+        matches a real read from disk.
     #>
-    param($Item, [int] $Position)
+    param($Item, [int] $Position, [string] $ResolvedRoot)
 
     $read = { param([string] $Key)
         if ($Item -is [System.Collections.IDictionary]) { if ($Item.Contains($Key)) { return $Item[$Key] } ; return $null }
@@ -110,6 +115,22 @@ function ConvertTo-EvidenceItem {
         if ([string]::IsNullOrEmpty([string] $value)) { continue }
         if ($key -eq 'line') { $plain[$key] = [int] $value } else { $plain[$key] = [string] $value }
     }
+
+    if ($plain.Contains('quote')) {
+        $filePath = Join-Path $ResolvedRoot ([string] $file)
+        if (-not (Test-Path -LiteralPath $filePath -PathType Leaf)) {
+            Write-Problem "Evidence item ${Position}: file '$file' does not exist under the session root '$ResolvedRoot'. Every quote must come from a file on disk."
+            exit 1
+        }
+        $fileText = (Get-Content -LiteralPath $filePath -Raw) -replace "`r`n", "`n"
+        $quoteLf = ([string] $plain['quote']) -replace "`r`n", "`n"
+        if (-not $fileText.Contains($quoteLf)) {
+            $preview = if ($quoteLf.Length -le 60) { $quoteLf } else { $quoteLf.Substring(0, 60) + '...' }
+            Write-Problem "Evidence item ${Position}: the quote does not appear in '$file'. Looked for: $preview"
+            exit 1
+        }
+    }
+
     $plain
 }
 
@@ -216,7 +237,8 @@ if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
     if ($HumanInput) { $entry['humanInput'] = $HumanInput }
     if ($null -ne $ScriptOutput) { $entry['scriptOutput'] = $ScriptOutput }
     if ($Evidence) {
-        $items = @(for ($i = 0; $i -lt $Evidence.Count; $i++) { ConvertTo-EvidenceItem -Item $Evidence[$i] -Position ($i + 1) })
+        $resolvedRoot = (Resolve-Path -LiteralPath $Root).Path
+        $items = @(for ($i = 0; $i -lt $Evidence.Count; $i++) { ConvertTo-EvidenceItem -Item $Evidence[$i] -Position ($i + 1) -ResolvedRoot $resolvedRoot })
         $entry['evidence'] = @($items)
     }
 

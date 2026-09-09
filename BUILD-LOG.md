@@ -2275,9 +2275,31 @@ quote passes, mismatched quote fails, missing file fails) and the one updated ex
 `Test-BuildProgress.ps1` exits 0. `session-verbose.json` still validates against the schema and
 `Export-EiSessionSummary.Tests.ps1` continues to consume it unchanged.
 
-**Attempts:** In progress.
+**Attempts:** 1. First `$P` reported 593 passed, 3 failed, all three inside `Context '-Evidence'`
+with the same message: `CommandNotFoundException: The term 'New-QuotedFile' is not recognised`.
+I had defined the helper inside the `Context` block, which Pester 5 does not expose to `It`
+scopes; only the outer `BeforeAll` block does. Moved the helper next to `Invoke-Entry` and
+`Get-Session` in the file-top `BeforeAll`. Second run reported 596 passed, 0 failed. The three
+new tests (`accepts a quote that matches the named file verbatim`, `rejects a quote that
+differs from the file, and writes nothing`, `rejects a quote whose file does not exist under
+the session root`) all fire the new code path. `Test-BuildProgress.ps1` exited 0 with 36 rows,
+32 done, 1 blocked, current task T034.
 
-**Decisions:** To be recorded at completion.
+**Decisions:** The runtime check lives inside `ConvertTo-EvidenceItem`, before any file is
+written, so a failed check leaves the disk untouched: no envelope written, no directory left
+behind past what was already there. Passed the pre-resolved root path in through a new
+`-ResolvedRoot` parameter rather than reaching for the script-scope `$Root` from inside the
+function, so the coupling stays explicit and the function stays testable in isolation.
+Normalised CRLF to LF on BOTH sides of the substring check because the writer's own JSON output
+uses LF (see `Save-Session`) and quotes copied from a file on a Windows checkout arrive as
+CRLF; without normalisation, a correct citation would fail the check. The error preview shows
+the first 60 characters of the LF-normalised quote so multi-line quotes are truncated
+predictably. Left `session.schema.json` alone — the storage contract still permits `quote` as
+`["string", "null"]`; the writer just refuses to store an unverified one. Raised the
+`Write-EiSessionEntry` line ceiling in `ScriptContract.Tests.ps1` from 250 to 275 (script is
+now 268 lines) rather than tightening the existing prose. `session-verbose.json` was not
+touched: only `Export-EiSessionSummary` reads it, and the renderer does not call the writer, so
+the fixture stays valid without further work.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.
 

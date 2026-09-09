@@ -17,6 +17,13 @@ BeforeAll {
         param([string] $Root, [string] $StoryId = '4965976')
         Get-Content -LiteralPath (Join-Path $Root '.ei-session-logs' $StoryId 'session.json') -Raw
     }
+
+    function New-QuotedFile {
+        param([string] $Root, [string] $RelativePath, [string] $Content)
+        $full = Join-Path $Root $RelativePath
+        $null = New-Item -ItemType Directory -Path (Split-Path -Parent $full) -Force
+        [System.IO.File]::WriteAllText($full, $Content, [System.Text.UTF8Encoding]::new($false))
+    }
 }
 
 Describe 'Write-EiSessionEntry' -Tag 'Unit' {
@@ -108,6 +115,8 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
     Context '-Evidence' {
 
         It 'records what the reasoning rests on, and reads back unchanged' {
+            New-QuotedFile -Root $script:Root -RelativePath 'src/A.cs' -Content 'if (existsInBoth) { return; }'
+
             $run = Invoke-Entry -Splat ($script:Base + @{
                 Phase = 'implementation'; Action = 'trace-setting'; Outcome = 'Found the caller.'
                 Reasoning = 'The setting reaches a private field and stops there.'
@@ -162,6 +171,36 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
             Invoke-Entry -Splat ($script:Base + @{ Phase = 'ado-intake'; Action = 'a'; Outcome = 'b' }) | Out-Null
             $entry = @((Get-Session -Root $script:Root | ConvertFrom-Json).entries)[0]
             $entry.PSObject.Properties.Name | Should -Not -Contain 'evidence'
+        }
+
+        It 'accepts a quote that matches the named file verbatim' {
+            New-QuotedFile -Root $script:Root -RelativePath 'src/A.cs' -Content "public void Method() {`n    return null;`n}`n"
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'
+                Evidence = @(@{ file = 'src/A.cs'; quote = 'return null;' })
+            })
+            $run.ExitCode | Should -Be 0
+            $found = @((Get-Session -Root $script:Root | ConvertFrom-Json).entries[0].evidence)
+            $found[0].quote | Should -Be 'return null;'
+        }
+
+        It 'rejects a quote that differs from the file, and writes nothing' {
+            New-QuotedFile -Root $script:Root -RelativePath 'src/A.cs' -Content 'if (existsInBoth) { return; }'
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'
+                Evidence = @(@{ file = 'src/A.cs'; quote = 'if (existsInBoth) { return null; }' })
+            })
+            $run.ExitCode | Should -Be 1
+            Test-Path -LiteralPath (Join-Path $script:Root '.ei-session-logs' '4965976' 'session.json') | Should -BeFalse
+        }
+
+        It 'rejects a quote whose file does not exist under the session root' {
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Phase = 'implementation'; Action = 'a'; Outcome = 'b'
+                Evidence = @(@{ file = 'src/Missing.cs'; quote = 'anything' })
+            })
+            $run.ExitCode | Should -Be 1
+            Test-Path -LiteralPath (Join-Path $script:Root '.ei-session-logs' '4965976' 'session.json') | Should -BeFalse
         }
     }
 
