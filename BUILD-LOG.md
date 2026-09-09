@@ -2156,8 +2156,21 @@ so a documentation edit does not trip it.
 The T017 manifests check, T018 documents check, T019 no-orphan check and the Part 3
 plain-language check on `ei-azure-devops-cli-intake/SKILL.md` all still pass.
 
-**Attempts:** In progress.
+**Attempts:** 1. The subsection went in on the first try. `$P` reported 576 passed, 0 failed
+(three new tests: the T031 checkpoint assertion, the T032 heading assertion and the T032
+three-script pipe assertion). `Test-BuildProgress.ps1` exited 0 with 35 rows, 30 done, 1
+blocked, current task T032.
 
-**Decisions:** To be recorded at completion.
+**Decisions:** Placed the code block inside the existing `## What happens next` heading, as a
+`### Canonical invocation` subsection, so it sits next to the prose that explains why each
+step exists rather than duplicating that context. Used repository-relative script paths in the
+example (`./plugins/aveva-ei-graphics/skills/.../Invoke-EiAdoCliIntake.ps1`, etc.) so an agent
+can paste the block from the repository root without further edits. Split the pipe across
+three lines with intermediate `$intake` and `$ado` variables rather than one long chain,
+because each step's exit code and each script's own JSON output need to be inspectable
+separately when something fails; a single monolithic pipe hides the boundary. The Pester
+test lives in its own `Skill.Tests.ps1` next to the skill's other test folders, matching how
+`ei-graphics-core` and `ei-graphics-doctor` are organised, and avoids growing the existing
+`AdoIntakeChain.Tests.ps1`, which is scoped to the copied helper scripts and their hash guard.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.

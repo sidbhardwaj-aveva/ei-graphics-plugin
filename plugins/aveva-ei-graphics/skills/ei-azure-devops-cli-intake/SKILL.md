@@ -148,3 +148,11 @@ Pipe its output into `Convert-EiAdoIntake.ps1`, which turns it into the shape
 
 If either of those two exits with a code other than 0, stop and report it. Never carry on to
 understanding the story without an `ado.json`.
+
+### Canonical invocation
+
+```powershell
+$intake = & ./plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/scripts/Invoke-EiAdoCliIntake.ps1 -WorkItemUrl $Url
+$ado    = $intake | & ./plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.ps1 -StoryId $StoryId
+$ado    | & ./plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiArtifact.ps1 -ArtifactType ado -StoryId $StoryId
+```

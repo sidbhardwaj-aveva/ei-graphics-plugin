@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T032
+**Current task:** T033
 **Last verified green:** T028 (2026-09-03T13:15:20Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -41,7 +41,7 @@ in `BUILD-LOG.md`.
 | T022 | Dry run against story 3408091 | BLOCKED | — | — |
 | T023 | Read the summary, improve the skill | DONE | b3d5edb | 2026-09-09T05:30:10Z |
 | T031 | Confirm the understanding, wired into the agent file | DONE | 39a5c93 | 2026-09-09T06:00:24Z |
-| T032 | Canonical intake invocation in ei-azure-devops-cli-intake SKILL.md | IN-PROGRESS | — | — |
+| T032 | Canonical intake invocation in ei-azure-devops-cli-intake SKILL.md | DONE | pending | 2026-09-09T06:04:35Z |
 | T033 | Wrapper scripts Invoke-EiStoryIntake and Complete-EiSession | TODO | — | — |
 | T034 | Verbatim-quote enforcement in Write-EiSessionEntry.ps1 | TODO | — | — |
 | T035 | Informational status lane for session entries | TODO | — | — |
