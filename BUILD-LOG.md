@@ -2075,3 +2075,37 @@ verbatim-quote check inside `Write-EiSessionEntry.ps1`, and an `informational` s
 own row.
 
 **Result:** DONE.
+
+## T031 — Confirm the understanding, wired into the agent file — 2026-09-09T05:48:20Z
+
+**Goal:** Close the Checkpoint 1 gap the story 3774939 review uncovered. The reference file
+`checkpoint-templates.md` already describes Checkpoint 1 in full, but `ei-graphics.agent.md`
+never tells the agent to run it, so a real session went from intake straight to code changes
+without a human agreeing on the story understanding first.
+
+**Assumptions:** The agent file currently has 79 of its 80-line budget used, so the new
+"Confirm the understanding" section will not fit without tightening existing prose. The T016
+literal-string test (`skill-first`, `Stop when done`, `.ei-session-logs/`, the two reference
+pointers, the plain-language block naming "short sentences" and "next action") and the T029
+escalation paragraph must survive any trim. The session schema already has a `human-checkpoint`
+phase, so no schema change is needed. The new section points at the reference rather than
+restating the five bullets, so the reference stays the single source of truth. The Pester test
+added under `tests/aveva-ei-graphics/agents/Agent.Tests.ps1` asserts three literal strings only
+(`Confirm the understanding`, `Checkpoint 1`, `-Phase human-checkpoint`) and does not police
+wording around them, so future rewording that keeps those three tokens still passes.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
+
+**Acceptance:** `$P` exits 0 including the new test. `Test-BuildProgress.ps1` exits 0. The
+agent file is 80 lines or fewer, has valid frontmatter, and still passes the T016 heading and
+literal-string test and the T029 escalation test.
+
+**Attempts:** In progress.
+
+**Decisions:** To be recorded at completion.
+
+**Result:** IN-PROGRESS.

@@ -40,7 +40,7 @@ in `BUILD-LOG.md`.
 | T030 | Integrate the EI Graphics doctor | DONE | bd4c04c | 2026-09-07T11:45:26Z |
 | T022 | Dry run against story 3408091 | BLOCKED | — | — |
 | T023 | Read the summary, improve the skill | DONE | b3d5edb | 2026-09-09T05:30:10Z |
-| T031 | Confirm the understanding, wired into the agent file | TODO | — | — |
+| T031 | Confirm the understanding, wired into the agent file | IN-PROGRESS | — | — |
 | T032 | Canonical intake invocation in ei-azure-devops-cli-intake SKILL.md | TODO | — | — |
 | T033 | Wrapper scripts Invoke-EiStoryIntake and Complete-EiSession | TODO | — | — |
 | T034 | Verbatim-quote enforcement in Write-EiSessionEntry.ps1 | TODO | — | — |
