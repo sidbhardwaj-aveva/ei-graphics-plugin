@@ -43,6 +43,6 @@ in `BUILD-LOG.md`.
 | T031 | Confirm the understanding, wired into the agent file | DONE | 39a5c93 | 2026-09-09T06:00:24Z |
 | T032 | Canonical intake invocation in ei-azure-devops-cli-intake SKILL.md | DONE | 7543dca | 2026-09-09T06:04:35Z |
 | T033 | Wrapper script Invoke-EiStoryIntake.ps1 | DONE | bc109b7 | 2026-09-09T06:36:25Z |
-| T034 | Verbatim-quote enforcement in Write-EiSessionEntry.ps1 | DONE | pending | 2026-09-09T06:59:41Z |
+| T034 | Verbatim-quote enforcement in Write-EiSessionEntry.ps1 | DONE | d7dbce7 | 2026-09-09T06:59:41Z |
 | T035 | Informational status lane for session entries | TODO | — | — |
 | T036 | Wrapper script Complete-EiSession.ps1 | TODO | — | — |
