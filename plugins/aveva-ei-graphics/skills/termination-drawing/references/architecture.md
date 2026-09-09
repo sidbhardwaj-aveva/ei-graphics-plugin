@@ -75,16 +75,11 @@ runtime model, the answer is usually "symbol-controlled".
 
 ## Codebase Location
 
-```
-https://dev.azure.com/AVEVA-VSTS/Dabacon%20Products/_git/dabacon-products?path=/Engineering/Modules/EI/Source
-```
+The agent runs from the root of the local `dabacon-products` clone at
+`Engineering/Modules/EI/Source`. Every path below is relative to that root, so no absolute
+path or remote URL is needed to open or edit the code.
 
-Default local clone path (override with `codebasePath` input):
-```
-d:\Git\dabacon-products\Engineering\Modules\EI\Source
-```
-
-Source tree within that root:
+Source tree:
 ```
 Presentation\Aveva.EI.CanvasDrawings\
 ├── EquipmentInserter.cs                               # Shape insert/update/delete + insertedTags

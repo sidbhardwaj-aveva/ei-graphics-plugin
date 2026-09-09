@@ -50,7 +50,7 @@ the root cause within the Termination Drawing pipeline, proposes a code fix, and
 | `adoWorkItemId` | one-of | ADO work item ID (`ADO#<id>`) |
 | `diagLogPath` | one-of | Path to `ts-diag.log` on the user's machine |
 | `symptomText` | one-of | Free-text symptom or pasted log fragment |
-| `codebasePath` | optional | Local clone root of `dabacon-products`. Defaults to `d:\Git\dabacon-products\Engineering\Modules\EI\Source` |
+| `codebasePath` | optional | Root of the local `dabacon-products` clone. Defaults to the current working directory, since the agent is invoked from `Engineering/Modules/EI/Source`. |
 | `isUpdateScenario` | optional | `true` if the bug occurs only during drawing UPDATE (re-generation), not first creation |
 
 At least one of `adoWorkItemId`, `diagLogPath`, or `symptomText` is required.
@@ -123,8 +123,11 @@ Compare `MODEL-DONE` and `BOX-ACTION` patterns between old and new log to confir
 ## Testing
 
 ### Running Tests
+
+Run from the codebase root (`Engineering/Modules/EI/Source`), which is the working directory
+the agent is invoked from.
+
 ```powershell
-cd d:\Git\dabacon-products\Engineering\Modules\EI\Source
 dotnet test Tests\Aveva.EI.CanvasDrawings.Test --filter "FullyQualifiedName~CoreConnectorManager" --no-restore
 dotnet test Tests\Aveva.EI.CanvasDrawings.Test --filter "FullyQualifiedName~LoopWireConnector" --no-restore
 ```
