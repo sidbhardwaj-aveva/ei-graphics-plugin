@@ -2127,3 +2127,37 @@ groups it with the other human-checkpoint entries. Grew the T029 row's row-count
 row-count drift, and pinning it to 35 keeps that signal alive after T031–T035 close.
 
 **Result:** DONE.
+
+## T032 — Canonical intake invocation in ei-azure-devops-cli-intake SKILL.md — 2026-09-09T06:02:22Z
+
+**Goal:** Close the intake-invocation rediscovery gap the story 3774939 review surfaced. The
+skill's "What happens next" section describes the pipe in prose, but no worked example exists,
+so an agent has to reason out the three-script sequence from the prose every time.
+
+**Assumptions:** The three scripts in the canonical pipe are `Invoke-EiAdoCliIntake.ps1` (in
+this skill), `Convert-EiAdoIntake.ps1` and `Write-EiArtifact.ps1` (both in `ei-graphics-core`).
+The T016 agent test already asserts this sequence in the agent file, so the code block must
+match that same order. The new `### Canonical invocation` subsection sits under the existing
+`## What happens next` heading rather than at the top of the file, because it depends on the
+context that section sets up. The Pester test lives in a new `Skill.Tests.ps1` under
+`tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/`, matching the naming used for the
+other skills (`ei-graphics-core/Skill.Tests.ps1`, `ei-graphics-doctor/Skill.Tests.ps1`). No
+schema, no script, and no plan-file line count is changed by this task. The
+`AdoIntakeChain.Tests.ps1` hash guard covers the three helper scripts only, not the SKILL.md,
+so a documentation edit does not trip it.
+
+**Files touched:**
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md`
+- `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/Skill.Tests.ps1` (new)
+
+**Acceptance:** `$P` exits 0 including the new SKILL test. `Test-BuildProgress.ps1` exits 0.
+The T017 manifests check, T018 documents check, T019 no-orphan check and the Part 3
+plain-language check on `ei-azure-devops-cli-intake/SKILL.md` all still pass.
+
+**Attempts:** In progress.
+
+**Decisions:** To be recorded at completion.
+
+**Result:** IN-PROGRESS.
