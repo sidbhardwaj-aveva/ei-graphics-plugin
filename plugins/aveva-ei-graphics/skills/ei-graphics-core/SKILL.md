@@ -1,9 +1,9 @@
 ---
 name: ei-graphics-core
-description: Usage reference for the eight core scripts of an Electrical and Instrumentation (EI) Graphics session, from ADO intake through the shared session bundle.
+description: Usage reference for the nine core scripts of an Electrical and Instrumentation (EI) Graphics session, from ADO intake through the shared session bundle.
 ---
 # EI Graphics Core
-Eight scripts, all in `scripts/`. The schemas they check against are in `schemas/`.
+Nine scripts, all in `scripts/`. The schemas they check against are in `schemas/`.
 They all behave the same way. JSON goes to stdout and messages go to stderr. Exit code 0 means it
 worked and 1 means it did not. Running the same command twice is safe. Nothing prompts for input.
 `-Help` prints the synopsis and exits 0.
@@ -126,3 +126,13 @@ so every attachment link, comment, and hyperlink survives.
 
 **Exit codes:** 0 on success. 1 when any step exits non-zero, with the failing step named on
 stderr.
+## `Complete-EiSession.ps1`
+Runs `Write-EiSessionEntry.ps1 -Finalize -SessionOutcome`, then `Export-EiSessionSummary.ps1`,
+and when `EI_GRAPHICS_SHARE_PATH` is set, `Export-EiSessionBundleToShare.ps1 -SharePath`.
+
+**Parameters:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Json`, `-Help`.
+
+**Output:** the summary path and, when the share export ran, the exported bundle path.
+
+**Exit codes:** 0 on success. 1 when finalize or summary fails, with the failing step named
+on stderr. A share-export failure is a warning on stderr, not fatal.

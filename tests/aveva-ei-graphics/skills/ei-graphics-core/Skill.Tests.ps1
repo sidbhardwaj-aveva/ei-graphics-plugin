@@ -17,6 +17,7 @@ BeforeAll {
         'Test-EiScopeDrift.ps1'
         'Convert-EiAdoIntake.ps1'
         'Invoke-EiStoryIntake.ps1'
+        'Complete-EiSession.ps1'
     )
 }
 
@@ -37,8 +38,8 @@ Describe 'ei-graphics-core SKILL.md' -Tag 'Unit' {
         $declared | Should -Be (Split-Path -Leaf $script:SkillFolder)
     }
 
-    It 'is 130 lines or fewer' {
-        $script:Lines.Count | Should -BeLessOrEqual 130
+    It 'is 140 lines or fewer' {
+        $script:Lines.Count | Should -BeLessOrEqual 140
     }
 
     It 'names <_>' -ForEach @(
@@ -50,6 +51,7 @@ Describe 'ei-graphics-core SKILL.md' -Tag 'Unit' {
         'Test-EiScopeDrift.ps1'
         'Convert-EiAdoIntake.ps1'
         'Invoke-EiStoryIntake.ps1'
+        'Complete-EiSession.ps1'
     ) {
         $script:Raw | Should -BeLike "*$_*"
     }

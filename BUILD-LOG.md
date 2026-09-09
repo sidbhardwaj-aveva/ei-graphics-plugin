@@ -2424,10 +2424,32 @@ warns on stderr but still exits 0. `Test-BuildProgress.ps1` exits 0. The T017 ma
 the T019 no-orphan check, the T020 script contract check, and the T021 global green check all
 still pass.
 
-**Attempts:** In progress.
+**Attempts:** One. Wrapper, its Pester file, the SKILL.md section, and all six count sites
+landed in a single pass. First full run had two failures: (1) Skill.Tests.ps1 ceiling of 130
+lines, actual 138 after the new `## Complete-EiSession.ps1` section — raised to 140; (2) the
+"warns but still exits 0" test could not parse the wrapper's `-Json` output because
+`ConvertTo-Json` (uncompressed) spans several lines, and the test's single-line
+`^\s*\{` filter picked only the opening brace. Fixed by scanning backwards through the merged
+stream for the last line matching `^\s*\{\s*$` and joining from there to end. Re-ran green.
 
-**Decisions:** To be recorded at completion.
+**Decisions:** Kept the wrapper's `-SessionOutcome` as a required parameter (validated in the
+script body with the same "No -X was given" pattern the plugin already uses), because a
+finalized session that carries no outcome would render "Outcome: not recorded" in the
+maintainer summary — the exact failure T036 exists to prevent. Kept the share-export failure
+as a warning, not fatal, matching the plan text: the local bundle stays usable and the
+operator retries with `Export-EiSessionBundleToShare.ps1` directly. Fished the exported
+bundle path out of `Export-EiSessionBundleToShare.ps1`'s existing `exportedPath` field
+rather than adding a new one. Chose to shim by copying the wrapper into a sandbox
+alongside shim `Write-EiSessionEntry.ps1`, `Export-EiSessionSummary.ps1`, and
+`Export-EiSessionBundleToShare.ps1` (the exact pattern T033 uses), because the wrapper
+resolves dependencies from `$PSScriptRoot` and no other technique both mocks all three sub-
+scripts and keeps `exit 1` isolated from the Pester process. Raised the SKILL.md ceiling
+130→140 (one-off, recorded here) because the new section is roughly ten lines and trimming
+elsewhere would remove parameter-list content that another test asserts on.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE. `$P` is 620/0/0. `Test-BuildProgress.ps1` is 0. The wrapper skips the
+bundle when `EI_GRAPHICS_SHARE_PATH` is unset, runs and exports the bundle when it is set,
+exits 1 with the failing step named when finalize or summary fails, and warns-but-still-
+exits-0 when the share export fails.
 
 
