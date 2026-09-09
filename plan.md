@@ -1707,45 +1707,46 @@ manifests and T018 documents checks still pass, and Part 3's plain-language chec
 for that file (the skill is exempt for jargon, but sentence length and next-action rules apply
 to any new prose).
 
-#### T033 — Wrapper scripts `Invoke-EiStoryIntake.ps1` and `Complete-EiSession.ps1`
+#### T033 — Wrapper script `Invoke-EiStoryIntake.ps1`
 
-**Why this task exists.** The agent runs a fixed sequence of scripts to start a story
-(intake → convert → write ado) and another fixed sequence to finish a session (finalize →
-render summary → optional share export). Wrapping each sequence removes rediscovery and cuts the
-terminal-command count in T022's live-run acceptance.
+**Why this task exists.** The agent runs a fixed sequence of scripts to start a story: intake,
+convert, then write ado. Wrapping the sequence removes rediscovery and cuts the terminal-command
+count in T022's live-run acceptance.
 
-**Do this.** Add two scripts under
-`plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/`.
-
-`Invoke-EiStoryIntake.ps1`. Parameters: `-WorkItem`, `-StoryId`, `-Root`, `-Json`, `-Help`.
-Calls `Invoke-EiAdoCliIntake.ps1`, pipes the result to `Convert-EiAdoIntake.ps1`, then to
-`Write-EiArtifact.ps1 -ArtifactType ado`. Returns one JSON object on stdout with the artifact
+**Do this.** Add `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Invoke-EiStoryIntake.ps1`.
+It calls `Invoke-EiAdoCliIntake.ps1`, pipes the result to `Convert-EiAdoIntake.ps1`, then to
+`Write-EiArtifact.ps1 -ArtifactType ado`. It returns one JSON object on stdout naming the artifact
 path and its hash. On any step's non-zero exit, name the step that failed on stderr and exit 1.
 
-`Complete-EiSession.ps1`. Parameters: `-StoryId`, `-SessionOutcome`, `-Root`, `-Json`, `-Help`.
-Calls `Write-EiSessionEntry.ps1 -Finalize`, then `Export-EiSessionSummary.ps1`. When
-`EI_GRAPHICS_SHARE_PATH` is set, then also calls `Export-EiSessionBundleToShare.ps1`. Returns
-one JSON object on stdout with the summary path, and the bundle path when the share export ran.
-A failure in finalize or summary exits 1. A share-export failure is a warning on stderr, not a
-fatal, so the local bundle stays usable.
+The wrapper never rewrites, re-parses, or filters the JSON between steps. The intake JSON goes
+into the converter unchanged so every attachment URL, every comment, every hyperlink survives.
+Stderr from every sub-script is forwarded unaltered.
 
-Both scripts follow the standard header: `#Requires -Version 7.0`, `Set-StrictMode -Version
-Latest`, `$ErrorActionPreference = 'Stop'`. Paths resolve from `$PSScriptRoot`. JSON goes to
-stdout, messages to stderr. Nothing prompts. `-Help` prints the synopsis and exits 0. Running
-twice is safe.
+Bare integer input goes as `-WorkItemId` to the intake script; anything else goes as
+`-WorkItemUrl` so URLs, markdown links, and pasted references all keep working exactly as they
+do today.
 
-Add Pester tests under `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/` for each: the
-happy path against fixtures or mocked sub-scripts, the `-Help` behaviour, the exit-1 branch of a
-sub-script failure, and for `Complete-EiSession.ps1` the environment-variable branch (share
-export ran vs skipped).
+**Parameters, exactly these 5:** `-WorkItem`, `-StoryId`, `-Root`, `-Json`, `-Help`.
+
+Follow the standard header: `#Requires -Version 7.0`, `Set-StrictMode -Version Latest`,
+`$ErrorActionPreference = 'Stop'`. Paths resolve from `$PSScriptRoot`. JSON goes to stdout,
+messages to stderr. Nothing prompts. `-Help` prints the synopsis and exits 0. Running twice is
+safe.
+
+Add Pester tests under `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/`: the happy
+path against mocked sub-scripts, the `-Help` behaviour, and the exit-1 branch when a sub-script
+fails.
 
 Update the script list in `plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md` to name
-the two new scripts. Update any line in that file, or in `plan.md` Part 6, that says the count
-of core scripts is seven.
+the new script. If that file, or any line in `plan.md` Part 11 that names the count of `.ps1`
+files under `plugins/`, still reads seven or twelve respectively, update to eight and thirteen.
+
+In `tests/ScriptContract.Tests.ps1`, add `Invoke-EiStoryIntake` to `$LineCeilings` and
+`$OwningTask`, and raise the total-count assertion from `12` to `13`.
 
 **Done when.** `$P` exits 0 including the new tests. `Test-BuildProgress.ps1` exits 0. The T017
 manifests check, the T019 no-orphan check, the T020 script contract check, and the T021 global
-green check all still pass. The `.ps1` count cap in T020 still holds.
+green check all still pass.
 
 #### T034 — Verbatim-quote enforcement in `Write-EiSessionEntry.ps1`
 
@@ -1817,6 +1818,48 @@ where none exists).
 existing session fixtures (`session-verbose.json`, `session-concise.json`, `session-empty.json`)
 still validate. The T019 no-orphan check still passes.
 
+#### T036 — Wrapper script `Complete-EiSession.ps1`
+
+**Why this task exists.** The other end of the same rediscovery gap T033 closes. An agent
+finishing a session runs `Write-EiSessionEntry.ps1 -Finalize`, then `Export-EiSessionSummary.ps1`,
+and when the share is configured, `Export-EiSessionBundleToShare.ps1`. Wrapping the sequence
+lets the agent close a session with one command.
+
+**Do this.** Add `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Complete-EiSession.ps1`.
+It calls `Write-EiSessionEntry.ps1 -Finalize -SessionOutcome $SessionOutcome`, then
+`Export-EiSessionSummary.ps1`. When `EI_GRAPHICS_SHARE_PATH` is set in the environment, it then
+calls `Export-EiSessionBundleToShare.ps1 -SharePath $env:EI_GRAPHICS_SHARE_PATH`.
+
+Returns one JSON object on stdout naming the summary path, and the bundle path when the share
+export ran. A failure in finalize or summary exits 1. A share-export failure is a warning on
+stderr, not fatal, so the local bundle stays usable and the operator can retry.
+
+The wrapper does not add its own session entries. It does not rewrite artifacts. It does not
+touch attachments, comments, or hyperlinks in `ado.json` or `story-understanding.json`. Stderr
+from every sub-script is forwarded unaltered.
+
+**Parameters, exactly these 5:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Json`, `-Help`.
+
+Follow the standard header: `#Requires -Version 7.0`, `Set-StrictMode -Version Latest`,
+`$ErrorActionPreference = 'Stop'`. Paths resolve from `$PSScriptRoot`. JSON goes to stdout,
+messages to stderr. Nothing prompts. `-Help` prints the synopsis and exits 0. Running twice is
+safe.
+
+Add Pester tests under `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/`: the happy
+path against mocked sub-scripts, the `-Help` behaviour, the exit-1 branch when finalize or
+summary fails, the branch when `EI_GRAPHICS_SHARE_PATH` is set, and the branch when it is not.
+
+Update the script list in `plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md` to name
+the new script. If that file, or any line in `plan.md` Part 11, still reads eight or thirteen
+after T033 lands, update to nine and fourteen.
+
+In `tests/ScriptContract.Tests.ps1`, add `Complete-EiSession` to `$LineCeilings` and
+`$OwningTask`, and raise the total-count assertion from `13` to `14`.
+
+**Done when.** `$P` exits 0 including the new tests. `Test-BuildProgress.ps1` exits 0. The T017
+manifests check, the T019 no-orphan check, the T020 script contract check, and the T021 global
+green check all still pass.
+
 ---
 
 ## Part 8 — When things go wrong
@@ -1864,8 +1907,9 @@ All of the following, checked in one sitting.
 
    This is a snapshot of the finished build, not a permanent cap. Adding domain skills later is
    expected.
-6. The `.ps1` count under `plugins/` is 12 or fewer. Expected 12: seven core, three ADO, one layer
-  guard and one doctor.
+6. The `.ps1` count under `plugins/` is 14 or fewer. Expected 14 once T033 and T036 close: nine
+  core, three ADO, one layer guard and one doctor. Until then, expect twelve, thirteen, and
+  fourteen as those two tasks land in order.
 
    Of the old repo's 36, four survive as copies and 32 are dropped. The other six are written
    fresh here.
