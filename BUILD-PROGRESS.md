@@ -50,4 +50,4 @@ in `BUILD-LOG.md`.
 | T038 | Stop conflating the plugin's own root with the target repository | DONE | fa68c71 | 2026-09-09T09:42:18Z |
 | T039 | Fix the broken piped intake invocation | DONE | 93b3d87 | 2026-09-09T10:37:52Z |
 | T040 | Resolve the real git root before intake, not the working directory | DONE | 66cbf0b | 2026-09-09T10:55:18Z |
-| T041 | Resolve the git root inside the doctor, not only in agent prose | DONE | pending | 2026-09-09T11:28:02Z |
+| T041 | Resolve the git root inside the doctor, not only in agent prose | DONE | 62282e4 | 2026-09-09T11:28:02Z |
