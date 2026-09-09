@@ -6,10 +6,10 @@ description: Work an Electrical and Instrumentation (EI) Graphics story from an 
 # EI Graphics
 
 ## Intake
-Before the first story, run `skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`. Stop if it reports `Blocked`.
-Run `Invoke-EiStoryIntake.ps1`, which chains the intake script, `Convert-EiAdoIntake.ps1`, and
-`Write-EiArtifact.ps1 -ArtifactType ado` without piping between the steps. If it exits with a
-code other than 0, report the failure and stop. Never carry on without an `ado.json`.
+Before the first story, resolve the real git repository root with `git rev-parse --show-toplevel`. Never assume the current directory is the root. Pass that path as `-Root` to `skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`. Stop if it reports `Blocked`.
+Run `Invoke-EiStoryIntake.ps1` with the same `-Root`, which chains the intake script,
+`Convert-EiAdoIntake.ps1`, and `Write-EiArtifact.ps1 -ArtifactType ado` without piping between
+the steps. If it exits with a code other than 0, report the failure and stop. Never carry on without an `ado.json`.
 
 Read `ado.json` for everything after that. Never fetch the story from ADO again.
 

@@ -49,4 +49,4 @@ in `BUILD-LOG.md`.
 | T037 | Fix doctor crash when the registry or .git is missing | DONE | 47c2862 | 2026-09-09T09:14:02Z |
 | T038 | Stop conflating the plugin's own root with the target repository | DONE | fa68c71 | 2026-09-09T09:42:18Z |
 | T039 | Fix the broken piped intake invocation | DONE | 93b3d87 | 2026-09-09T10:37:52Z |
-| T040 | Resolve the real git root before intake, not the working directory | IN-PROGRESS | — | — |
+| T040 | Resolve the real git root before intake, not the working directory | DONE | pending | 2026-09-09T10:55:18Z |

@@ -2660,6 +2660,7 @@ instruction to the agent file closes the gap without touching either script's co
 **Files touched:**
 - `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md` (Intake section names
   `git rev-parse --show-toplevel` and passes the result as `-Root` to both scripts)
+- `tests/EverythingGreen.Tests.ps1` (row count 39→40)
 - `plan.md` (new `#### T040` section)
 - `BUILD-PROGRESS.md`
 - `BUILD-LOG.md`
