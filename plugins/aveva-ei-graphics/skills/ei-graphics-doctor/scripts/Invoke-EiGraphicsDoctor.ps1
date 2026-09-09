@@ -7,6 +7,11 @@
     Checks: PowerShell runtime, Azure DevOps CLI & authentication, plugin file structure,
     skill registry & schemas, session artifacts, and git configuration.
     
+    -Root names the target repository a story is worked in (defaults to the current directory):
+    session artifacts and git configuration are checked there. The plugin's own files are always
+    resolved from this script's install location, never from -Root, because the target repository
+    does not contain a copy of the plugin.
+    
     Returns status: pass | blocked | needs-manual-review
     Exit code: 0 if status is "pass", 1 if "blocked" or "needs-manual-review".
 #>
@@ -103,17 +108,20 @@ function Test-AzureDevOpsCli {
         Organization = $null
     }
     
-    # Check if az devops is installed
+    # Check if the azure-devops extension is installed. `az devops -v` is not a valid command
+    # (devops is an extension command group that requires a subcommand); the extension's own
+    # metadata is the correct source for "is it installed".
     $azVersion = $null
     try {
-        $output = @(az devops -v 2>&1)
+        $output = az extension show --name azure-devops --output json 2>&1
         if ($LASTEXITCODE -eq 0) {
-            $azVersion = $output[0]
+            $extensionObj = $output -join '' | ConvertFrom-Json -ErrorAction SilentlyContinue
+            $azVersion = $extensionObj.version
             $details.CliVersion = $azVersion
         } else {
             $findings += New-Finding -Code 'EIGD002' -Severity 'Block' `
                 -Path 'az devops' `
-                -Message "Azure DevOps CLI is installed but returned an error: $($output -join ' '). Try: az login"
+                -Message "Azure DevOps CLI extension is not installed. Install with: az extension add --name azure-devops"
             $details.AuthStatus = 'blocked'
         }
     } catch {
@@ -127,11 +135,12 @@ function Test-AzureDevOpsCli {
     if ($null -ne $azVersion) {
         $org = $null
         try {
-            $config = @(az devops configure -l --output json 2>&1)
+            # `az devops configure -l` always prints INI-style text; it ignores --output json.
+            $config = @(az devops configure -l 2>&1)
             if ($LASTEXITCODE -eq 0) {
-                $configObj = $config -join '' | ConvertFrom-Json -ErrorAction SilentlyContinue
-                if ($configObj.defaults.organization) {
-                    $org = $configObj.defaults.organization
+                $orgLine = $config | Where-Object { $_ -match '^\s*organization\s*=\s*(.+?)\s*$' } | Select-Object -First 1
+                if ($orgLine -and $orgLine -match '^\s*organization\s*=\s*(.+?)\s*$') {
+                    $org = $Matches[1]
                     $details.DefaultOrg = $org
                 }
             }
@@ -173,12 +182,12 @@ function Test-AzureDevOpsCli {
 # ============================================================================
 
 function Test-PluginFileStructure {
-    param([string] $RootPath)
+    param([string] $PluginRoot)
     
     $findings = @()
     $details = @{}
     
-    $pluginRoot = Join-Path $RootPath 'plugins' 'aveva-ei-graphics'
+    $pluginRoot = $PluginRoot
     
     $requiredFiles = @(
         'agents/ei-graphics.agent.md',
@@ -199,16 +208,24 @@ function Test-PluginFileStructure {
     $missingFiles = @()
     $truncatedFiles = @()
     
+    # domain-skill-registry.json is legitimately small with few domains registered; Check 4
+    # already validates its content against a JSON schema, so it gets a lower floor than the
+    # prose documents this heuristic exists to catch truncated copies of.
+    $minSizeOverrides = @{
+        'skills/ei-graphics-core/references/domain-skill-registry.json' = 100
+    }
+    
     foreach ($file in $requiredFiles) {
         $fullPath = Join-Path $pluginRoot $file
         if (Test-Path -LiteralPath $fullPath) {
             $filesFound++
             $size = (Get-Item -LiteralPath $fullPath).Length
-            if ($size -lt 500) {
+            $minSize = if ($minSizeOverrides.ContainsKey($file)) { $minSizeOverrides[$file] } else { 500 }
+            if ($size -lt $minSize) {
                 $truncatedFiles += $file
                 $findings += New-Finding -Code 'EIGD003' -Severity 'Block' `
                     -Path $file `
-                    -Message "File is truncated ($size bytes). Expected >= 500 bytes. Check: $fullPath"
+                    -Message "File is truncated ($size bytes). Expected >= $minSize bytes. Check: $fullPath"
             } else {
                 $filesValid++
             }
@@ -234,12 +251,12 @@ function Test-PluginFileStructure {
 # ============================================================================
 
 function Test-SkillRegistry {
-    param([string] $RootPath)
+    param([string] $PluginRoot)
     
     $findings = @()
     $details = @{}
     
-    $pluginRoot = Join-Path $RootPath 'plugins' 'aveva-ei-graphics'
+    $pluginRoot = $PluginRoot
     $registryPath = Join-Path $pluginRoot 'skills' 'ei-graphics-core' 'references' 'domain-skill-registry.json'
     $registrySchemaPath = Join-Path $pluginRoot 'skills' 'ei-graphics-core' 'schemas' 'domain-skill-registry.schema.json'
     $schemaFiles = @(
@@ -303,22 +320,23 @@ function Test-SkillRegistry {
             if (Test-Path -LiteralPath $skillPath) {
                 $details.DomainsResolvable++
                 
-                # Check for frontmatter
+                # Check for frontmatter. (?m) matches per line; without it ^/$ anchor to the
+                # whole file, so a real opening '---' followed by more content never matches.
                 $skillText = Get-Content -LiteralPath $skillPath -Raw
-                if (-not ($skillText -match '^---\s*$')) {
+                if (-not ($skillText -match '(?m)^---\s*$')) {
                     $findings += New-Finding -Code 'EIGD004' -Severity 'ManualReview' `
                         -Path $domain.skillPath `
                         -Message "Domain skill $domainId does not have YAML frontmatter (no opening ---)."
                     continue
                 }
                 
-                if (-not ($skillText -match '^\s*name:\s*')) {
+                if (-not ($skillText -match '(?m)^\s*name:\s*')) {
                     $findings += New-Finding -Code 'EIGD004' -Severity 'ManualReview' `
                         -Path $domain.skillPath `
                         -Message "Domain skill $domainId frontmatter is missing 'name:' key."
                 }
                 
-                if (-not ($skillText -match '^\s*description:\s*')) {
+                if (-not ($skillText -match '(?m)^\s*description:\s*')) {
                     $findings += New-Finding -Code 'EIGD004' -Severity 'ManualReview' `
                         -Path $domain.skillPath `
                         -Message "Domain skill $domainId frontmatter is missing 'description:' key."
@@ -367,7 +385,7 @@ function Test-SkillRegistry {
 # ============================================================================
 
 function Test-SessionArtifacts {
-    param([string] $RootPath)
+    param([string] $RootPath, [string] $PluginRoot)
     
     $findings = @()
     $details = @{}
@@ -414,7 +432,7 @@ function Test-SessionArtifacts {
                 'ado.json' = 'ado.schema.json'
             }
             
-            $pluginRoot = Join-Path $RootPath 'plugins' 'aveva-ei-graphics'
+            $pluginRoot = $PluginRoot
             
             foreach ($artifact in $artifactTypes.Keys) {
                 $artifactPath = Join-Path $latestPath $artifact
@@ -558,6 +576,10 @@ function Test-GitConfiguration {
 
 $rootPath = (Resolve-Path -LiteralPath $Root).Path
 
+# The plugin's own files live beside this script, not necessarily under -Root: -Root is the
+# target repository a story is being worked in, which never contains a copy of the plugin.
+$pluginRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' '..' '..')).Path
+
 $findings = @()
 $checkDetails = @{}
 
@@ -573,17 +595,17 @@ $findings += $result[0]
 $checkDetails.AzureDevOpsCliAuth = $result[1]
 
 Write-Problem 'Checking plugin file structure...'
-$result = Test-PluginFileStructure -RootPath $rootPath
+$result = Test-PluginFileStructure -PluginRoot $pluginRoot
 $findings += $result[0]
 $checkDetails.PluginFileStructure = $result[1]
 
 Write-Problem 'Checking skill registry & schemas...'
-$result = Test-SkillRegistry -RootPath $rootPath
+$result = Test-SkillRegistry -PluginRoot $pluginRoot
 $findings += $result[0]
 $checkDetails.SkillRegistryAndSchemas = $result[1]
 
 Write-Problem 'Checking session artifacts...'
-$result = Test-SessionArtifacts -RootPath $rootPath
+$result = Test-SessionArtifacts -RootPath $rootPath -PluginRoot $pluginRoot
 $findings += $result[0]
 $checkDetails.SessionArtifacts = $result[1]
 
@@ -625,6 +647,8 @@ if ($Json) {
     $output = [pscustomobject]@{
         status          = $status
         timestamp       = [System.DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+        targetRoot      = $rootPath
+        pluginRoot      = $pluginRoot
         violations      = $violations
         reviewFlags     = $reviewFlags
         affectedAreas   = @($affectedAreas | Select-Object -Unique)

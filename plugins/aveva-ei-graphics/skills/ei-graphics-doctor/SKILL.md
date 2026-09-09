@@ -52,6 +52,9 @@ Read `status`, `violations`, `reviewFlags`, `requiredActions`, and `checkDetails
 
 ## Gotchas
 
-- Run from the repository root unless `-Root` is supplied explicitly.
+- `-Root` is the target repository a story is worked in (defaults to the current directory).
+  It is never the plugin's own install location. The plugin's files are always resolved from
+  where this script is installed, because the target repository does not contain a copy of
+  the plugin.
 - The doctor is diagnostic only. Never execute its suggested repair commands without the user's approval.
 - Do not treat skipped checks or missing evidence as a pass.

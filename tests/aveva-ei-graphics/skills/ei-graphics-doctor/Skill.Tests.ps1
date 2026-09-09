@@ -233,13 +233,21 @@ Describe 'Invoke-EiGraphicsDoctor.ps1' -Tag 'Unit' {
     }
     
     Context 'Regression - missing registry or .git does not crash the report' {
-        It 'Root with no plugins tree exits without throwing and reports zero domains' {
-            $noPluginRoot = Join-Path $TestDrive 'no-plugin-root'
-            New-Item -ItemType Directory -Path $noPluginRoot -Force | Out-Null
+        It 'A corrupted plugin install (registry missing) exits without throwing and reports zero domains' {
+            # Plugin files are resolved from the script's own install location, not from -Root,
+            # so simulating a missing registry means copying the plugin tree and deleting it there.
+            $corruptedPluginRoot = Join-Path $TestDrive 'corrupted-plugin' 'plugins' 'aveva-ei-graphics'
+            New-Item -ItemType Directory -Path $corruptedPluginRoot -Force | Out-Null
+            Copy-Item -Path (Join-Path $pluginRoot '*') -Destination $corruptedPluginRoot -Recurse -Force
+            Remove-Item -LiteralPath (Join-Path $corruptedPluginRoot 'skills' 'ei-graphics-core' 'references' 'domain-skill-registry.json') -Force
+            $corruptedScriptPath = Join-Path $corruptedPluginRoot 'skills' 'ei-graphics-doctor' 'scripts' 'Invoke-EiGraphicsDoctor.ps1'
             
-            { & pwsh -NoProfile -File $scriptPath -Root $noPluginRoot -Json 2>$null } | Should -Not -Throw
+            $anyTargetRoot = Join-Path $TestDrive 'any-target'
+            New-Item -ItemType Directory -Path $anyTargetRoot -Force | Out-Null
             
-            $output = & pwsh -NoProfile -File $scriptPath -Root $noPluginRoot -Json 2>$null
+            { & pwsh -NoProfile -File $corruptedScriptPath -Root $anyTargetRoot -Json 2>$null } | Should -Not -Throw
+            
+            $output = & pwsh -NoProfile -File $corruptedScriptPath -Root $anyTargetRoot -Json 2>$null
             $exitCode = $LASTEXITCODE
             @(0, 1) | Should -Contain $exitCode
             
@@ -248,11 +256,9 @@ Describe 'Invoke-EiGraphicsDoctor.ps1' -Tag 'Unit' {
             $json.status | Should -Be 'blocked'
         }
         
-        It 'Root with a plugin tree but no .git exits without throwing and reports git as unconfigured' {
+        It 'Root with no .git exits without throwing and reports git as unconfigured' {
             $noGitRoot = Join-Path $TestDrive 'no-git-root'
-            $noGitPluginRoot = Join-Path $noGitRoot 'plugins' 'aveva-ei-graphics'
-            New-Item -ItemType Directory -Path $noGitPluginRoot -Force | Out-Null
-            Copy-Item -Path (Join-Path $pluginRoot '*') -Destination $noGitPluginRoot -Recurse -Force
+            New-Item -ItemType Directory -Path $noGitRoot -Force | Out-Null
             
             { & pwsh -NoProfile -File $scriptPath -Root $noGitRoot -Json 2>$null } | Should -Not -Throw
             
@@ -263,6 +269,46 @@ Describe 'Invoke-EiGraphicsDoctor.ps1' -Tag 'Unit' {
             $json = $output -join "`n" | ConvertFrom-Json
             $json.checkDetails.GitConfiguration.UserConfigured | Should -Be $false
             $json.checkDetails.GitConfiguration.GitRepoExists | Should -Be $false
+        }
+    }
+    
+    Context 'Regression - plugin files resolve independently of -Root' {
+        It 'A -Root with no plugins/ tree still finds the plugin''s own files' {
+            $targetRoot = Join-Path $TestDrive 'target-repo-no-plugin-copy'
+            New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
+            
+            $output = & pwsh -NoProfile -File $scriptPath -Root $targetRoot -Json 2>$null
+            $json = $output -join "`n" | ConvertFrom-Json
+            $json.checkDetails.PluginFileStructure.MissingFiles | Should -Be 0
+            $json.checkDetails.SkillRegistryAndSchemas.DomainsNotFound | Should -Be 0
+        }
+        
+        It 'JSON reports both targetRoot and pluginRoot' {
+            $output = & pwsh -NoProfile -File $scriptPath -Root $repoRoot -Json 2>$null
+            $json = $output -join "`n" | ConvertFrom-Json
+            $json.targetRoot | Should -Be $repoRoot
+            $json.pluginRoot | Should -Be $pluginRoot
+        }
+    }
+    
+    Context 'Regression - Azure DevOps CLI check uses valid commands' {
+        It 'Does not call the invalid "az devops -v" command' {
+            $content = Get-Content -LiteralPath $scriptPath -Raw
+            $content | Should -Not -Match 'az devops -v(\s|$)'
+        }
+        
+        It 'Parses "az devops configure -l" as text, not --output json' {
+            $content = Get-Content -LiteralPath $scriptPath -Raw
+            $content | Should -Not -Match "az devops configure -l --output json"
+        }
+    }
+    
+    Context 'Regression - frontmatter checks use multiline mode' {
+        It 'Frontmatter regexes use (?m) so real content after line 1 still matches' {
+            $content = Get-Content -LiteralPath $scriptPath -Raw
+            $content | Should -Match '\(\?m\)\^---'
+            $content | Should -Match '\(\?m\)\^\\s\*name:'
+            $content | Should -Match '\(\?m\)\^\\s\*description:'
         }
     }
 }

@@ -2546,6 +2546,7 @@ lower floor (100 bytes) rather than a blanket change.
   "no plugins tree" regression to corrupt a copied plugin install instead of `-Root`; added
   four new regression tests)
 - `tests/ScriptContract.Tests.ps1` (line ceiling for `Invoke-EiGraphicsDoctor` 700→730, both maps)
+- `tests/EverythingGreen.Tests.ps1` (row count 37→38)
 - `plan.md` (new `#### T038` section)
 - `BUILD-PROGRESS.md`
 - `BUILD-LOG.md`
