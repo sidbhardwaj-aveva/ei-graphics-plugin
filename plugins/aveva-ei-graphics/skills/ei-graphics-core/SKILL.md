@@ -1,9 +1,9 @@
 ---
 name: ei-graphics-core
-description: Usage reference for the seven core scripts of an Electrical and Instrumentation (EI) Graphics session. Covers the artifact writer, the session log, the rendered summary, the shared session export, the skill catalogue, the drift check, and the ADO converter.
+description: Usage reference for the eight core scripts of an Electrical and Instrumentation (EI) Graphics session, from ADO intake through the shared session bundle.
 ---
 # EI Graphics Core
-Seven scripts, all in `scripts/`. The schemas they check against are in `schemas/`.
+Eight scripts, all in `scripts/`. The schemas they check against are in `schemas/`.
 They all behave the same way. JSON goes to stdout and messages go to stderr. Exit code 0 means it
 worked and 1 means it did not. Running the same command twice is safe. Nothing prompts for input.
 `-Help` prints the synopsis and exits 0.
@@ -114,3 +114,15 @@ is a warning, and the rest carry on. `-SkipAttachmentDownload` turns the whole s
 
 **Exit codes:** 0 on success. 1 when the intake did not retrieve the story, when the description
 is empty, or when the work item id is not a positive number.
+## `Invoke-EiStoryIntake.ps1`
+Runs `Invoke-EiAdoCliIntake.ps1`, `Convert-EiAdoIntake.ps1`, then
+`Write-EiArtifact.ps1 -ArtifactType ado`, in that order. The JSON flows between steps unchanged,
+so every attachment link, comment, and hyperlink survives.
+
+**Parameters:** `-WorkItem`, `-StoryId`, `-Root`, `-Json`, `-Help`. A bare integer for
+`-WorkItem` routes to `-WorkItemId`; anything else routes to `-WorkItemUrl`.
+
+**Output:** the `ado.json` path, the story id, and the null hash for `ado`.
+
+**Exit codes:** 0 on success. 1 when any step exits non-zero, with the failing step named on
+stderr.

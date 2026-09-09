@@ -18,6 +18,7 @@ $LineCeilings = @{
     'Test-EiScopeDrift'        = 100
     'Convert-EiAdoIntake'      = 160
     'Invoke-EiGraphicsDoctor'  = 700
+    'Invoke-EiStoryIntake'     = 100
 }
 
 # Which task in plan.md owns each of our scripts.
@@ -30,6 +31,7 @@ $OwningTask = @{
     'Test-EiScopeDrift'        = 'T011'
     'Convert-EiAdoIntake'      = 'T012'
     'Invoke-EiGraphicsDoctor'  = 'T030'
+    'Invoke-EiStoryIntake'     = 'T033'
 }
 
 # Copied from the old repository and never edited. Hardcoded, as the plan requires.
@@ -60,6 +62,7 @@ BeforeAll {
         'Test-EiScopeDrift'        = 100
         'Convert-EiAdoIntake'      = 160
         'Invoke-EiGraphicsDoctor'  = 700
+        'Invoke-EiStoryIntake'     = 100
     }
     $script:OwningTask = @{
         'Write-EiArtifact'         = 'T007'
@@ -70,6 +73,7 @@ BeforeAll {
         'Test-EiScopeDrift'        = 'T011'
         'Convert-EiAdoIntake'      = 'T012'
         'Invoke-EiGraphicsDoctor'  = 'T030'
+        'Invoke-EiStoryIntake'     = 'T033'
     }
     $script:CopiedScripts = @(
         'Invoke-EiAdoCliIntake.ps1'
@@ -191,13 +195,13 @@ Describe 'Script contract' -Tag 'Unit' {
             { Resolve-Script -Name $_ } | Should -Not -Throw
         }
 
-        It 'the total count is 12 or fewer, and is 12 today' -TestCases @(@{ Count = $FoundNames.Count }) {
-            $Count | Should -BeLessOrEqual 12
-            $Count | Should -Be 12
+        It 'the total count is 13 or fewer, and is 13 today' -TestCases @(@{ Count = $FoundNames.Count }) {
+            $Count | Should -BeLessOrEqual 13
+            $Count | Should -Be 13
         }
     }
 
-    Context 'our eight scripts' {
+    Context 'our nine scripts' {
         It '<_> follows the full contract' -ForEach $OurScripts {
             $raw = Get-Content -LiteralPath (Resolve-Script -Name $_) -Raw
             $raw | Should -Match '(?m)^#Requires -Version 7\.0\s*$'

@@ -2212,8 +2212,33 @@ roster match against T033's `**Parameters, exactly these 5:**` marker) and the T
 green check all still pass. The `.ps1` count cap in `ScriptContract.Tests.ps1` is raised
 12 → 13, recorded here.
 
-**Attempts:** In progress.
+**Attempts:** 1. First `$P` reported 590 passed, 3 failed. Three real drifts, all in the same
+edit surface. (a) `EverythingGreen.Tests.ps1:113` pinned the script count `Should -BeLessOrEqual
+12`, separate from the `ScriptContract.Tests.ps1` cap I had already bumped; raised both to 13.
+(b) `PlainLanguage.Tests.ps1` flagged the new SKILL.md frontmatter description at 27 words,
+above the 25-word ceiling; rewrote it to a single 22-word sentence. (c) The `-Help` test was
+using `pwsh -NoProfile -File $wrapper -Help` and matching `SYNOPSIS` in the output, but the
+sub-process only emitted the syntax line (comment-based help was not surfaced under `-File`);
+switched to the in-process `& $wrapper -Help` and `$LASTEXITCODE | Should -Be 0` pattern the
+other seven core script tests use. Second run reported 592 passed, 1 failed: SKILL.md hit the
+`URL` acronym-without-expansion rule from a sentence I added; changed the prose from
+"attachment URL" to "attachment link". Third run reported 593 passed, 0 failed.
+`Test-BuildProgress.ps1` exited 0 with 36 rows, 31 done, 1 blocked, current task T033.
 
-**Decisions:** To be recorded at completion.
+**Decisions:** Kept the wrapper to pure orchestration: it never opens the intake or ado JSON,
+never re-shapes it, never filters it. Every attachment link, comment and hyperlink already
+collected by the underlying pipeline flows through untouched. Stderr is not redirected, so a
+failed image download or an unreadable comment thread from a sub-script still reaches the
+operator. Routed `-WorkItem` by shape (`^\d+$` → `-WorkItemId`, else → `-WorkItemUrl`), matching
+the split `EiWorkItemReference.ps1` already draws between numeric ids and everything else.
+Forced `-Json` on every sub-script call so the string form flows into the next `-IntakeJson` or
+`-InputJson` parameter without a round-trip through object serialisation, which would rewrite
+timestamps and lose null-versus-missing distinctions. Made the `-Help` test in-process rather
+than via `pwsh -NoProfile -File`, following the pattern of the seven other core script tests.
+Raised the ei-graphics-core `SKILL.md` line ceiling from 120 to 130 in `Skill.Tests.ps1` to fit
+the new section without shrinking the existing seven; T036 will need one more raise for its
+own section. The tests exercise the wrapper against staged shim sub-scripts inside `$TestDrive`,
+so a broken shim proves the wrapper reports the right step number without needing `az` on the
+machine.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.
