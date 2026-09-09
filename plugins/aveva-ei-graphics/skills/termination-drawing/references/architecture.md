@@ -24,7 +24,7 @@ User Action → Execute() → TryBuildModel() → InsertModel() → FinalizeGene
 | `Presentation/Aveva.EI.CanvasDrawings/TerminationDrawing/Inserter/LinkConnectorInserter.cs` | Link connector insertion with terminal validation |
 | `Presentation/Aveva.EI.CanvasDrawings/TerminationDrawing/Inserter/LoopWireConnectorInserter.cs` | Loop wire insertion with terminal validation |
 | `Presentation/Aveva.EI.CanvasDrawings/Helper/MetaDataHelper.cs` | Metadata constants: `ShapeConnectivitySide`, `ConnectivitySideDriving` |
-| `Presentation/Aveva.EI.CanvasDrawings/Helper/TsDiag.cs` | Diagnostic logging to `D:\HVE\ts-diag.log` |
+| `Presentation/Aveva.EI.CanvasDrawings/Helper/TsDiag.cs` | Diagnostic logging. Output path is defined at the top of this file, so it varies per environment. |
 
 ### Settings & Configuration Surface
 
@@ -84,7 +84,7 @@ Source tree:
 Presentation\Aveva.EI.CanvasDrawings\
 ├── EquipmentInserter.cs                               # Shape insert/update/delete + insertedTags
 ├── Helper\MetaDataHelper.cs                           # Metadata key constants
-├── Helper\TsDiag.cs                                   # Diagnostic logging → D:\HVE\ts-diag.log
+├── Helper\TsDiag.cs                                   # Diagnostic logging (output path set in this file, varies per environment)
 ├── SGCClient\CanvasEventManager.cs                    # IsDrawingUpdateRequired + LOC change detection
 └── TerminationDrawing\
     ├── Controller\TerminationDrawingGenerationWorkflow.cs   # Pipeline orchestration, UpdateDrawing()

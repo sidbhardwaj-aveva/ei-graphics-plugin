@@ -1,7 +1,9 @@
 ## Diagnostic Logging
 
 ### Enable
-Logging writes to `D:\HVE\ts-diag.log`. Ensure `TsDiag.cs` has correct guard:
+Logging writes to the path defined at the top of `TsDiag.cs`. That path is compile-time and
+varies per environment, so treat the supplied `diagLogPath` as the source of truth for every
+command below. Ensure `TsDiag.cs` has the correct guard:
 ```csharp
 if (string.IsNullOrEmpty(message)) return;  // Only skip empty messages
 ```
@@ -20,15 +22,19 @@ if (string.IsNullOrEmpty(message)) return;  // Only skip empty messages
 | `CORE-Y` | TryResolveConnectedCoreY resolution for devices. |
 
 ### Log Analysis Commands (PowerShell)
+
+Set `$logPath` to the value supplied with the problem report (the `diagLogPath` input, or the
+path `TsDiag.cs` was compiled to write to) before running any command below.
+
 ```powershell
 # Extract key actions
-Select-String -Path "D:\HVE\ts-diag.log" -Pattern "MODEL-DONE|INSERT-START|BOX-ACTION|TERM-ACTION|WIRE-INS|CORE-INSERT" | ForEach-Object { $_.LineNumber.ToString().PadLeft(4) + " " + $_.Line }
+Select-String -Path $logPath -Pattern "MODEL-DONE|INSERT-START|BOX-ACTION|TERM-ACTION|WIRE-INS|CORE-INSERT" | ForEach-Object { $_.LineNumber.ToString().PadLeft(4) + " " + $_.Line }
 
 # Find creation vs update (separate by timestamp gap)
-Select-String -Path "D:\HVE\ts-diag.log" -Pattern "MODEL-DONE" | Select-Object LineNumber, Line
+Select-String -Path $logPath -Pattern "MODEL-DONE" | Select-Object LineNumber, Line
 
 # Check what's NOT placed
-Select-String -Path "D:\HVE\ts-diag.log" -Pattern "fromValid=False|toValid=False|NO-START-POINT"
+Select-String -Path $logPath -Pattern "fromValid=False|toValid=False|NO-START-POINT"
 ```
 Run these against the log path supplied with the problem report:
 
