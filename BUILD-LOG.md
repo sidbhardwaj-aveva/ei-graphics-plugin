@@ -2473,6 +2473,7 @@ changes.
 - `plugins/aveva-ei-graphics/skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`
   (`Test-SkillRegistry`, `Test-GitConfiguration`)
 - `tests/aveva-ei-graphics/skills/ei-graphics-doctor/Skill.Tests.ps1` (two new regression tests)
+- `tests/EverythingGreen.Tests.ps1` (row count 36→37)
 - `plan.md` (new `#### T037` section)
 - `BUILD-PROGRESS.md`
 - `BUILD-LOG.md`
@@ -2483,6 +2484,30 @@ JSON output) and a `$TestDrive` root with a plugin tree but no `.git` (exits wit
 `UserConfigured -eq $false` in JSON output). `Test-BuildProgress.ps1` and the full Pester suite
 both exit 0.
 
-**Attempts:**
+**Attempts:** One. Initialized every detail key the report renderer reads at the top of
+`Test-SkillRegistry` and `Test-GitConfiguration`, before their early returns, removing the
+now-redundant re-initializations further down each function. Added the two regression tests
+against `$TestDrive` roots (one with no `plugins/` tree, one with a copied plugin tree but no
+`.git`); the first pass of the "no `.git`" test hit `Copy-Item -LiteralPath (Join-Path ... '*')`,
+which does not expand the wildcard under `-LiteralPath` — switched to `-Path`. Manually
+reproduced the user's exact report (`-Root` pointed at an empty directory) after the fix: the
+doctor now returns `status: blocked` instead of throwing. The focused Pester file went
+24/24 green. The full suite's first run failed one pre-existing count assertion in
+`EverythingGreen.Tests.ps1` ("the progress table was read", hardcoded row count 36), the same
+class of governed-count edit as T024/T025 — raised to 37. Second full run was 622/622 green.
+
+**Decisions:** Fixed the same bug class in both `Test-SkillRegistry` (two early returns:
+registry missing, registry invalid JSON) and `Test-GitConfiguration` (one early return: no
+`.git`), even though the user's report only reproduced the registry path, because
+`Test-GitConfiguration` would crash identically the moment the doctor runs against a root with
+no `.git`. Left `Test-SessionArtifacts`, `Test-AzureDevOpsCli`, `Test-PluginFileStructure`, and
+`Test-PowerShellRuntime` untouched after confirming each already sets every key its caller reads
+on every code path. Did not change the doctor's read-only behavior, its six-check structure, or
+its `-Root`/`-Json`/`-Help` parameter contract.
+
+**Result:** DONE. The focused doctor suite is 24/0/0. The full suite is 622/0/0.
+`Test-BuildProgress.ps1` exits 0. Manually confirmed against `-Root` pointed at an empty
+directory: the doctor now reports `blocked` instead of throwing
+`PropertyNotFoundException`.
 
 

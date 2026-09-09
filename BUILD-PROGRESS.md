@@ -46,4 +46,4 @@ in `BUILD-LOG.md`.
 | T034 | Verbatim-quote enforcement in Write-EiSessionEntry.ps1 | DONE | d7dbce7 | 2026-09-09T06:59:41Z |
 | T035 | Informational status lane for session entries | DONE | 270d05c | 2026-09-09T07:11:25Z |
 | T036 | Wrapper script Complete-EiSession.ps1 | DONE | 5c0126c | 2026-09-09T08:39:47Z |
-| T037 | Fix doctor crash when the registry or .git is missing | IN-PROGRESS | — | — |
+| T037 | Fix doctor crash when the registry or .git is missing | DONE | pending | 2026-09-09T09:14:02Z |

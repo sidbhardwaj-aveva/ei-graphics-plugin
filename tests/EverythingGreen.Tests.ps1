@@ -42,7 +42,7 @@ BeforeAll {
 Describe 'Everything green, before the live run' -Tag 'Unit' {
 
     It 'the progress table was read' {
-        $script:Rows.Count | Should -Be 36
+        $script:Rows.Count | Should -Be 37
         $script:MustBeDone.Count | Should -Be 20
     }
 

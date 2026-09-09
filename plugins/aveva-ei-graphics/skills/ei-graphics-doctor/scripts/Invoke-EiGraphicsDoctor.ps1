@@ -242,6 +242,21 @@ function Test-SkillRegistry {
     $pluginRoot = Join-Path $RootPath 'plugins' 'aveva-ei-graphics'
     $registryPath = Join-Path $pluginRoot 'skills' 'ei-graphics-core' 'references' 'domain-skill-registry.json'
     $registrySchemaPath = Join-Path $pluginRoot 'skills' 'ei-graphics-core' 'schemas' 'domain-skill-registry.schema.json'
+    $schemaFiles = @(
+        'ado.schema.json',
+        'session.schema.json',
+        'story-understanding.schema.json',
+        'approved-files.schema.json',
+        'domain-skill-registry.schema.json'
+    )
+    
+    # Default every key the report renderer reads, so an early return still yields a complete object
+    $details.DomainsRegistered = 0
+    $details.DomainsResolvable = 0
+    $details.DomainsNotFound = 0
+    $details.SchemasChecked = $schemaFiles.Count
+    $details.SchemasLoaded = 0
+    $details.SchemasNotFound = $schemaFiles.Count
     
     # Load registry
     if (-not (Test-Path -LiteralPath $registryPath)) {
@@ -277,8 +292,6 @@ function Test-SkillRegistry {
     }
     
     # Check all registered domains (which are skills)
-    $details.DomainsRegistered = 0
-    $details.DomainsResolvable = 0
     $domainsNotFound = @()
     
     if ($registry.domains) {
@@ -322,16 +335,6 @@ function Test-SkillRegistry {
     $details.DomainsNotFound = $domainsNotFound.Count
     
     # Check all schema files
-    $schemaFiles = @(
-        'ado.schema.json',
-        'session.schema.json',
-        'story-understanding.schema.json',
-        'approved-files.schema.json',
-        'domain-skill-registry.schema.json'
-    )
-    
-    $details.SchemasChecked = $schemaFiles.Count
-    $details.SchemasLoaded = 0
     $schemasNotFound = @()
     
     foreach ($schemaFile in $schemaFiles) {
@@ -456,6 +459,14 @@ function Test-GitConfiguration {
     
     $findings = @()
     $details = @{}
+    
+    # Default every key the report renderer reads, so an early return still yields a complete object
+    $details.UserName = $null
+    $details.UserConfigured = $false
+    $details.UserEmail = $null
+    $details.EmailConfigured = $false
+    $details.GcAutoValue = $null
+    $details.GcAutoSet = $false
     
     $gitDir = Join-Path $RootPath '.git'
     $details.GitRepoExists = Test-Path -LiteralPath $gitDir -PathType Container

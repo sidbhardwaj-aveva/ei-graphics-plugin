@@ -231,4 +231,38 @@ Describe 'Invoke-EiGraphicsDoctor.ps1' -Tag 'Unit' {
             $content | Should -Match 'Check 6.*Git'
         }
     }
+    
+    Context 'Regression - missing registry or .git does not crash the report' {
+        It 'Root with no plugins tree exits without throwing and reports zero domains' {
+            $noPluginRoot = Join-Path $TestDrive 'no-plugin-root'
+            New-Item -ItemType Directory -Path $noPluginRoot -Force | Out-Null
+            
+            { & pwsh -NoProfile -File $scriptPath -Root $noPluginRoot -Json 2>$null } | Should -Not -Throw
+            
+            $output = & pwsh -NoProfile -File $scriptPath -Root $noPluginRoot -Json 2>$null
+            $exitCode = $LASTEXITCODE
+            @(0, 1) | Should -Contain $exitCode
+            
+            $json = $output -join "`n" | ConvertFrom-Json
+            $json.checkDetails.SkillRegistryAndSchemas.DomainsResolvable | Should -Be 0
+            $json.status | Should -Be 'blocked'
+        }
+        
+        It 'Root with a plugin tree but no .git exits without throwing and reports git as unconfigured' {
+            $noGitRoot = Join-Path $TestDrive 'no-git-root'
+            $noGitPluginRoot = Join-Path $noGitRoot 'plugins' 'aveva-ei-graphics'
+            New-Item -ItemType Directory -Path $noGitPluginRoot -Force | Out-Null
+            Copy-Item -Path (Join-Path $pluginRoot '*') -Destination $noGitPluginRoot -Recurse -Force
+            
+            { & pwsh -NoProfile -File $scriptPath -Root $noGitRoot -Json 2>$null } | Should -Not -Throw
+            
+            $output = & pwsh -NoProfile -File $scriptPath -Root $noGitRoot -Json 2>$null
+            $exitCode = $LASTEXITCODE
+            @(0, 1) | Should -Contain $exitCode
+            
+            $json = $output -join "`n" | ConvertFrom-Json
+            $json.checkDetails.GitConfiguration.UserConfigured | Should -Be $false
+            $json.checkDetails.GitConfiguration.GitRepoExists | Should -Be $false
+        }
+    }
 }
