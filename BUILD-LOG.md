@@ -2781,3 +2781,14 @@ suite passed 31/31.
 History is recorded as informational context, not as proof that the story is verified. Validation
 results remain in a separate session entry.
 
+**Blocked diagnosis:** The focused checks passed: agent guidance 31/31 and summary rendering
+31/31. `Test-BuildProgress.ps1` passed. The full suite could not complete because JaCoCo XML
+output replaced PowerShell test files during broad harness runs. `Documents.Tests.ps1` was already
+malformed before T042 and remains untouched. The broad run also replaced
+`EverythingGreen.Tests.ps1` and `Export-EiSessionSummary.Tests.ps1`; both were restored, with only
+T042's intended row-count edit retained in `EverythingGreen.Tests.ps1`. After three broad-run
+attempts, Rule 7 requires this task to be marked `BLOCKED` rather than claim a full-suite pass.
+
+**Result:** BLOCKED. A person must repair or disable the coverage-output collision, restore the
+user-owned `tests/Documents.Tests.ps1`, then rerun the full suite. No product-code change is needed.
+

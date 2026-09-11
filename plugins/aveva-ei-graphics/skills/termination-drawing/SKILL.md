@@ -37,14 +37,12 @@ Use this skill when working on AVEVA EI Termination Drawing features including:
 ---
 
 ## Goal
-
 Given a symptom, diagnostic log, or ADO work item, produce a structured diagnosis that identifies
 the root cause within the Termination Drawing pipeline, proposes a code fix, and verifies it.
 
 ---
 
 ## Inputs
-
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `adoWorkItemId` | one-of | ADO work item ID (`ADO#<id>`) |
@@ -58,7 +56,6 @@ At least one of `adoWorkItemId`, `diagLogPath`, or `symptomText` is required.
 ---
 
 ## Output Contract
-
 Return a JSON object:
 
 ```json
@@ -82,7 +79,6 @@ Return a JSON object:
 ---
 
 ## Invocation Workflow
-
 ### Step 1 — Understand the Problem
 - Determine whether the bug is a **CREATION** issue (first generation) or an **UPDATE** issue (re-generation).
 - If only a symptom is supplied and confidence < 0.7, request the diagnostic log before proceeding.
@@ -93,24 +89,12 @@ Return a JSON object:
 
 Run the PowerShell patterns in `references/log-analysis.md` against the supplied log path.
 
-When the conclusion depends on code that was introduced before the current story, inspect local
-Git history as a separate evidence source. State that the finding came from Git, not from the ADO
-story. Show the exact commands and the relevant source lines in the response and session log.
-
-Use this sequence when a method's origin matters:
-
-```powershell
-git log --all --oneline -S "<symbol>" -- <file> <file>
-git blame -L <start>,<end> <file>
-git show <commit> -- <file> <file>
-```
-
-Record the commit, title, related work item when present, source file, line range, symbol and exact
-code quote. Explain the inference in `reasoning`, and add the source lines as `evidence` through
-`Write-EiSessionEntry.ps1`. Use an informational entry when this is historical context rather
-than a pass/fail result. Git history can show when a mechanism was introduced. It cannot prove
-that the current story is fully verified or that every scenario in the story is satisfied.
-
+When the conclusion depends on earlier code, inspect local Git history separately from the ADO
+story. In chat and the session log, show the exact commands and source lines: `git log --all
+--oneline -S "<symbol>" -- <file> <file>`; `git blame -L <start>,<end> <file>`; `git show
+<commit> -- <file> <file>`. Record the commit, title, related work item, file, line, symbol and
+quote in `reasoning` and `evidence` through `Write-EiSessionEntry.ps1`. Use an informational entry
+for history. It shows provenance, not proof that the story or every scenario is verified.
 ### Step 3 — Read Source Before Touching It
 
 Before modifying any file, call `read_file` on the full relevant source file.  
@@ -136,8 +120,7 @@ dotnet test Tests\Aveva.EI.CanvasDrawings.Test --filter "FullyQualifiedName~<Cla
 Ask the user to rebuild and regenerate the drawing, then provide the new log.  
 Compare `MODEL-DONE` and `BOX-ACTION` patterns between old and new log to confirm the fix.
 
-Keep compile and targeted-test results in a separate validation entry. Do not use a historical
-commit as a substitute for those checks.
+Keep compile and targeted-test results in a separate validation entry, not in Git-history evidence.
 
 ---
 
