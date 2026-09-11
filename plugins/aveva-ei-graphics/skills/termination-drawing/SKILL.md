@@ -93,6 +93,24 @@ Return a JSON object:
 
 Run the PowerShell patterns in `references/log-analysis.md` against the supplied log path.
 
+When the conclusion depends on code that was introduced before the current story, inspect local
+Git history as a separate evidence source. State that the finding came from Git, not from the ADO
+story. Show the exact commands and the relevant source lines in the response and session log.
+
+Use this sequence when a method's origin matters:
+
+```powershell
+git log --all --oneline -S "<symbol>" -- <file> <file>
+git blame -L <start>,<end> <file>
+git show <commit> -- <file> <file>
+```
+
+Record the commit, title, related work item when present, source file, line range, symbol and exact
+code quote. Explain the inference in `reasoning`, and add the source lines as `evidence` through
+`Write-EiSessionEntry.ps1`. Use an informational entry when this is historical context rather
+than a pass/fail result. Git history can show when a mechanism was introduced. It cannot prove
+that the current story is fully verified or that every scenario in the story is satisfied.
+
 ### Step 3 — Read Source Before Touching It
 
 Before modifying any file, call `read_file` on the full relevant source file.  
@@ -117,6 +135,9 @@ dotnet test Tests\Aveva.EI.CanvasDrawings.Test --filter "FullyQualifiedName~<Cla
 
 Ask the user to rebuild and regenerate the drawing, then provide the new log.  
 Compare `MODEL-DONE` and `BOX-ACTION` patterns between old and new log to confirm the fix.
+
+Keep compile and targeted-test results in a separate validation entry. Do not use a historical
+commit as a substitute for those checks.
 
 ---
 

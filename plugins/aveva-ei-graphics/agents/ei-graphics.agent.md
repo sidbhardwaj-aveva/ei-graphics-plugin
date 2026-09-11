@@ -12,22 +12,18 @@ Run `Invoke-EiStoryIntake.ps1` with the same `-Root`, which chains the intake sc
 the steps. If it exits with a code other than 0, report the failure and stop. Never carry on without an `ado.json`.
 
 Read `ado.json` for everything after that. Never fetch the story from ADO again.
-
 A comment can correct the description. Where the two disagree, the later comment wins.
 
 ## Confirm the understanding
-
 Follow Checkpoint 1 in `references/checkpoint-templates.md` before you pick a domain skill.
 Log the exchange with `Write-EiSessionEntry.ps1 -Phase human-checkpoint`. Wait for agreement.
 
 ## Choosing a domain
-
 Run `Get-EiDomainSkillCatalog.ps1` and pick from what it returns. Never invent a domain
 identifier. If nothing matches, use the block in `references/rnd-delegation.md` under
 "No matching domain skill", word for word.
 
 ## Implementation priority: skill-first, explore-second
-
 1. Check the domain skill's bug patterns. If one matches the symptom, use its documented cause and
    files, and fix it directly. Do not search the codebase.
 2. If none matches, read the skill's Key Files table. Open those files first.
@@ -36,7 +32,6 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
    Note it in the session log.
 
 ## Working
-
 - Understand the cause before you edit. Separate the symptom from what you think caused it. If no
   pattern matches and the evidence is thin, say so. Do not guess at a fix.
 - If evidence is missing or conflicts, repeated reasoning adds no evidence, or a claim cannot be grounded, stop. Say what is uncertain, name the missing context, and ask one focused question.
@@ -48,6 +43,11 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
   right" is not verification.
 - Surface test gaps. After reading the source, check whether a test covers the code you changed.
   If none does, ask whether to add one.
+- When a conclusion comes from local Git history, use an `Evidence used` section in chat. Show the
+  exact `git log`, `git blame` and `git show` commands, commit, title and source lines. Explain
+  that this is historical provenance, not proof that the ADO story is fully verified. Record the
+  reasoning and quotes in the session log. Keep compile and targeted-test results in a separate
+  validation entry; Git history is not a test result.
 - Run the layer guard before committing. If it reports `blocked`, report the violation and do not
   commit.
 - Stop when done. Once the tests pass and the guard is clear, stop. No polish, no tidying nearby

@@ -2750,3 +2750,34 @@ intake chain's session-log path, but that's a separate task if wanted, not folde
 **Result:** DONE. Focused doctor suite 30/0/0. Full suite 628/0/0. `Test-BuildProgress.ps1`
 exits 0.
 
+## T042 — Record Git history evidence in session summaries — 2026-09-11T00:00:00Z
+
+**Goal:** Make local Git-history reasoning visible in chat and in the rendered session summary,
+while keeping compile and targeted-test results as a separate validation record.
+
+**Assumptions:** The existing session `reasoning` and file-backed `evidence` fields already carry
+the required explanation, source link, symbol and quoted C# lines. No schema change is needed.
+The unrelated modification in `tests/Documents.Tests.ps1` belongs to the user and is not part of
+this task.
+
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/fixtures/session-git-history.json`
+- `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Export-EiSessionSummary.Tests.ps1`
+- `plan.md`
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+
+**Acceptance:** The workflow requires exact Git-history commands and an explicit provenance limit.
+The verbose summary shows the commands, commit `56f69e11583`, work item `3735081` limitation,
+source line, symbol and quote. Concise output omits the reasoning trail and evidence.
+
+**Attempts:** In progress. The first focused agent run found the existing under-80-line contract;
+the guidance was compressed and the focused agent suite then passed 31/31. The focused summary
+suite passed 31/31.
+
+**Decisions:** Reused the existing session fields rather than adding Git-specific schema fields.
+History is recorded as informational context, not as proof that the story is verified. Validation
+results remain in a separate session entry.
+

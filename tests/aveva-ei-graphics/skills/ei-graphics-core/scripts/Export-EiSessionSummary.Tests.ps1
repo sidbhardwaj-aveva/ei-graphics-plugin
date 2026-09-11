@@ -78,6 +78,31 @@ Describe 'Export-EiSessionSummary' -Tag 'Unit' {
 
     Context 'the evidence behind the reasoning' {
 
+        It 'renders Git-history provenance, commands, and source lines' {
+            $root = New-SessionRoot -Fixture 'session-git-history.json' -StoryId '3735081'
+            $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root -StoryId '3735081').Result.path -Raw
+            $rendered | Should -Match 'This statement came from the repository''s local Git history, not from the Azure DevOps story\.'
+            $rendered | Should -Match 'git log --all --oneline -S "IsContentAssignmentUpdated"'
+            $rendered | Should -Match 'git blame -L 1037,1048'
+            $rendered | Should -Match 'git show 56f69e11583'
+            $rendered | Should -Match '56f69e11583'
+            $rendered | Should -Match 'work item 3735081 is fully verified'
+            $rendered | Should -Match '\[.*CanvasEventManager\.cs:1042.*\]\(\.\./\.\./Presentation/Aveva\.EI\.CanvasDrawings/SGCClient/CanvasEventManager\.cs#L1042\)'
+            $rendered | Should -Match 'IsContentAssignmentUpdated'
+            $rendered | Should -Match 'if \(_canvasEventModel\.CanvasDrawingsService\.IsContentAssignmentUpdated\(\.\.\.\)\)'
+        }
+
+        It 'omits Git-history reasoning and evidence at concise verbosity' {
+            $root = New-SessionRoot -Fixture 'session-git-history.json' -StoryId '3735081'
+            $path = Join-Path $root '.ei-session-logs' '3735081' 'session.json'
+            (Get-Content -LiteralPath $path -Raw) -replace '"verbosity": "verbose"', '"verbosity": "concise"' |
+                Set-Content -LiteralPath $path -NoNewline
+            $rendered = Get-Content -LiteralPath (Invoke-Export -Root $root -StoryId '3735081').Result.path -Raw
+            $rendered | Should -Not -Match 'Agent Reasoning Trail'
+            $rendered | Should -Not -Match '56f69e11583'
+            $rendered | Should -Not -Match 'IsContentAssignmentUpdated'
+        }
+
         It 'links the file at the line it was read, from where the summary sits' {
             # Two folders up, because the summary lives at .ei-session-logs/<storyId>/ and the
             # recorded path starts at the repository root.

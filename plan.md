@@ -1988,6 +1988,24 @@ the script directly (no agent involved) with `-Root` pointed at
 `C:\Git\dabacon-products\Engineering\Modules\EI\Source` resolves `targetRoot` to
 `C:\Git\dabacon-products` and reports zero `Block` findings.
 
+#### T042 — Record Git history evidence in session summaries
+
+**Why this task exists.** A diagnosis may use local Git history to explain when a mechanism was
+introduced. The current workflow does not require the agent to show those commands, source lines
+or the limit of that conclusion in chat or in the session summary.
+
+**Do this.** Update the termination-drawing skill and agent guidance to require an `Evidence used`
+section in chat, exact `git log`, `git blame` and `git show` commands, the commit and title, and
+the relevant source lines. Record the explanation with the existing session `reasoning` and
+`evidence` fields. Keep compile and targeted-test results in a separate validation entry.
+
+Add focused summary coverage proving that verbose output shows the history commands, commit,
+provenance limitation, source link, symbol and quote, while concise output omits the reasoning
+trail and evidence.
+
+**Done when.** The focused summary and agent tests pass with no skipped tests. The build-progress
+check and full Pester suite also exit 0.
+
 ---
 
 ## Part 8 — When things go wrong
