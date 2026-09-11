@@ -17,7 +17,7 @@ $LineCeilings = @{
     'Get-EiDomainSkillCatalog' = 120
     'Test-EiScopeDrift'        = 100
     'Convert-EiAdoIntake'      = 160
-    'Invoke-EiGraphicsDoctor'  = 750
+    'Invoke-EiGraphicsDoctor'  = 800
     'Invoke-EiStoryIntake'     = 100
     'Complete-EiSession'       = 120
 }
@@ -63,7 +63,7 @@ BeforeAll {
         'Get-EiDomainSkillCatalog' = 120
         'Test-EiScopeDrift'        = 100
         'Convert-EiAdoIntake'      = 160
-        'Invoke-EiGraphicsDoctor'  = 750
+        'Invoke-EiGraphicsDoctor'  = 800
         'Invoke-EiStoryIntake'     = 100
         'Complete-EiSession'       = 120
     }

@@ -1652,7 +1652,8 @@ plugin README and agent guidance under the repository contracts. Add the doctor 
 not a domain skill. Update filesystem-driven expectations, the script ownership contract and the
 plain-language checks. Keep `ei-graphics.agent.md` under 80 lines and `SKILL.md` concise.
 
-**Parameters, exactly these 3:** `-Root`, `-Json`, `-Help`.
+**Parameters, exactly these 6:** `-Root`, `-DecisionPath`, `-RememberDecision`,
+`-DeclineAndRemember`, `-Json`, `-Help`.
 
 **Done when.** The doctor-focused tests pass with no skipped tests. The default and JSON commands
 run without a fatal error. `Test-BuildProgress.ps1` and the full Pester suite both exit 0 with no

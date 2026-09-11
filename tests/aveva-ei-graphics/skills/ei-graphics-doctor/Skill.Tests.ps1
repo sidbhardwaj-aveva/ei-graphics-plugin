@@ -133,6 +133,36 @@ Describe 'Invoke-EiGraphicsDoctor.ps1' -Tag 'Unit' {
             }
         }
     }
+
+    Context 'One-time user decision' {
+        It 'records a decline without running any readiness check' {
+            $decisionPath = Join-Path $TestDrive 'declined.json'
+            $output = & pwsh -NoProfile -File $scriptPath -DecisionPath $decisionPath -DeclineAndRemember -Json 2>&1
+            $LASTEXITCODE | Should -Be 0
+            ($output -join "`n") | Should -Not -Match 'Checking PowerShell runtime'
+            $decision = Get-Content -LiteralPath $decisionPath -Raw | ConvertFrom-Json
+            $decision.decision | Should -Be 'declined'
+            $decision.status | Should -Be 'skipped'
+        }
+
+        It 'records the status returned by a remembered run' {
+            $decisionPath = Join-Path $TestDrive 'run.json'
+            $output = & pwsh -NoProfile -File $scriptPath -Root $repoRoot -DecisionPath $decisionPath -RememberDecision -Json 2>$null
+            @(0, 1) | Should -Contain $LASTEXITCODE
+            $result = $output -join "`n" | ConvertFrom-Json
+            $decision = Get-Content -LiteralPath $decisionPath -Raw | ConvertFrom-Json
+            $decision.decision | Should -Be 'run'
+            $decision.status | Should -Be $result.status
+        }
+
+        It 'rejects conflicting choices without writing a decision' {
+            $decisionPath = Join-Path $TestDrive 'conflict.json'
+            $output = & pwsh -NoProfile -File $scriptPath -DecisionPath $decisionPath -RememberDecision -DeclineAndRemember -Json 2>&1
+            $LASTEXITCODE | Should -Be 1
+            ($output -join "`n") | Should -Match 'not both'
+            Test-Path -LiteralPath $decisionPath | Should -BeFalse
+        }
+    }
     
     Context 'Plugin File Structure' {
         It 'Required plugin directories exist' {

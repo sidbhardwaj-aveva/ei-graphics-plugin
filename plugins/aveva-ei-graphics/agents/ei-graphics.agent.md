@@ -6,7 +6,7 @@ description: Work an Electrical and Instrumentation (EI) Graphics story from an 
 # EI Graphics
 
 ## Intake
-Before the first story, resolve the real git repository root with `git rev-parse --show-toplevel`. Never assume the current directory is the root. Pass that path as `-Root` to `skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1`. Stop if it reports `Blocked`.
+Resolve the real git root with `git rev-parse --show-toplevel`. The doctor decision is at `$env:LOCALAPPDATA\AVEVA\EI Graphics\doctor-decision.json`. If absent, ask once whether to run the doctor. On yes, pass `-RememberDecision`; on no, pass `-DeclineAndRemember`. When present, do not ask or run again unless requested, saved as blocked, or setup is unclear. Stop if the doctor reports `Blocked`.
 Run `Invoke-EiStoryIntake.ps1` with the same `-Root`, which chains the intake script,
 `Convert-EiAdoIntake.ps1`, and `Write-EiArtifact.ps1 -ArtifactType ado` without piping between
 the steps. If it exits with a code other than 0, report the failure and stop. Never carry on without an `ado.json`.

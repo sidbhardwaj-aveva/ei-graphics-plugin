@@ -52,4 +52,4 @@ in `BUILD-LOG.md`.
 | T040 | Resolve the real git root before intake, not the working directory | DONE | 66cbf0b | 2026-09-09T10:55:18Z |
 | T041 | Resolve the git root inside the doctor, not only in agent prose | DONE | 62282e4 | 2026-09-09T11:28:02Z |
 | T042 | Record Git history evidence in session summaries | DONE | e11977c | 2026-09-11T05:51:01Z |
-| T043 | Remember the doctor decision once per user | IN-PROGRESS | — | — |
+| T043 | Remember the doctor decision once per user | DONE | pending | 2026-09-11T06:03:29Z |

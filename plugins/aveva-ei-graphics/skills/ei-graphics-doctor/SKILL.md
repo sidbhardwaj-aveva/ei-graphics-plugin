@@ -14,6 +14,10 @@ allowedTools:
 
 Run the bundled read-only diagnostic. Do not install tools, authenticate, change configuration, or repair files.
 
+Before a user's first story, ask once whether to run it. Save yes with `-RememberDecision`.
+Save no with `-DeclineAndRemember`, which runs no checks. The decision file is under the user's
+local application data folder. Later stories read that file and skip the question and doctor.
+
 ## Diagnostic Workflow
 
 1. From the repository root, run:
@@ -60,4 +64,5 @@ Read `status`, `violations`, `reviewFlags`, `requiredActions`, and `checkDetails
   top level and uses that instead, so a subfolder several levels deep still resolves
   correctly. Read `targetRoot` in `-Json` output to see the path actually checked.
 - The doctor is diagnostic only. Never execute its suggested repair commands without the user's approval.
+- Normal direct runs do not save a decision. The two remember switches are explicit.
 - Do not treat skipped checks or missing evidence as a pass.

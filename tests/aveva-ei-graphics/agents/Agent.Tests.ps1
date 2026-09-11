@@ -83,6 +83,14 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:AgentFlat | Should -Match '-Phase human-checkpoint'
     }
 
+    It 'asks for the doctor choice once per user' {
+        $script:AgentFlat | Should -Match 'doctor-decision\.json'
+        $script:AgentFlat | Should -Match '(?i)ask once'
+        $script:AgentFlat | Should -Match '-RememberDecision'
+        $script:AgentFlat | Should -Match '-DeclineAndRemember'
+        $script:AgentFlat | Should -Match '(?i)do not ask or run again'
+    }
+
     It 'names nothing this build dropped' {
         # The list is read from tests/data/forbidden-identifiers.txt. Writing the names here would
         # make this file fail T019's own scan.

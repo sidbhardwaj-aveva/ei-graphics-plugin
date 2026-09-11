@@ -20,6 +20,9 @@
 [CmdletBinding()]
 param(
     [string] $Root = '.',
+    [string] $DecisionPath = '',
+    [switch] $RememberDecision,
+    [switch] $DeclineAndRemember,
     [switch] $Json,
     [switch] $Help
 )
@@ -34,6 +37,37 @@ if ($Help) { Get-Help -Detailed $PSCommandPath; exit 0 }
 # ============================================================================
 
 function Write-Problem { param([string] $Message) [Console]::Error.WriteLine($Message) }
+
+function Get-DoctorDecisionPath {
+    if ($DecisionPath) { return [System.IO.Path]::GetFullPath($DecisionPath) }
+    $localData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
+    if (-not $localData) {
+        Write-Problem 'The local application data folder is unavailable. Set -DecisionPath to a writable JSON file and run again.'
+        exit 1
+    }
+    Join-Path $localData 'AVEVA' 'EI Graphics' 'doctor-decision.json'
+}
+
+function Save-DoctorDecision {
+    param([string] $Path, [string] $Decision, [string] $Status)
+    $record = [ordered]@{
+        schemaVersion = '1.0.0'
+        decision      = $Decision
+        status        = $Status
+        recordedAt    = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+    }
+    try {
+        $folder = Split-Path -Parent $Path
+        $null = New-Item -ItemType Directory -Path $folder -Force
+        $temporaryPath = "$Path.$([guid]::NewGuid().ToString('N')).tmp"
+        $record | ConvertTo-Json | Set-Content -LiteralPath $temporaryPath -Encoding utf8
+        Move-Item -LiteralPath $temporaryPath -Destination $Path -Force
+    } catch {
+        Write-Problem "Could not write the doctor decision to '$Path'. Ensure its folder is writable, then run again. $($_.Exception.Message)"
+        exit 1
+    }
+    [pscustomobject]$record
+}
 
 function New-Finding {
     param(
@@ -576,6 +610,18 @@ function Test-GitConfiguration {
 # Main
 # ============================================================================
 
+if ($RememberDecision -and $DeclineAndRemember) {
+    Write-Problem 'Use either -RememberDecision or -DeclineAndRemember, not both. No decision was written.'
+    exit 1
+}
+
+$decisionFilePath = Get-DoctorDecisionPath
+if ($DeclineAndRemember) {
+    $savedDecision = Save-DoctorDecision -Path $decisionFilePath -Decision 'declined' -Status 'skipped'
+    if ($Json) { $savedDecision | ConvertTo-Json } else { Write-Problem "Doctor declined. Decision saved at: $decisionFilePath" }
+    exit 0
+}
+
 $rootPath = (Resolve-Path -LiteralPath $Root).Path
 
 # -Root may be a subfolder of the real repository (e.g. a project folder several levels under
@@ -640,6 +686,10 @@ if ($violations.Count -gt 0) {
     $status = 'blocked'
 } elseif ($reviewFlags.Count -gt 0) {
     $status = 'needs-manual-review'
+}
+
+if ($RememberDecision) {
+    $null = Save-DoctorDecision -Path $decisionFilePath -Decision 'run' -Status $status
 }
 
 # Collect affected areas
