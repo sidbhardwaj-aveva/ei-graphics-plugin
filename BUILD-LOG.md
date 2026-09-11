@@ -2807,3 +2807,24 @@ on this row's status. No product or test file changed during recovery.
 **Result:** DONE. The full suite's product checks passed 629/629 with zero skipped tests. The
 focused progress assertion is rerun after changing this row to `DONE`.
 
+## T043 — Remember the doctor decision once per user — 2026-09-11T05:53:30Z
+
+**Goal:** Stop running the six-check doctor before every user story. Ask the user once, remember
+their answer globally for that user, and rerun only when requested or setup is unclear.
+
+**Assumptions:** The choice is global per user, as the user explicitly selected. A file under
+local application data survives new chats without changing a target repository. PowerShell stays
+noninteractive; the agent owns the yes-or-no question. T037 through T041 already fix the three
+first-attempt script failures found in chat history.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** Not started.
+
+**Decisions:** Extend the existing doctor instead of adding a fifteenth plugin script. Keep normal
+direct diagnostic runs unchanged. Use `-DecisionPath` so tests never write the real user choice.
+
+**Result:** IN-PROGRESS.
+

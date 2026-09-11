@@ -2006,6 +2006,35 @@ trail and evidence.
 **Done when.** The focused summary and agent tests pass with no skipped tests. The build-progress
 check and full Pester suite also exit 0.
 
+#### T043 — Remember the doctor decision once per user
+
+**Why this task exists.** Chat history shows the doctor ran before each new story because the
+agent had no durable record of the user's earlier choice. The same history shows three earlier
+first-attempt failures: a strict-mode report crash, a wrong repository root, and invalid pipeline
+binding. T037 through T041 fixed those script defects. Repeating all six doctor checks does not
+prevent them and adds delay and approval prompts.
+
+**Do this.** Add a user-local JSON decision file to `Invoke-EiGraphicsDoctor.ps1`. Its default
+path is under the current user's local application data folder. Add `-DecisionPath` for isolated
+tests, `-RememberDecision` to run the checks and save their status, and `-DeclineAndRemember` to
+save a decline without running any check. The two switches are mutually exclusive. Normal direct
+doctor runs remain unchanged and read-only.
+
+Update the agent intake guidance. When the decision file is absent, ask the user once whether to
+run the doctor. A yes runs it with `-RememberDecision`; a no runs only
+`-DeclineAndRemember`. When the file exists, do not ask or run the doctor unless the user requests
+it, its saved status is blocked, or setup has become unclear.
+
+**Parameters, exactly these 6:** `-Root`, `-DecisionPath`, `-RememberDecision`,
+`-DeclineAndRemember`, `-Json`, `-Help`.
+
+Add regression tests proving a decline writes the decision without emitting any check message,
+a remembered run writes its returned status, conflicting switches fail without writing, and the
+agent carries the one-time policy.
+
+**Done when.** The doctor and agent focused suites pass with no skipped tests. The progress check
+and full Pester suite also exit 0.
+
 ---
 
 ## Part 8 — When things go wrong
