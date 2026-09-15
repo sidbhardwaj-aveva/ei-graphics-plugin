@@ -1,57 +1,49 @@
 # Instructions
 
-How to drive this plugin, and what it will ask of you.
+How to use this plugin and what it will ask you.
 
 ## Starting a run
 
-Give the agent a link to the story. A pasted title works too. You do not need to pull the number
-out yourself; the intake skill does that, and it does it the same way every time.
+Give the agent a story link or pasted title. It finds the story number for you.
 
-## The two moments it will stop
+## The two checks
 
-**It will tell you what it understood.** Read it properly. This is the cheapest place to catch a
-misunderstanding. If the description and a later comment disagree, the agent follows the comment,
-and it will say so.
+**It explains what it understood.** Check this for mistakes. Later comments override the story
+description, and the agent will say so.
 
-**It will show you a plan, if the change is large.** The plan names each file, what changes in it,
-and why. It also names the test command it will run, and says whether anything is untested.
+**It shows a plan for a large change.** The plan lists the files, changes, reason, test command,
+and anything not tested.
 
-You can agree, narrow it, widen it, or refuse it. What you agree to is written down, and checked
-again at the end.
+You can approve, change, or refuse the plan. Your decision is recorded and checked again at the end.
 
-For a small change with a documented cause, it skips the second stop and fixes it.
+For a small change with a documented domain pattern, it skips plan approval and fixes it.
 
 ## What it will not do without asking
 
-- Change a file you did not agree to. If one changes anyway, it is reported as drift.
+- Change a file you did not approve. Any such change is reported.
 - Add a test you did not ask for.
-- Tidy code near the fix.
-- Commit when the layer guard reports a problem.
+- Clean up unrelated code.
+- Commit when the layer check reports a problem.
 
 ## When it cannot help
 
-If no domain skill covers the area, the agent says so plainly rather than guessing. It will ask
-you which files matter and whether there are rules it should follow. Answering well is worth the
-minute it takes, because the answer can then be written into a skill.
+If no domain skill covers the area, the agent stops and asks which files and rules matter. That
+answer can later be added to a skill.
 
 ## When reasoning is stuck
 
-The agent stops and asks for context when evidence is missing or conflicts. It also stops when
-repeated reasoning adds no evidence or when it cannot support a claim. It will say what is uncertain, name the missing
-context, and ask one focused question. Give it the relevant file, expected behavior, constraint,
-error output, or decision. This is better than letting it guess or spend tokens repeating itself.
+The agent stops when information is missing, conflicts, or does not support a conclusion. It says
+what is unclear and asks one focused question. Give it the relevant file, expected behavior, rule,
+error, or decision.
 
 ## After the run
 
-Read `.ei-session-logs/<story number>/session-summary.md`. The last section is written for you.
+Read `.ei-session-logs/<story number>/session-summary.md`. Its last section is for you.
 
-If the agent had to read files that are not listed in the skill, that is a gap. Add them to the
-skill, and the next run will be quicker and more accurate.
+If it had to read files not listed in the skill, add them to the skill for the next run.
 
 ## If something goes wrong
 
-The agent stops rather than carrying on with a half-fetched story. If the intake fails, it reports
-the failure and stops, and there will be no `ado.json`.
+The agent stops if the story was not fully fetched. If intake fails, there is no `ado.json`.
 
-Every message names the file it is talking about and says what to do next. If you ever get one
-that does not, that is a defect worth reporting.
+Every message names the file and the next action. Report any message that does not.

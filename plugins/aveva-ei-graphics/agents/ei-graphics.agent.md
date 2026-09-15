@@ -37,8 +37,8 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 - If evidence is missing or conflicts, repeated reasoning adds no evidence, or a claim cannot be grounded, stop. Say what is uncertain, name the missing context, and ask one focused question.
   Do not guess or present an unverified claim as fact.
 - Make surgical changes. Touch only what the fix needs. Leave nearby code, comments and formatting alone. Match the style already there.
-- Small change: fix it, then verify. Large change: show the plan from
-  `references/checkpoint-templates.md` and wait for a person to agree.
+- Small change with a documented domain pattern: fix it, then verify. If no documented pattern
+  matches, show the plan from `references/checkpoint-templates.md` and wait for a person to agree.
 - Verify before you say you are done. Run a test command from the skill, or a build. "It looks
   right" is not verification.
 - Surface test gaps. After reading the source, check whether a test covers the code you changed.

@@ -1,24 +1,24 @@
 # aveva-ei-graphics
 
-The plugin itself. One agent and five skills.
+One agent and five skills for working on Electrical and Instrumentation (EI) Graphics stories.
 
 ## Quick Start
 
-**First time? Verify your setup is ready:**
+Run this before your first story:
 
 ```powershell
 pwsh -NoProfile -File ./plugins/aveva-ei-graphics/skills/ei-graphics-doctor/scripts/Invoke-EiGraphicsDoctor.ps1
 ```
 
-The doctor checks:
+It checks:
 - PowerShell 7.0+ is installed
 - Azure DevOps CLI and authentication are working
-- Plugin files are complete and not truncated
-- Skill registry and schemas are valid
-- Session artifacts directory is writable
-- Git is configured for safe OneDrive sync
+- Plugin files are complete
+- Skill list and schemas are valid
+- Session log folder is writable
+- Git is safe to use in a OneDrive folder
 
-**Status:** `Ready` = all systems go | `ManualReview` = warnings (can proceed) | `Blocked` = fix required
+**Status:** `Ready` = good to go | `ManualReview` = warning, but work can continue | `Blocked` = fix required
 
 For automated checks, add the `-Json` flag.
 
@@ -26,14 +26,13 @@ For automated checks, add the `-Json` flag.
 
 | Skill | What it is for | When it is read |
 |---|---|---|
-| `ei-graphics-core` | The six scripts that write and read the artifacts, plus their schemas | Whenever the agent needs to write or read an artifact |
-| `ei-azure-devops-cli-intake` | Fetching a story, its images and its discussion | At the start of a run |
-| `ei-graphics-doctor` | Checking that the plugin and its dependencies are ready | Before the first story or when setup is unclear |
-| `ei-layer-guard` | A pass or fail check on architecture rules | Before committing |
-| `termination-drawing` | What is known about the termination drawing code | When the story is about that area |
+| `ei-graphics-core` | Nine scripts for session files and checks | When the agent uses a session file |
+| `ei-azure-devops-cli-intake` | Gets a story, images, and comments | At the start |
+| `ei-graphics-doctor` | Checks that the plugin can run | Before the first story or when setup is unclear |
+| `ei-layer-guard` | Checks file-layer rules | Before committing |
+| `termination-drawing` | Knowledge of termination drawing code | When the story covers that area |
 
-`termination-drawing` is a domain skill. The other four are tools. Only domain skills appear in
-`domain-skill-registry.json`.
+`termination-drawing` is the only domain skill. The registry lists domain skills only.
 
 ## Folder tree
 
@@ -49,7 +48,7 @@ aveva-ei-graphics/
     │   ├── SKILL.md
     │   ├── schemas/          five schemas
     │   ├── references/       the registry, plus two files the agent loads on demand
-    │   └── scripts/          six scripts
+    │   └── scripts/          nine scripts
     ├── ei-azure-devops-cli-intake/
     │   ├── SKILL.md
     │   └── scripts/          the intake script and its two helpers
@@ -64,29 +63,27 @@ aveva-ei-graphics/
         └── references/       five files, loaded only when needed
 ```
 
-## Artifacts
+## Session files
 
-Everything a run produces lands in `.ei-session-logs/<story number>/`. That folder is not
-committed.
+Run files go in `.ei-session-logs/<story number>`. That folder is not committed.
 
 | File | Written by | What it holds |
 |---|---|---|
-| `ado.json` | `Write-EiArtifact.ps1` | The story as it was fetched |
-| `story-understanding.json` | `Write-EiArtifact.ps1` | What the agent understood, after you agreed |
-| `approved-files.json` | `Write-EiArtifact.ps1` | The files you agreed it may change |
-| `session.json` | `Write-EiSessionEntry.ps1` | Every step, added one at a time |
-| `session-summary.md` | `Export-EiSessionSummary.ps1` | The same session, written for a person |
-| `attachments/` | `Convert-EiAdoIntake.ps1` | The images attached to the story |
+| `ado.json` | `Write-EiArtifact.ps1` | The fetched story |
+| `story-understanding.json` | `Write-EiArtifact.ps1` | What the agent understood after approval |
+| `approved-files.json` | `Write-EiArtifact.ps1` | Files approved for changes |
+| `session.json` | `Write-EiSessionEntry.ps1` | The session steps |
+| `session-summary.md` | `Export-EiSessionSummary.ps1` | A readable session summary |
+| `attachments/` | `Convert-EiAdoIntake.ps1` | Story images |
 
-`story-understanding.json` and `approved-files.json` each carry a `hash`. `ado.json` does not,
-because its schema allows no such field. It is tied down instead by the `adoHash` field inside
-`story-understanding.json`.
+`story-understanding.json` and `approved-files.json` carry a `hash` to detect changes. `ado.json`
+uses the `adoHash` field in `story-understanding.json` instead.
 
 ## Adding a domain skill
 
-Two files change, and nothing else.
+Change two files:
 
 1. Write `skills/<name>/SKILL.md`, with a `name` matching the folder and a `## When to Use` list.
 2. Add one entry to `skills/ei-graphics-core/references/domain-skill-registry.json`.
 
-No manifest edit. No test edit. Nothing counts the skills.
+Do not edit the manifest or tests. The registry is the full skill list.
