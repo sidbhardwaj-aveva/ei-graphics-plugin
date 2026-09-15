@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Progressive disclosure — three-tier skill loading</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --color-paper:  #f7f5f9;
-    --color-ink:    #3d1152;
-    --color-muted:  #6b5a7a;
-    --color-accent: #6b05a8;
-    --font-sans:  'Roboto', system-ui, sans-serif;
+    --color-paper:  #f5f5f5;
+    --color-ink:    #2d3142;
+    --color-muted:  #4f5d75;
+    --color-accent: #eb6c36;
+    --font-sans:  'Geist', system-ui, sans-serif;
     --font-serif: 'Instrument Serif', serif;
     --font-mono:  'Geist Mono', ui-monospace, monospace;
   }
@@ -26,7 +26,7 @@
   p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1.5rem; max-width: 62ch; }
   svg { width: 100%; min-width: 640px; display: block; }
   footer { margin-top: 1rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
-    border-top: 1px solid rgba(61,17,82,0.12); padding-top: 0.75rem; }
+    border-top: 1px solid rgba(45,49,66,0.12); padding-top: 0.75rem; }
 </style>
 </head>
 <body>
@@ -43,51 +43,51 @@
     description, always loaded for every skill; tier two, the SKILL.md body, loaded only when a skill is
     activated; and tier three, references and scripts, loaded only on demand when the task needs deeper detail.</desc>
     <defs>
-      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
     </defs>
-    <rect width="100%" height="100%" fill="#f7f5f9"/>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
 
     <!-- Direction indicator -->
-    <path d="M 40,100 V 300" fill="none" stroke="#9186a0" stroke-width="1" marker-end="url(#arrow)"/>
-    <text x="40" y="330" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LOADED</text>
-    <text x="40" y="342" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LESS OFTEN</text>
+    <path d="M 40,100 V 300" fill="none" stroke="#7a8399" stroke-width="1" marker-end="url(#arrow)"/>
+    <text x="40" y="330" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LOADED</text>
+    <text x="40" y="342" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LESS OFTEN</text>
 
     <!-- Layer stack: x=100..780, layers at y=80,160,240, h=72 -->
-    <rect x="100" y="80"  width="680" height="72" fill="#f7f5f9" stroke="#3d1152" stroke-width="1"/>
+    <rect x="100" y="80"  width="680" height="72" fill="#f5f5f5" stroke="#2d3142" stroke-width="1"/>
     <rect x="100" y="152" width="680" height="72" fill="#ece7f0" stroke-width="0"/>
-    <rect x="100" y="152" width="680" height="72" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1.2"/>
-    <rect x="100" y="224" width="680" height="72" fill="#f7f5f9" stroke="#3d1152" stroke-width="1"/>
-    <line x1="100" y1="152" x2="780" y2="152" stroke="rgba(61,17,82,0.12)" stroke-width="1"/>
-    <line x1="100" y1="224" x2="780" y2="224" stroke="rgba(61,17,82,0.12)" stroke-width="1"/>
+    <rect x="100" y="152" width="680" height="72" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+    <rect x="100" y="224" width="680" height="72" fill="#f5f5f5" stroke="#2d3142" stroke-width="1"/>
+    <line x1="100" y1="152" x2="780" y2="152" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <line x1="100" y1="224" x2="780" y2="224" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
 
     <!-- Row 1 -->
-    <text x="118" y="102" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIER 1</text>
-    <text x="118" y="128" fill="#3d1152" font-size="14" font-weight="600" font-family="'Roboto', sans-serif">Skill name &amp; description</text>
-    <text x="762" y="122" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">always loaded · ~100 tokens</text>
+    <text x="118" y="102" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIER 1</text>
+    <text x="118" y="128" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">Skill name &amp; description</text>
+    <text x="762" y="122" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">always loaded · ~100 tokens</text>
 
     <!-- Row 2 (focal) -->
-    <text x="118" y="174" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIER 2</text>
-    <text x="118" y="200" fill="#3d1152" font-size="14" font-weight="600" font-family="'Roboto', sans-serif">SKILL.md body</text>
-    <text x="762" y="194" fill="#6b05a8" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">on activation · &lt;5000 tokens</text>
+    <text x="118" y="174" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIER 2</text>
+    <text x="118" y="200" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">SKILL.md body</text>
+    <text x="762" y="194" fill="#eb6c36" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">on activation · &lt;5000 tokens</text>
 
     <!-- Row 3 -->
-    <text x="118" y="246" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIER 3</text>
-    <text x="118" y="272" fill="#3d1152" font-size="14" font-weight="600" font-family="'Roboto', sans-serif">References &amp; scripts</text>
-    <text x="762" y="266" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">on demand only</text>
+    <text x="118" y="246" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIER 3</text>
+    <text x="118" y="272" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif">References &amp; scripts</text>
+    <text x="762" y="266" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">on demand only</text>
 
     <!-- Between-row triggers -->
-    <rect x="330" y="146" width="160" height="14" rx="2" fill="#f7f5f9"/>
-    <text x="410" y="157" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">SKILL LOOKS RELEVANT</text>
-    <rect x="330" y="218" width="170" height="14" rx="2" fill="#f7f5f9"/>
-    <text x="415" y="229" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">NEEDS DEEPER DETAIL</text>
+    <rect x="330" y="146" width="160" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="410" y="157" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">SKILL LOOKS RELEVANT</text>
+    <rect x="330" y="218" width="170" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="415" y="229" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">NEEDS DEEPER DETAIL</text>
 
     <!-- Legend -->
-    <line x1="30" y1="336" x2="830" y2="336" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
-    <text x="30" y="354" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
-    <rect x="140" y="346" width="12" height="12" rx="3" fill="rgba(107,5,168,0.08)" stroke="#6b05a8"/>
-    <text x="158" y="355" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">focal: activation gate</text>
-    <rect x="330" y="346" width="12" height="12" rx="3" fill="#f7f5f9" stroke="#3d1152"/>
-    <text x="348" y="355" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">always-resident layer</text>
+    <line x1="30" y1="336" x2="830" y2="336" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="30" y="354" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="140" y="346" width="12" height="12" rx="3" fill="rgba(235,108,54,0.08)" stroke="#eb6c36"/>
+    <text x="158" y="355" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">focal: activation gate</text>
+    <rect x="330" y="346" width="12" height="12" rx="3" fill="#f5f5f5" stroke="#2d3142"/>
+    <text x="348" y="355" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">always-resident layer</text>
   </svg>
 
   <footer>docs/presentation/05-progressive-disclosure.html · redrawn from 05-progressive-disclosure.mmd · AVEVA profile</footer>

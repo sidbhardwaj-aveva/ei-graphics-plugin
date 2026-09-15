@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>System context — EI Graphics plugin</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --color-paper:  #f7f5f9;
-    --color-ink:    #3d1152;
-    --color-muted:  #6b5a7a;
-    --color-accent: #6b05a8;
-    --font-sans:  'Roboto', system-ui, sans-serif;
+    --color-paper:  #f5f5f5;
+    --color-ink:    #2d3142;
+    --color-muted:  #4f5d75;
+    --color-accent: #eb6c36;
+    --font-sans:  'Geist', system-ui, sans-serif;
     --font-serif: 'Instrument Serif', serif;
     --font-mono:  'Geist Mono', ui-monospace, monospace;
   }
@@ -57,7 +57,7 @@
     font-family: var(--font-mono);
     font-size: 0.68rem;
     color: var(--color-muted);
-    border-top: 1px solid rgba(61,17,82,0.12);
+    border-top: 1px solid rgba(45,49,66,0.12);
     padding-top: 0.75rem;
   }
 </style>
@@ -77,120 +77,120 @@
     commit and PR work to the aveva-rnd plugin, and appends every step to session logs, while core and
     domain skills supply code knowledge to the agent.</desc>
     <defs>
-      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
-      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b05a8"/></marker>
-      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0d6efd"/></marker>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
     </defs>
 
-    <rect width="100%" height="100%" fill="#f7f5f9"/>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
 
     <!-- Zone: plugin boundary -->
-    <rect x="292" y="60" width="240" height="472" rx="8" fill="rgba(61,17,82,0.02)" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
-    <rect x="308" y="64" width="150" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="383" y="73" fill="rgba(61,17,82,0.40)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">AVEVA-EI-GRAPHICS PLUGIN</text>
+    <rect x="292" y="60" width="240" height="472" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <rect x="308" y="64" width="150" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="383" y="73" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">AVEVA-EI-GRAPHICS PLUGIN</text>
 
     <!-- Arrows (drawn before nodes) -->
     <!-- Dev -> Agent -->
-    <path d="M 160,240 H 292" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="188" y="216" width="72" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="224" y="225" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">STORY LINK</text>
+    <path d="M 160,240 H 292" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <rect x="188" y="216" width="72" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="224" y="225" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">STORY LINK</text>
 
     <!-- Agent -> Dev (return, dashed) -->
-    <path d="M 292,284 H 160" fill="none" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
-    <rect x="176" y="292" width="112" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="232" y="301" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">TWO APPROVALS</text>
+    <path d="M 292,284 H 160" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+    <rect x="176" y="292" width="112" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="232" y="301" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">TWO APPROVALS</text>
 
     <!-- Skills -> Agent (within zone) -->
-    <path d="M 412,392 V 300" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="376" y="338" width="80" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="416" y="347" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CODE KNOW.</text>
+    <path d="M 412,392 V 300" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="376" y="338" width="80" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="416" y="347" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CODE KNOW.</text>
 
     <!-- Agent -> ADO -->
-    <path d="M 532,200 H 620 Q 628,200 628,208 V 240" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="640" y="182" width="70" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="675" y="191" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">READ ONLY</text>
+    <path d="M 532,200 H 620 Q 628,200 628,208 V 240" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="640" y="182" width="70" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="675" y="191" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">READ ONLY</text>
 
     <!-- Agent -> Repo -->
-    <path d="M 532,240 H 700" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="580" y="248" width="98" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="629" y="257" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">READ + EDIT</text>
+    <path d="M 532,240 H 700" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <rect x="580" y="248" width="98" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="629" y="257" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">READ + EDIT</text>
 
     <!-- Agent -> Rnd -->
-    <path d="M 532,280 H 620 Q 628,280 628,288 V 340" fill="none" stroke="#0d6efd" stroke-width="1.2" marker-end="url(#arrow-link)"/>
-    <rect x="632" y="300" width="106" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="685" y="309" fill="#0d6efd" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">REVIEW·PR</text>
+    <path d="M 532,280 H 620 Q 628,280 628,288 V 340" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="632" y="300" width="106" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="685" y="309" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">REVIEW·PR</text>
 
     <!-- Agent -> Logs (dashed, append) -->
-    <path d="M 412,300 V 400 Q 412,408 420,408 H 620 Q 628,408 628,416 V 452" fill="none" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
-    <rect x="580" y="420" width="112" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="636" y="429" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">APPEND STEPS</text>
+    <path d="M 412,300 V 400 Q 412,408 420,408 H 620 Q 628,408 628,416 V 452" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+    <rect x="580" y="420" width="112" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="636" y="429" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">APPEND STEPS</text>
 
     <!-- Nodes -->
     <!-- Dev (input) -->
-    <rect x="40" y="216" width="120" height="64" rx="6" fill="#f7f5f9"/>
-    <rect x="40" y="216" width="120" height="64" rx="6" fill="rgba(107,90,122,0.10)" stroke="#9186a0" stroke-width="1"/>
-    <rect x="48" y="222" width="34" height="12" rx="2" fill="transparent" stroke="rgba(145,134,160,0.5)" stroke-width="0.8"/>
-    <text x="65" y="231" fill="#9186a0" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">USER</text>
-    <text x="100" y="256" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Developer</text>
+    <rect x="40" y="216" width="120" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="40" y="216" width="120" height="64" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <rect x="48" y="222" width="34" height="12" rx="2" fill="transparent" stroke="rgba(122,131,153,0.5)" stroke-width="0.8"/>
+    <text x="65" y="231" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">USER</text>
+    <text x="100" y="256" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Developer</text>
 
     <!-- Agent (focal) -->
-    <rect x="308" y="168" width="192" height="64" rx="6" fill="#f7f5f9"/>
-    <rect x="308" y="168" width="192" height="64" rx="6" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
-    <rect x="316" y="174" width="42" height="12" rx="2" fill="transparent" stroke="rgba(107,5,168,0.5)" stroke-width="0.8"/>
-    <text x="337" y="183" fill="#6b05a8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AGENT</text>
-    <text x="404" y="206" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">EI Graphics agent</text>
-    <text x="404" y="222" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">orchestrator</text>
+    <rect x="308" y="168" width="192" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="308" y="168" width="192" height="64" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <rect x="316" y="174" width="42" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.5)" stroke-width="0.8"/>
+    <text x="337" y="183" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AGENT</text>
+    <text x="404" y="206" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">EI Graphics agent</text>
+    <text x="404" y="222" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">orchestrator</text>
 
     <!-- Skills (backend) -->
-    <rect x="308" y="392" width="192" height="64" rx="6" fill="#f7f5f9"/>
-    <rect x="308" y="392" width="192" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <rect x="316" y="398" width="46" height="12" rx="2" fill="transparent" stroke="rgba(61,17,82,0.4)" stroke-width="0.8"/>
-    <text x="339" y="407" fill="#3d1152" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SKILLS</text>
-    <text x="404" y="430" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Core &amp; domain skills</text>
-    <text x="404" y="446" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">code knowledge</text>
+    <rect x="308" y="392" width="192" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="308" y="392" width="192" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="316" y="398" width="46" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+    <text x="339" y="407" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SKILLS</text>
+    <text x="404" y="430" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Core &amp; domain skills</text>
+    <text x="404" y="446" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">code knowledge</text>
 
     <!-- ADO (external) -->
-    <rect x="700" y="176" width="160" height="64" rx="6" fill="#f7f5f9"/>
-    <rect x="700" y="176" width="160" height="64" rx="6" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)" stroke-width="1"/>
-    <rect x="708" y="182" width="46" height="12" rx="2" fill="transparent" stroke="rgba(61,17,82,0.4)" stroke-width="0.8"/>
-    <text x="731" y="191" fill="rgba(61,17,82,0.7)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
-    <text x="780" y="214" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Azure DevOps story</text>
-    <text x="780" y="230" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">read-only</text>
+    <rect x="700" y="176" width="160" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="700" y="176" width="160" height="64" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <rect x="708" y="182" width="46" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+    <text x="731" y="191" fill="rgba(45,49,66,0.7)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+    <text x="780" y="214" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Azure DevOps story</text>
+    <text x="780" y="230" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">read-only</text>
 
     <!-- Repo (external) -->
-    <rect x="700" y="276" width="160" height="64" rx="6" fill="#f7f5f9"/>
-    <rect x="700" y="276" width="160" height="64" rx="6" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)" stroke-width="1"/>
-    <rect x="708" y="282" width="46" height="12" rx="2" fill="transparent" stroke="rgba(61,17,82,0.4)" stroke-width="0.8"/>
-    <text x="731" y="291" fill="rgba(61,17,82,0.7)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
-    <text x="780" y="314" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Product code repo</text>
-    <text x="780" y="330" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">read + edit</text>
+    <rect x="700" y="276" width="160" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="700" y="276" width="160" height="64" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <rect x="708" y="282" width="46" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+    <text x="731" y="291" fill="rgba(45,49,66,0.7)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+    <text x="780" y="314" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Product code repo</text>
+    <text x="780" y="330" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">read + edit</text>
 
     <!-- Rnd (external) -->
-    <rect x="700" y="376" width="160" height="64" rx="6" fill="#f7f5f9"/>
-    <rect x="700" y="376" width="160" height="64" rx="6" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)" stroke-width="1"/>
-    <rect x="708" y="382" width="46" height="12" rx="2" fill="transparent" stroke="rgba(61,17,82,0.4)" stroke-width="0.8"/>
-    <text x="731" y="391" fill="rgba(61,17,82,0.7)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
-    <text x="780" y="414" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">aveva-rnd plugin</text>
-    <text x="780" y="430" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">review · commit · PR</text>
+    <rect x="700" y="376" width="160" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="700" y="376" width="160" height="64" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <rect x="708" y="382" width="46" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+    <text x="731" y="391" fill="rgba(45,49,66,0.7)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+    <text x="780" y="414" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">aveva-rnd plugin</text>
+    <text x="780" y="430" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">review · commit · PR</text>
 
     <!-- Logs (store, cylinder) -->
-    <rect x="700" y="452" width="160" height="56" fill="#f7f5f9"/>
-    <path d="M 700,464 V 496 Q 780,508 860,496 V 464" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
-    <ellipse cx="780" cy="464" rx="80" ry="12" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
-    <text x="780" y="486" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Session logs</text>
-    <text x="780" y="500" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">append-only</text>
+    <rect x="700" y="452" width="160" height="56" fill="#f5f5f5"/>
+    <path d="M 700,464 V 496 Q 780,508 860,496 V 464" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <ellipse cx="780" cy="464" rx="80" ry="12" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="780" y="486" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Session logs</text>
+    <text x="780" y="500" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">append-only</text>
 
     <!-- Legend -->
-    <line x1="30" y1="556" x2="930" y2="556" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
-    <text x="30" y="574" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
-    <rect x="120" y="566" width="12" height="12" rx="3" fill="rgba(107,5,168,0.08)" stroke="#6b05a8"/>
-    <text x="138" y="575" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">focal / agent</text>
-    <rect x="260" y="566" width="12" height="12" rx="3" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)"/>
-    <text x="278" y="575" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">external system</text>
-    <rect x="420" y="566" width="12" height="12" rx="3" fill="rgba(107,90,122,0.10)" stroke="#9186a0"/>
-    <text x="438" y="575" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">human</text>
-    <line x1="540" y1="572" x2="562" y2="572" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3"/>
-    <text x="570" y="575" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">passive / return</text>
+    <line x1="30" y1="556" x2="930" y2="556" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="30" y="574" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="120" y="566" width="12" height="12" rx="3" fill="rgba(235,108,54,0.08)" stroke="#eb6c36"/>
+    <text x="138" y="575" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">focal / agent</text>
+    <rect x="260" y="566" width="12" height="12" rx="3" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)"/>
+    <text x="278" y="575" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">external system</text>
+    <rect x="420" y="566" width="12" height="12" rx="3" fill="rgba(79,93,117,0.10)" stroke="#7a8399"/>
+    <text x="438" y="575" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">human</text>
+    <line x1="540" y1="572" x2="562" y2="572" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="570" y="575" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">passive / return</text>
   </svg>
 
   <footer>docs/presentation/01-system-context.html · redrawn from 01-system-context.mmd · AVEVA profile</footer>

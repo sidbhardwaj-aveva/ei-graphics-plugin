@@ -4,159 +4,217 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Run sequence — the same flow over time</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --color-paper:  #f7f5f9;
-    --color-ink:    #3d1152;
-    --color-muted:  #6b5a7a;
-    --color-accent: #6b05a8;
-    --font-sans:  'Roboto', system-ui, sans-serif;
+    --color-paper:  #f5f5f5;
+    --color-ink:    #2d3142;
+    --color-muted:  #4f5d75;
+    --color-accent: #eb6c36;
+    --color-link:   #2e5aa8;
+    --font-sans:  'Geist', system-ui, sans-serif;
     --font-serif: 'Instrument Serif', serif;
     --font-mono:  'Geist Mono', ui-monospace, monospace;
+    --motion-fast: 160ms;
+    --motion-step: 480ms;
+    --motion-hold: 420ms;
+    --motion-total: 3360ms;
+    --motion-ease: cubic-bezier(.2,.8,.2,1);
   }
   body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
     min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
-  .frame { max-width: 1000px; width: 100%; }
+  .frame { max-width: 1280px; width: 100%; }
   .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
     text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
   h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 1.9rem); font-weight: 400;
     letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
-  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1.5rem; max-width: 62ch; }
+  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1rem; max-width: 66ch; }
   svg { width: 100%; min-width: 780px; display: block; }
+  .motion-note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
+    margin-bottom: 0.5rem; }
   footer { margin-top: 1rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
-    border-top: 1px solid rgba(61,17,82,0.12); padding-top: 0.75rem; }
+    border-top: 1px solid rgba(45,49,66,0.12); padding-top: 0.75rem; }
+
+  /* Reveal animation: CSS-only, plays once on load, ends complete. */
+  [data-motion-item] {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: reveal-in var(--motion-step) var(--motion-ease) forwards;
+    animation-delay: calc(var(--step, 0) * var(--motion-hold));
+  }
+  @keyframes reveal-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-motion-item] { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+  @media print {
+    [data-motion-item] { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
 </style>
 </head>
 <body>
 <div class="frame">
   <p class="eyebrow">Sequence · Diagram Design</p>
   <h1>Run sequence — the same flow over time</h1>
-  <p class="sub">The agent reads ado.json once and never re-fetches from ADO. Core scripts are the only
-  thing writing artifacts; checkpoint 2 only fires for large changes.</p>
+  <p class="sub">The doctor readiness gate runs before anything else. The agent reads ado.json once and
+  never re-fetches from ADO. Core scripts are the only thing writing artifacts; checkpoint 2 only fires
+  for large changes.</p>
+  <p class="motion-note" aria-hidden="true">Plays once on load to show the sequential flow, then stays complete. Reduced-motion and print show the full diagram immediately.</p>
 
-  <svg viewBox="0 0 940 920" xmlns="http://www.w3.org/2000/svg" role="img"
-       aria-labelledby="seq-title seq-desc">
+  <svg viewBox="0 0 980 900" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-labelledby="seq-title seq-desc" data-motion-root data-motion-mode="reveal" data-step-count="8">
     <title id="seq-title">Sequence of a run from story link to summary</title>
-    <desc id="seq-desc">Sequence diagram across five lifelines — developer, EI Graphics agent, ADO intake,
-    core scripts and aveva-rnd — showing the story link, a single ADO fetch, a self-review by the agent,
-    checkpoint 1, an optional checkpoint 2 for large changes, persistence and layer-guard steps, delegated
-    review/commit/PR, and a final summary link back to the developer.</desc>
+    <desc id="seq-desc">Sequence diagram across five lifelines — developer, EI Graphics agent, doctor,
+    core scripts and aveva-rnd — showing the story link, a cache-aware doctor readiness check that either
+    blocks the run with a setup message or continues, a single ADO fetch and write into core scripts, a
+    self-review by the agent, checkpoint 1, an optional checkpoint 2 for large changes, persistence and
+    layer-guard steps, delegated review, commit and PR, session finalization with bundle export, and a
+    final summary link back to the developer.</desc>
     <defs>
-      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
-      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b05a8"/></marker>
-      <marker id="arrow-return" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      <marker id="arrow-return" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
     </defs>
-    <rect width="100%" height="100%" fill="#f7f5f9"/>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
 
-    <!-- Lifelines -->
-    <line x1="90"  y1="80" x2="90"  y2="800" stroke="rgba(61,17,82,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
-    <line x1="290" y1="80" x2="290" y2="800" stroke="rgba(61,17,82,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
-    <line x1="470" y1="80" x2="470" y2="800" stroke="rgba(61,17,82,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
-    <line x1="650" y1="80" x2="650" y2="800" stroke="rgba(61,17,82,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
-    <line x1="830" y1="80" x2="830" y2="800" stroke="rgba(61,17,82,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+    <!-- Lifelines (static structure, always visible) -->
+    <line x1="90"  y1="80" x2="90"  y2="800" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="290" y1="80" x2="290" y2="800" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="470" y1="80" x2="470" y2="800" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="650" y1="80" x2="650" y2="800" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="830" y1="80" x2="830" y2="800" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
 
-    <!-- Activation bar: Ag active for the whole run -->
-    <rect x="286" y="118" width="8" height="642" fill="rgba(61,17,82,0.06)" stroke="#6b5a7a" stroke-width="0.8"/>
+    <!-- Activation bar: Ag active for the whole run (static structure) -->
+    <rect x="286" y="118" width="8" height="642" fill="rgba(45,49,66,0.06)" stroke="#4f5d75" stroke-width="0.8"/>
 
-    <!-- opt fragment frame (checkpoint 2, large changes only) -->
-    <rect x="70" y="480" width="240" height="96" rx="4" fill="rgba(61,17,82,0.02)" stroke="rgba(61,17,82,0.22)" stroke-width="1"/>
-    <rect x="70" y="480" width="40" height="16" rx="2" fill="#f7f5f9" stroke="rgba(61,17,82,0.22)" stroke-width="1"/>
-    <text x="90" y="492" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">OPT</text>
-    <text x="120" y="496" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.04em">[large change]</text>
+    <!-- Actor boxes (static structure) -->
+    <rect x="30" y="40" width="120" height="40" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="90" y="64" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Developer</text>
 
-    <!-- Actor boxes -->
-    <rect x="30" y="40" width="120" height="40" rx="6" fill="rgba(107,90,122,0.10)" stroke="#9186a0" stroke-width="1"/>
-    <text x="90" y="64" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Developer</text>
+    <rect x="230" y="40" width="120" height="40" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="290" y="64" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">EI Agent</text>
 
-    <rect x="230" y="40" width="120" height="40" rx="6" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
-    <text x="290" y="64" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">EI Agent</text>
+    <rect x="410" y="40" width="120" height="40" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="470" y="64" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Doctor</text>
 
-    <rect x="410" y="40" width="120" height="40" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <text x="470" y="64" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">ADO intake</text>
+    <rect x="590" y="40" width="120" height="40" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="650" y="64" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Core scripts</text>
 
-    <rect x="590" y="40" width="120" height="40" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <text x="650" y="64" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Core scripts</text>
+    <rect x="770" y="40" width="120" height="40" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <text x="830" y="64" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">aveva-rnd</text>
 
-    <rect x="770" y="40" width="120" height="40" rx="6" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)" stroke-width="1"/>
-    <text x="830" y="64" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">aveva-rnd</text>
+    <!-- Step 0: story link -->
+    <g data-motion-item style="--step:0">
+      <path d="M 90,130 H 286" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <rect x="132" y="118" width="70" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="167" y="127" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">STORY LINK</text>
+    </g>
 
-    <!-- 1: Dev -> Ag -->
-    <path d="M 90,130 H 286" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="132" y="118" width="70" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="167" y="127" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">STORY LINK</text>
+    <!-- Step 1: check doctor cache + alt fragment frame -->
+    <g data-motion-item style="--step:1">
+      <path d="M 294,164 H 470" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="322" y="152" width="120" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="382" y="161" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">CHECK/RUN DOCTOR</text>
 
-    <!-- 2: Ag -> In -->
-    <path d="M 294,164 H 470" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="322" y="152" width="120" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="382" y="161" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">FETCH STORY+IMG</text>
+      <rect x="70" y="190" width="440" height="140" rx="4" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
+      <rect x="70" y="190" width="40" height="16" rx="2" fill="#f5f5f5" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
+      <text x="90" y="202" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">ALT</text>
+      <text x="120" y="206" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.04em">[doctor blocked]</text>
+      <line x1="70" y1="262" x2="510" y2="262" stroke="rgba(45,49,66,0.22)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="80" y="274" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.04em">[else: doctor ready]</text>
+    </g>
 
-    <!-- 3: In -> Sc -->
-    <path d="M 470,198 H 650" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="500" y="186" width="120" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="560" y="195" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">WRITE ADO.JSON</text>
+    <!-- Step 2: alt outcomes -->
+    <g data-motion-item style="--step:2">
+      <path d="M 470,222 H 294" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-return)"/>
+      <rect x="330" y="210" width="60" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="360" y="219" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">BLOCKED</text>
+      <path d="M 286,238 H 90" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="130" y="226" width="120" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="190" y="235" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">SETUP ISSUE: STOP</text>
 
-    <!-- 4: Ag self -->
-    <path d="M 294,232 H 340 Q 348,232 348,240 V 248 Q 348,256 340,256 H 294" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="356" y="236" width="118" height="20" rx="2" fill="#f7f5f9"/>
-    <text x="360" y="247" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace">READ + DRAFT</text>
-    <text x="360" y="257" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace">UNDERSTANDING</text>
+      <path d="M 470,300 H 294" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-return)"/>
+      <rect x="335" y="288" width="50" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="360" y="297" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">READY</text>
+    </g>
 
-    <!-- 5: Ag -> Dev CP1 -->
-    <path d="M 286,300 H 90" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="120" y="288" width="90" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="165" y="297" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">CHECKPOINT 1</text>
+    <!-- Step 3: fetch + write ado.json -->
+    <g data-motion-item style="--step:3">
+      <path d="M 294,364 H 650" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="380" y="352" width="180" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="470" y="361" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">FETCH STORY + WRITE ADO.JSON</text>
+    </g>
 
-    <!-- 6: Dev --> Ag agree (dashed return) -->
-    <path d="M 90,340 H 286" fill="none" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-return)"/>
-    <rect x="150" y="328" width="50" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="175" y="337" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">AGREE</text>
+    <!-- Step 4: self-review + checkpoint 1 -->
+    <g data-motion-item style="--step:4">
+      <path d="M 294,398 H 340 Q 348,398 348,406 V 414 Q 348,422 340,422 H 294" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="356" y="402" width="118" height="20" rx="2" fill="#f5f5f5"/>
+      <text x="360" y="413" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">READ + DRAFT</text>
+      <text x="360" y="423" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">UNDERSTANDING</text>
 
-    <!-- 7: Ag -> Sc write understanding + match skill -->
-    <path d="M 294,404 H 650" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="380" y="392" width="180" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="470" y="401" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">WRITE UNDERSTANDING+SKILL</text>
+      <path d="M 286,444 H 90" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <rect x="120" y="432" width="90" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="165" y="441" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">CHECKPOINT 1</text>
+    </g>
 
-    <!-- 8 (inside opt): Ag -> Dev CP2 -->
-    <path d="M 286,524 H 90" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="120" y="512" width="90" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="165" y="521" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">CHECKPOINT 2</text>
+    <!-- Step 5: agree + persist understanding/skill -->
+    <g data-motion-item style="--step:5">
+      <path d="M 90,478 H 286" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-return)"/>
+      <rect x="150" y="466" width="50" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="175" y="475" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">AGREE</text>
 
-    <!-- 9 (inside opt): Dev --> Ag approve -->
-    <path d="M 90,558 H 286" fill="none" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-return)"/>
-    <rect x="140" y="546" width="70" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="175" y="555" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">APPROVE</text>
+      <path d="M 294,518 H 650" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="380" y="506" width="180" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="470" y="515" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">WRITE UNDERSTANDING + SKILL</text>
+    </g>
 
-    <!-- 10: Ag -> Sc persist+implement+guard -->
-    <path d="M 294,624 H 650" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="350" y="612" width="240" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="470" y="621" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">PERSIST + IMPLEMENT + GUARD</text>
+    <!-- Step 6: checkpoint 2 (large only) -->
+    <g data-motion-item style="--step:6">
+      <path d="M 286,558 H 90" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <rect x="118" y="546" width="94" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="165" y="555" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">CP2 (LARGE ONLY)</text>
 
-    <!-- 11: Ag -> Rn -->
-    <path d="M 294,674 H 830" fill="none" stroke="#0d6efd" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="500" y="662" width="150" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="575" y="671" fill="#0d6efd" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">REVIEW, COMMIT, PR</text>
+      <path d="M 90,592 H 286" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-return)"/>
+      <rect x="140" y="580" width="70" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="175" y="589" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">APPROVE</text>
+    </g>
 
-    <!-- 12: Ag -> Dev summary (headline) -->
-    <path d="M 286,730 H 90" fill="none" stroke="#6b05a8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
-    <rect x="120" y="718" width="90" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="165" y="727" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">SUMMARY LINK</text>
+    <!-- Step 7: persist + implement + guard, review/commit/PR -->
+    <g data-motion-item style="--step:7">
+      <path d="M 294,632 H 650" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="330" y="620" width="290" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="475" y="629" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">PERSIST APPROVED-FILES + IMPLEMENT + GUARD/DRIFT</text>
 
-    <!-- Legend -->
-    <line x1="30" y1="848" x2="910" y2="848" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
-    <text x="30" y="866" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
-    <line x1="130" y1="861" x2="152" y2="861" stroke="#6b05a8" stroke-width="1.2"/>
-    <text x="160" y="864" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">call (human / headline)</text>
-    <line x1="330" y1="861" x2="352" y2="861" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3"/>
-    <text x="360" y="864" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">return</text>
-    <line x1="450" y1="861" x2="472" y2="861" stroke="#0d6efd" stroke-width="1.2"/>
-    <text x="480" y="864" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">external delegate</text>
-    <rect x="640" y="855" width="16" height="12" rx="2" fill="rgba(61,17,82,0.02)" stroke="rgba(61,17,82,0.22)"/>
-    <text x="666" y="864" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">opt fragment</text>
+      <path d="M 294,672 H 830" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <rect x="500" y="660" width="150" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="575" y="669" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">REVIEW, COMMIT, PR</text>
+
+      <path d="M 294,706 H 650" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="360" y="694" width="220" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="470" y="703" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">FINALIZE SESSION + EXPORT BUNDLE</text>
+
+      <path d="M 286,740 H 90" fill="none" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <rect x="120" y="728" width="90" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="165" y="737" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">SUMMARY LINK</text>
+    </g>
+
+    <!-- Legend (static structure) -->
+    <line x1="30" y1="828" x2="950" y2="828" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="30" y="846" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <line x1="130" y1="841" x2="152" y2="841" stroke="#eb6c36" stroke-width="1.2"/>
+    <text x="160" y="844" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">call (human / headline)</text>
+    <line x1="330" y1="841" x2="352" y2="841" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="360" y="844" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">return</text>
+    <line x1="450" y1="841" x2="472" y2="841" stroke="#2e5aa8" stroke-width="1.2"/>
+    <text x="480" y="844" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">external delegate</text>
+    <rect x="640" y="835" width="16" height="12" rx="2" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.22)"/>
+    <text x="666" y="844" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">alt fragment</text>
   </svg>
 
-  <footer>docs/presentation/03-run-sequence.html · redrawn from 03-run-sequence.mmd · AVEVA profile</footer>
+  <footer>docs/presentation/03-run-sequence.html · redrawn from 03-run-sequence.mmd · AVEVA brand tokens · animated reveal (mode=reveal)</footer>
 </div>
 </body>
 </html>

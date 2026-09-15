@@ -4,148 +4,193 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Workflow — story to fix</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --color-paper:  #f7f5f9;
-    --color-ink:    #3d1152;
-    --color-muted:  #6b5a7a;
-    --color-accent: #6b05a8;
-    --font-sans:  'Roboto', system-ui, sans-serif;
+    --color-paper:  #f5f5f5;
+    --color-ink:    #2d3142;
+    --color-muted:  #4f5d75;
+    --color-accent: #eb6c36;
+    --color-link:   #2e5aa8;
+    --font-sans:  'Geist', system-ui, sans-serif;
     --font-serif: 'Instrument Serif', serif;
     --font-mono:  'Geist Mono', ui-monospace, monospace;
+    --motion-fast: 160ms;
+    --motion-step: 480ms;
+    --motion-hold: 420ms;
+    --motion-total: 3360ms;
+    --motion-ease: cubic-bezier(.2,.8,.2,1);
   }
   body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
     min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
-  .frame { max-width: 1000px; width: 100%; }
+  .frame { max-width: 1280px; width: 100%; }
   .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
     text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
   h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 1.9rem); font-weight: 400;
     letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
-  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1.5rem; max-width: 62ch; }
+  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1rem; max-width: 66ch; }
   svg { width: 100%; min-width: 760px; display: block; }
+  .motion-note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
+    margin-bottom: 0.5rem; }
   footer { margin-top: 1rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
-    border-top: 1px solid rgba(61,17,82,0.12); padding-top: 0.75rem; }
+    border-top: 1px solid rgba(45,49,66,0.12); padding-top: 0.75rem; }
+
+  /* Reveal animation: CSS-only, plays once on load, ends complete. */
+  [data-motion-item] {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: reveal-in var(--motion-step) var(--motion-ease) forwards;
+    animation-delay: calc(var(--step, 0) * var(--motion-hold));
+  }
+  @keyframes reveal-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-motion-item] { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+  @media print {
+    [data-motion-item] { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
 </style>
 </head>
 <body>
 <div class="frame">
   <p class="eyebrow">Flowchart · Diagram Design</p>
   <h1>End-to-end workflow — how a story becomes a fix</h1>
-  <p class="sub">Two human checkpoints gate the run. Small bugs skip straight to implementation; large
-  changes get a plan first. Only scripts decide pass or fail on the guard.</p>
+  <p class="sub">The doctor readiness gate runs first. Two human checkpoints gate the run: understanding
+  and scope approval. Small bugs skip straight to implementation; large changes get a plan first. Only
+  scripts decide pass or fail on the guard.</p>
+  <p class="motion-note" aria-hidden="true">Plays once on load to show the sequential flow, then stays complete. Reduced-motion and print show the full diagram immediately.</p>
 
-  <svg viewBox="0 0 940 980" xmlns="http://www.w3.org/2000/svg" role="img"
-       aria-labelledby="workflow-title workflow-desc">
+  <svg viewBox="0 0 1000 1100" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-labelledby="workflow-title workflow-desc" data-motion-root data-motion-mode="reveal" data-step-count="8">
     <title id="workflow-title">Workflow from ADO story to delivered fix</title>
-    <desc id="workflow-desc">Flowchart showing ADO intake and agent understanding leading to a human
-    checkpoint, a complexity branch that either implements a small fix directly or routes large changes
-    through a scope proposal and a second approval checkpoint, then a shared implementation step, a
-    layer-guard and drift check, and two outcomes: delegate to aveva-rnd and summarize, or report and stop.</desc>
+    <desc id="workflow-desc">Flowchart showing a cache-aware doctor readiness gate leading to ADO intake
+    and agent understanding, a human checkpoint, persistence of understanding with a domain skill match, a
+    complexity branch that either implements a small fix directly or routes large changes through a scope
+    proposal and a second approval checkpoint, a shared implementation and test step, a layer-guard and
+    drift check, and two outcomes: delegate to aveva-rnd and finalize the session, or report and stop.</desc>
     <defs>
-      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
-      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b05a8"/></marker>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
     </defs>
-    <rect width="100%" height="100%" fill="#f7f5f9"/>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
 
-    <!-- Arrows -->
-    <path d="M 470,104 V 152" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="434" y="118" width="72" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="470" y="127" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">AUTOMATIC</text>
+    <!-- Step 1: Doctor gate -->
+    <g data-motion-item style="--step:0">
+      <rect x="380" y="40" width="220" height="64" rx="32" fill="rgba(79,93,117,0.10)" stroke="#4f5d75" stroke-width="1"/>
+      <text x="490" y="66" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Doctor readiness gate</text>
+      <text x="490" y="82" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">cache-aware; asks before first run</text>
+    </g>
 
-    <path d="M 470,240 V 296" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="440" y="256" width="60" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="470" y="265" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">AGREES</text>
+    <!-- Step 2: ADO intake + understanding -->
+    <g data-motion-item style="--step:1">
+      <path d="M 490,104 V 140" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="440" y="114" width="100" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="490" y="123" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">READY (CACHED)</text>
+      <rect x="380" y="140" width="220" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="490" y="166" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">ADO intake &amp; understanding</text>
+      <text x="490" y="182" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">writes ado.json; drafts summary</text>
+    </g>
 
-    <!-- small bug: straight down (same x) -->
-    <path d="M 470,384 V 620" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="432" y="486" width="76" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="470" y="495" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SMALL BUG</text>
+    <!-- Step 3: Checkpoint 1 -->
+    <g data-motion-item style="--step:2">
+      <path d="M 490,204 V 240" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <polygon points="490,240 600,284 490,328 380,284" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="490" y="280" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Checkpoint 1</text>
+      <text x="490" y="293" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">understanding + domain</text>
+    </g>
 
-    <!-- large change: right then down to scope -->
-    <path d="M 590,340 H 700 Q 708,340 708,348 V 420" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="632" y="358" width="82" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="673" y="367" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">LARGE CHANGE</text>
+    <!-- Step 4: Persist understanding + domain skill -->
+    <g data-motion-item style="--step:3">
+      <path d="M 490,328 V 360" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <rect x="452" y="336" width="76" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="490" y="345" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">AGREES</text>
+      <rect x="380" y="360" width="220" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="490" y="386" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Persist understanding</text>
+      <text x="490" y="402" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">story-understanding.json; matches domain skill</text>
+    </g>
 
-    <path d="M 760,484 V 496" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <!-- Step 5: Complexity -->
+    <g data-motion-item style="--step:4">
+      <path d="M 490,424 V 460" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <polygon points="490,460 600,504 490,548 380,504" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="490" y="509" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Complexity?</text>
+    </g>
 
-    <!-- CP2 approves: down, left, down to Implement top -->
-    <path d="M 760,584 V 608 Q 760,616 752,616 H 486 Q 478,616 478,624 V 620" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="640" y="596" width="76" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="678" y="605" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">APPROVES</text>
+    <!-- Step 6: Large-change branch: propose scope + checkpoint 2 -->
+    <g data-motion-item style="--step:5">
+      <path d="M 600,504 H 630 Q 638,504 638,512 V 584 Q 638,592 646,592 H 650" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="642" y="524" width="92" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="688" y="533" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">LARGE CHANGE</text>
+      <rect x="650" y="560" width="220" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="760" y="586" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Agent proposes scope</text>
+      <text x="760" y="602" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">files, why, what changes</text>
+      <path d="M 760,624 V 660" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <polygon points="760,660 870,704 760,748 650,704" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="760" y="700" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Checkpoint 2</text>
+      <text x="760" y="713" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">plan approval</text>
+    </g>
 
-    <path d="M 470,684 V 716" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <!-- Step 7: Implement + guard -->
+    <g data-motion-item style="--step:6">
+      <path d="M 490,548 V 700" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="440" y="616" width="100" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="490" y="625" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">SMALL BUG</text>
 
-    <!-- clear: right then down -->
-    <path d="M 590,760 H 700 Q 708,760 708,768 V 848" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
-    <rect x="672" y="794" width="52" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="698" y="803" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CLEAR</text>
+      <path d="M 760,748 V 780 Q 760,788 752,788 H 612 Q 604,788 604,780 V 736 H 600" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <rect x="656" y="774" width="76" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="694" y="783" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">APPROVES</text>
 
-    <!-- violation/drift: straight down -->
-    <path d="M 470,804 V 848" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
-    <rect x="400" y="812" width="140" height="12" rx="2" fill="#f7f5f9"/>
-    <text x="470" y="821" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">VIOLATION OR DRIFT</text>
+      <rect x="380" y="700" width="220" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="490" y="726" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Implement fix &amp; tests</text>
+      <text x="490" y="742" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">persists approved-files.json when approved</text>
 
-    <!-- Nodes -->
-    <!-- 1. Intake & Understand -->
-    <rect x="350" y="40" width="240" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <text x="470" y="66" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">ADO intake &amp; understanding</text>
-    <text x="470" y="82" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">writes ado.json; drafts summary</text>
+      <path d="M 490,764 V 820" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <polygon points="490,820 600,864 490,908 380,864" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="490" y="860" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Layer guard &amp;</text>
+      <text x="490" y="873" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">drift check</text>
+    </g>
 
-    <!-- 2. CP1 diamond -->
-    <polygon points="470,152 590,196 470,240 350,196" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
-    <text x="470" y="192" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Checkpoint 1</text>
-    <text x="470" y="205" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">understanding + domain</text>
+    <!-- Step 8: Outcomes (success + stop) -->
+    <g data-motion-item style="--step:7">
+      <path d="M 600,864 H 752 Q 760,864 760,872 V 940" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+      <rect x="720" y="878" width="52" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="746" y="887" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CLEAR</text>
 
-    <!-- 3. Complexity diamond -->
-    <polygon points="470,296 590,340 470,384 350,340" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <text x="470" y="345" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Complexity?</text>
+      <path d="M 490,908 V 940" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="420" y="916" width="140" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="490" y="925" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">VIOLATION OR DRIFT</text>
 
-    <!-- 4. Scope proposal -->
-    <rect x="650" y="420" width="220" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <text x="760" y="446" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Agent proposes scope</text>
-    <text x="760" y="462" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">files, why, what changes</text>
+      <!-- Blocked path from doctor gate, drawn dashed to signal the rare early-exit route -->
+      <path d="M 380,72 H 140 Q 132,72 132,80 V 964 Q 132,972 140,972 H 370" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+      <rect x="60" y="500" width="146" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="133" y="509" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">BLOCKED: SETUP ISSUE</text>
 
-    <!-- 5. CP2 diamond -->
-    <polygon points="760,496 880,540 760,584 640,540" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
-    <text x="760" y="536" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Checkpoint 2</text>
-    <text x="760" y="549" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">plan approval</text>
+      <rect x="650" y="940" width="240" height="64" rx="32" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="770" y="966" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Delegate &amp; finalize</text>
+      <text x="770" y="982" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">aveva-rnd + export bundle + summary</text>
 
-    <!-- 6. Implement -->
-    <rect x="350" y="620" width="240" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <text x="470" y="646" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Implement fix</text>
-    <text x="470" y="662" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">persist approved-files.json; run tests</text>
-
-    <!-- 7. Guard & Drift diamond -->
-    <polygon points="470,716 590,760 470,804 350,760" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
-    <text x="470" y="756" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Layer guard &amp;</text>
-    <text x="470" y="769" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">drift check</text>
-
-    <!-- 8. Delegate & Summarize (end) -->
-    <rect x="600" y="848" width="220" height="64" rx="32" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
-    <text x="710" y="874" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Delegate &amp; summarize</text>
-    <text x="710" y="890" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">aveva-rnd + session summary</text>
-
-    <!-- 9. Report & Stop (end) -->
-    <rect x="360" y="848" width="220" height="64" rx="32" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
-    <text x="470" y="874" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Report &amp; stop</text>
-    <text x="470" y="890" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">human resolves before retry</text>
+      <rect x="370" y="940" width="240" height="64" rx="32" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <text x="490" y="966" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Report &amp; stop</text>
+      <text x="490" y="982" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">human resolves before retry</text>
+    </g>
 
     <!-- Legend -->
-    <line x1="30" y1="936" x2="910" y2="936" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
-    <text x="30" y="954" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
-    <polygon points="130,940 145,948 130,956 115,948" fill="rgba(107,5,168,0.08)" stroke="#6b05a8"/>
-    <text x="155" y="951" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">human checkpoint</text>
-    <polygon points="330,940 345,948 330,956 315,948" fill="#ffffff" stroke="#3d1152"/>
-    <text x="355" y="951" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">automated decision</text>
-    <rect x="510" y="942" width="16" height="12" rx="6" fill="rgba(107,5,168,0.08)" stroke="#6b05a8"/>
-    <text x="536" y="951" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">end: success</text>
-    <rect x="660" y="942" width="16" height="12" rx="6" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a"/>
-    <text x="686" y="951" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">end: stopped</text>
+    <line x1="30" y1="1030" x2="970" y2="1030" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="30" y="1048" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <polygon points="140,1034 155,1042 140,1050 125,1042" fill="rgba(235,108,54,0.08)" stroke="#eb6c36"/>
+    <text x="165" y="1045" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">human checkpoint</text>
+    <polygon points="340,1034 355,1042 340,1050 325,1042" fill="#ffffff" stroke="#2d3142"/>
+    <text x="365" y="1045" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">automated decision</text>
+    <rect x="530" y="1036" width="16" height="12" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36"/>
+    <text x="556" y="1045" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">end: success</text>
+    <rect x="690" y="1036" width="16" height="12" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75"/>
+    <text x="716" y="1045" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">end: stopped</text>
   </svg>
 
-  <footer>docs/presentation/02-workflow.html · redrawn from 02-workflow.mmd · AVEVA profile</footer>
+  <footer>docs/presentation/02-workflow.html · redrawn from 02-workflow.mmd · AVEVA brand tokens · animated reveal (mode=reveal)</footer>
 </div>
 </body>
 </html>
