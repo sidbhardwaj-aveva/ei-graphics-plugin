@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artifacts and drift</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --color-paper:  #f7f5f9;
+    --color-ink:    #3d1152;
+    --color-muted:  #6b5a7a;
+    --color-accent: #6b05a8;
+    --font-sans:  'Roboto', system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono:  'Geist Mono', ui-monospace, monospace;
+  }
+  body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+  .frame { max-width: 900px; width: 100%; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+  h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 1.9rem); font-weight: 400;
+    letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
+  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1.5rem; max-width: 62ch; }
+  svg { width: 100%; min-width: 760px; display: block; }
+  footer { margin-top: 1rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
+    border-top: 1px solid rgba(61,17,82,0.12); padding-top: 0.75rem; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">Architecture · Diagram Design</p>
+  <h1>Artifacts and drift — how the run stays honest</h1>
+  <p class="sub">Each stage writes a schema-checked JSON artifact, chained by hashes. The approved file
+  list is compared against real git changes before anything is committed; drift is reported, not
+  auto-resolved.</p>
+
+  <svg viewBox="0 0 900 780" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-labelledby="drift-title drift-desc">
+    <title id="drift-title">Artifact chain and drift check before commit</title>
+    <desc id="drift-desc">Architecture diagram showing ADO intake writing ado.json, which chains by hash
+    into story-understanding.json and then approved-files.json, which together with the actual git changes
+    feed a drift check; a clean result delegates to commit while drift produces a human report; every step
+    is separately logged to a session log.</desc>
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b05a8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f5f9"/>
+
+    <!-- Arrows -->
+    <path d="M 470,96 V 140" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <path d="M 470,196 V 240" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="440" y="210" width="60" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="470" y="219" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.05em">ADOHASH</text>
+
+    <path d="M 470,296 V 340" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <path d="M 470,396 V 420" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <rect x="400" y="392" width="140" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="470" y="401" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.03em">APPROVED LIST+HASH</text>
+
+    <!-- Changes -> Drift (same y, plain line) -->
+    <path d="M 670,470 H 580" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <!-- Drift -> Commit (pass) -->
+    <path d="M 360,470 H 330 Q 322,470 322,478 V 582" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <rect x="296" y="516" width="46" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="319" y="525" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PASS</text>
+
+    <!-- Drift -> Report (drift) -->
+    <path d="M 470,520 V 550 Q 470,558 478,558 H 602 Q 610,558 610,566 V 582" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="560" y="530" width="60" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="590" y="539" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">DRIFT</text>
+
+    <!-- Intake -> Session (dashed, logging) -->
+    <path d="M 570,68 H 850 Q 858,68 858,76 V 672" fill="none" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+    <rect x="800" y="360" width="100" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="850" y="369" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.03em">LOGS EVERY STEP</text>
+
+    <!-- Nodes -->
+    <!-- Intake -->
+    <rect x="370" y="40" width="200" height="56" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="470" y="65" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">ADO intake</text>
+    <text x="470" y="80" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">deterministic script</text>
+
+    <!-- ado.json cylinder -->
+    <path d="M 390,148 V 180 Q 470,190 550,180 V 148" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <ellipse cx="470" cy="148" rx="80" ry="10" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <text x="470" y="170" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">ado.json</text>
+
+    <!-- story-understanding.json cylinder -->
+    <path d="M 360,248 V 280 Q 470,290 580,280 V 248" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <ellipse cx="470" cy="248" rx="110" ry="10" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <text x="470" y="270" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">story-understanding.json</text>
+
+    <!-- approved-files.json cylinder -->
+    <path d="M 360,348 V 380 Q 470,390 580,380 V 348" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
+    <ellipse cx="470" cy="348" rx="110" ry="10" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
+    <text x="470" y="370" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">approved-files.json</text>
+
+    <!-- Actual git changes (input) -->
+    <rect x="670" y="442" width="180" height="56" rx="6" fill="rgba(107,90,122,0.10)" stroke="#9186a0" stroke-width="1"/>
+    <text x="760" y="467" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Actual git changes</text>
+    <text x="760" y="482" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">real diff on disk</text>
+
+    <!-- Drift diamond -->
+    <polygon points="470,420 580,470 470,520 360,470" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="470" y="466" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Drift check</text>
+    <text x="470" y="479" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">vs git changes</text>
+
+    <!-- Commit (delegate, end) -->
+    <rect x="222" y="582" width="200" height="56" rx="28" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
+    <text x="322" y="607" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Delegate commit</text>
+    <text x="322" y="622" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">to aveva-rnd</text>
+
+    <!-- Report (end) -->
+    <rect x="510" y="582" width="200" height="56" rx="28" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <text x="610" y="607" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Report unapproved</text>
+    <text x="610" y="622" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">stops for a human</text>
+
+    <!-- Session log cylinder -->
+    <path d="M 650,680 V 712 Q 760,722 870,712 V 680" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <ellipse cx="760" cy="680" rx="110" ry="10" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <text x="760" y="702" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">session.json</text>
+    <text x="760" y="716" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">→ session-summary.md</text>
+
+    <!-- Legend -->
+    <line x1="30" y1="740" x2="870" y2="740" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
+    <text x="30" y="756" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="140" y="748" width="12" height="12" rx="3" fill="rgba(107,5,168,0.08)" stroke="#6b05a8"/>
+    <text x="158" y="757" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">focal artifact</text>
+    <rect x="300" y="748" width="12" height="12" rx="3" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a"/>
+    <text x="318" y="757" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">JSON store</text>
+    <rect x="430" y="748" width="12" height="12" rx="3" fill="rgba(107,90,122,0.10)" stroke="#9186a0"/>
+    <text x="448" y="757" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">external input</text>
+    <line x1="600" y1="754" x2="622" y2="754" stroke="#6b5a7a" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="630" y="757" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">background logging</text>
+  </svg>
+
+  <footer>docs/presentation/06-artifacts-and-drift.html · redrawn from 06-artifacts-and-drift.mmd · AVEVA profile</footer>
+</div>
+</body>
+</html>

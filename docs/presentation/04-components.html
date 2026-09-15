@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Components and ownership</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --color-paper:  #f7f5f9;
+    --color-ink:    #3d1152;
+    --color-muted:  #6b5a7a;
+    --color-accent: #6b05a8;
+    --font-sans:  'Roboto', system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono:  'Geist Mono', ui-monospace, monospace;
+  }
+  body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+  .frame { max-width: 900px; width: 100%; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+  h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 1.9rem); font-weight: 400;
+    letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
+  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1.5rem; max-width: 62ch; }
+  svg { width: 100%; min-width: 700px; display: block; }
+  footer { margin-top: 1rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
+    border-top: 1px solid rgba(61,17,82,0.12); padding-top: 0.75rem; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">Architecture · Diagram Design</p>
+  <h1>Components and ownership — owns vs. delegates</h1>
+  <p class="sub">The plugin ships one agent and five skills. Review, commit and PR are read directly from
+  aveva-rnd rather than wrapped, which keeps the surface small.</p>
+
+  <svg viewBox="0 0 760 640" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-labelledby="components-title components-desc">
+    <title id="components-title">EI Graphics plugin components and ownership</title>
+    <desc id="components-desc">Architecture diagram showing the EI Graphics agent owning five skills —
+    ADO intake, core scripts, layer guard and the termination-drawing domain skill — where core scripts
+    write JSON artifacts and a summary, while the agent separately delegates code review, commit and
+    pull-request creation to the external aveva-rnd plugin.</desc>
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b05a8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f5f9"/>
+
+    <!-- Zones -->
+    <rect x="40" y="160" width="680" height="140" rx="8" fill="rgba(61,17,82,0.02)" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
+    <rect x="56" y="164" width="180" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="146" y="173" fill="rgba(61,17,82,0.45)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">EI PLUGIN OWNS — SKILLS</text>
+
+    <rect x="180" y="380" width="400" height="140" rx="8" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.16)" stroke-width="0.8" stroke-dasharray="4,4"/>
+    <rect x="196" y="384" width="180" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="286" y="393" fill="rgba(61,17,82,0.45)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">DELEGATED TO AVEVA-RND</text>
+
+    <!-- Arrows -->
+    <path d="M 380,104 V 160" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <path d="M 470,72 H 720 Q 728,72 728,80 V 442 Q 728,450 720,450 H 580" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="640" y="150" width="90" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="685" y="159" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">DELEGATES</text>
+
+    <path d="M 300,268 V 320" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+    <!-- Agent (focal) -->
+    <rect x="290" y="40" width="180" height="64" rx="6" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
+    <rect x="298" y="46" width="42" height="12" rx="2" fill="transparent" stroke="rgba(107,5,168,0.5)" stroke-width="0.8"/>
+    <text x="319" y="55" fill="#6b05a8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AGENT</text>
+    <text x="380" y="80" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">ei-graphics agent</text>
+    <text x="380" y="96" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">conversational orchestrator</text>
+
+    <!-- Skills row -->
+    <rect x="70" y="204" width="140" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="140" y="230" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">ADO intake</text>
+    <text x="140" y="246" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">ei-azure-devops-cli</text>
+
+    <rect x="230" y="204" width="140" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="300" y="230" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Core scripts</text>
+    <text x="300" y="246" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">ei-graphics-core: 6 scripts</text>
+
+    <rect x="390" y="204" width="140" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="460" y="230" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Layer guard</text>
+    <text x="460" y="246" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">ei-layer-guard</text>
+
+    <rect x="550" y="204" width="140" height="64" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="620" y="230" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Domain skill</text>
+    <text x="620" y="246" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">termination-drawing</text>
+
+    <!-- Artifacts store -->
+    <path d="M 230,320 V 352 Q 300,364 370,352 V 320" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <ellipse cx="300" cy="320" rx="70" ry="10" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <text x="300" y="342" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">JSON artifacts</text>
+    <text x="300" y="356" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">+ summary</text>
+
+    <!-- Delegates row -->
+    <rect x="200" y="424" width="110" height="64" rx="6" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)" stroke-width="1"/>
+    <text x="255" y="452" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">code-review</text>
+    <text x="255" y="468" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">aveva-rnd</text>
+
+    <rect x="330" y="424" width="110" height="64" rx="6" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)" stroke-width="1"/>
+    <text x="385" y="452" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">git-commit</text>
+    <text x="385" y="468" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">aveva-rnd</text>
+
+    <rect x="460" y="424" width="110" height="64" rx="6" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)" stroke-width="1"/>
+    <text x="515" y="452" fill="#3d1152" font-size="11" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">create-pr</text>
+    <text x="515" y="468" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">aveva-rnd</text>
+
+    <!-- Legend -->
+    <line x1="30" y1="576" x2="730" y2="576" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
+    <text x="30" y="594" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="130" y="586" width="12" height="12" rx="3" fill="rgba(107,5,168,0.08)" stroke="#6b05a8"/>
+    <text x="148" y="595" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">focal / agent</text>
+    <rect x="290" y="586" width="12" height="12" rx="3" fill="#ffffff" stroke="#3d1152"/>
+    <text x="308" y="595" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">owned skill</text>
+    <rect x="430" y="586" width="12" height="12" rx="3" fill="rgba(61,17,82,0.03)" stroke="rgba(61,17,82,0.30)"/>
+    <text x="448" y="595" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">external / delegated</text>
+    <rect x="620" y="586" width="12" height="12" rx="3" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a"/>
+    <text x="638" y="595" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">store</text>
+  </svg>
+
+  <footer>docs/presentation/04-components.html · redrawn from 04-components.mmd · AVEVA profile</footer>
+</div>
+</body>
+</html>

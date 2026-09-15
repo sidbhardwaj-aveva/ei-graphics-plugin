@@ -2,7 +2,7 @@
 
 **Plan:** `plan.md`
 **Current task:** T043
-**Last verified green:** T028 (2026-09-03T13:15:20Z)
+**Last verified green:** T043 (2026-09-15T00:00:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layer guard — the pre-commit check</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --color-paper:  #f7f5f9;
+    --color-ink:    #3d1152;
+    --color-muted:  #6b5a7a;
+    --color-accent: #6b05a8;
+    --font-sans:  'Roboto', system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono:  'Geist Mono', ui-monospace, monospace;
+  }
+  body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+  .frame { max-width: 900px; width: 100%; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+  h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 1.9rem); font-weight: 400;
+    letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
+  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1.5rem; max-width: 62ch; }
+  svg { width: 100%; min-width: 700px; display: block; }
+  footer { margin-top: 1rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
+    border-top: 1px solid rgba(61,17,82,0.12); padding-top: 0.75rem; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">Flowchart · Diagram Design</p>
+  <h1>Layer guard — the check that runs before commit</h1>
+  <p class="sub">The guard sorts changed files into Domain, Application or Presentation and returns one of
+  three outcomes. Layer violations and committed build artifacts block; softer concerns become review flags.</p>
+
+  <svg viewBox="0 0 840 700" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-labelledby="guard-title guard-desc">
+    <title id="guard-title">Layer guard decision flow before commit</title>
+    <desc id="guard-desc">Flowchart showing changed files sorted into Domain, Application or Presentation
+    layers, then checked for layer violations or committed build artifacts, which blocks the run; otherwise
+    checked for vocabulary mapping changes or broad exception catches, which pass with review flags; a
+    clean result passes outright, and missing input routes to manual review.</desc>
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b5a7a"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b05a8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f5f9"/>
+
+    <!-- Arrows -->
+    <path d="M 400,96 V 120" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <path d="M 500,160 H 560" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="510" y="146" width="40" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="530" y="155" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+
+    <path d="M 400,200 V 240" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="380" y="212" width="36" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="398" y="221" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+
+    <path d="M 400,296 V 320" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <path d="M 520,360 H 580" fill="none" stroke="#6b05a8" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <rect x="530" y="346" width="40" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="550" y="355" fill="#6b05a8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+
+    <path d="M 400,400 V 440" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="380" y="412" width="36" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="398" y="421" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+
+    <path d="M 520,480 H 580" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="530" y="466" width="40" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="550" y="475" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">YES</text>
+
+    <path d="M 400,520 V 560" fill="none" stroke="#6b5a7a" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="380" y="532" width="36" height="12" rx="2" fill="#f7f5f9"/>
+    <text x="398" y="541" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">NO</text>
+
+    <!-- Nodes -->
+    <!-- In -->
+    <rect x="300" y="40" width="200" height="56" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="400" y="65" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Changed files &amp; projects</text>
+    <text x="400" y="80" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">guard input</text>
+
+    <!-- E diamond -->
+    <polygon points="400,120 500,160 400,200 300,160" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="400" y="156" fill="#3d1152" font-size="10" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Nothing</text>
+    <text x="400" y="168" fill="#3d1152" font-size="10" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">provided?</text>
+
+    <!-- Manual end -->
+    <rect x="560" y="132" width="200" height="56" rx="28" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <text x="660" y="157" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Needs manual review</text>
+    <text x="660" y="172" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">no evidence to sort</text>
+
+    <!-- Sort -->
+    <rect x="300" y="240" width="200" height="56" rx="6" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="400" y="262" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Sort into layers</text>
+    <text x="400" y="278" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">domain · app · presentation</text>
+
+    <!-- B diamond -->
+    <polygon points="400,320 520,360 400,400 280,360" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="400" y="352" fill="#3d1152" font-size="9" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Layer violation or</text>
+    <text x="400" y="365" fill="#3d1152" font-size="9" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">build artifact committed?</text>
+
+    <!-- Blocked end -->
+    <rect x="580" y="332" width="200" height="56" rx="28" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
+    <text x="680" y="357" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Blocked</text>
+    <text x="680" y="372" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">stop before commit</text>
+
+    <!-- F diamond -->
+    <polygon points="400,440 520,480 400,520 280,480" fill="#ffffff" stroke="#3d1152" stroke-width="1"/>
+    <text x="400" y="472" fill="#3d1152" font-size="9" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Vocabulary map changed or</text>
+    <text x="400" y="485" fill="#3d1152" font-size="9" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">broad catch(Exception)?</text>
+
+    <!-- Flag end -->
+    <rect x="580" y="452" width="200" height="56" rx="28" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a" stroke-width="1"/>
+    <text x="680" y="477" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Pass, with flags</text>
+    <text x="680" y="492" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">human review noted</text>
+
+    <!-- Pass end -->
+    <rect x="300" y="560" width="200" height="56" rx="28" fill="rgba(107,5,168,0.08)" stroke="#6b05a8" stroke-width="1"/>
+    <text x="400" y="585" fill="#3d1152" font-size="12" font-weight="600" font-family="'Roboto', sans-serif" text-anchor="middle">Pass: clean</text>
+    <text x="400" y="600" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">safe to delegate</text>
+
+    <!-- Legend -->
+    <line x1="30" y1="656" x2="810" y2="656" stroke="rgba(61,17,82,0.10)" stroke-width="0.8"/>
+    <text x="30" y="674" fill="#6b5a7a" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <polygon points="150,660 165,668 150,676 135,668" fill="#ffffff" stroke="#3d1152"/>
+    <text x="175" y="671" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">decision</text>
+    <rect x="300" y="662" width="16" height="12" rx="6" fill="rgba(107,5,168,0.08)" stroke="#6b05a8"/>
+    <text x="326" y="671" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">end: safe to proceed</text>
+    <rect x="500" y="662" width="16" height="12" rx="6" fill="rgba(61,17,82,0.05)" stroke="#6b5a7a"/>
+    <text x="526" y="671" fill="#6b5a7a" font-size="9" font-family="'Geist Mono', monospace">end: needs a human</text>
+  </svg>
+
+  <footer>docs/presentation/07-layer-guard.html · redrawn from 07-layer-guard.mmd · AVEVA profile</footer>
+</div>
+</body>
+</html>
