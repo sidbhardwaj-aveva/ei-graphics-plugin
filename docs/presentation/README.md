@@ -52,9 +52,9 @@ delegated. Nothing in the plugin tries to reason on the agent's behalf.
 
 **Rendered diagram:** [`02-workflow.html`](02-workflow.html)
 
-Two human checkpoints gate the run. A deterministic script fetches the story; the agent proposes;
-the human confirms understanding, then approves scope. Small bugs skip straight to implementation;
-large changes get a plan first.
+The doctor readiness check comes first. Two human checkpoints gate the run: understanding and
+scope approval. Domain skill matching, complexity branching, layer guard validation, and session
+logging are all shown. The flow ends with session bundle export and git ignore setup.
 
 ```mermaid
 flowchart TD
@@ -82,8 +82,9 @@ reasoning (understanding, scope, implementation) is deliberate. Only scripts dec
 
 **Rendered diagram:** [`03-run-sequence.html`](03-run-sequence.html)
 
-The temporal view. Notice the agent reads `ado.json` once and never re-fetches from ADO, and that
-core scripts are the only thing writing artifacts.
+The temporal sequence from story link to summary. Starts with the doctor readiness check, then
+ADO intake, understanding checkpoint, domain catalog lookup, complexity decision, implementation,
+layer guard check, and finally session finalization, bundle export, and summary delivery.
 
 ```mermaid
 sequenceDiagram
@@ -118,8 +119,9 @@ sequenceDiagram
 
 **Rendered diagram:** [`04-components.html`](04-components.html)
 
-The plugin ships one agent and five skills. Review, commit and PR are read directly from
-`aveva-rnd` rather than wrapped, which keeps the surface small.
+The plugin ships one agent and five skills: intake, core scripts, doctor readiness, layer guard,
+and domain knowledge. Review, commit and PR are delegated to `aveva-rnd` rather than wrapped,
+which keeps the surface small.
 
 ```mermaid
 flowchart TB

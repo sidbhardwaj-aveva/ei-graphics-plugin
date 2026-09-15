@@ -1,14 +1,29 @@
 flowchart TD
-    A["ADO intake script writes ado.json"] --> B["Agent reads and understands story"]
-    B --> C{"Checkpoint 1: understanding and domain"}
+    Start["Developer provides story link"] --> Z["Check doctor decision cache"]
+    Z -->|"absent"| Z1{"Ask: run doctor?"}
+    Z1 -->|"yes"| Z2["Run doctor"]
+    Z1 -->|"no"| Z3["Decline and remember"]
+    Z2 -->|"Blocked"| Stop1["STOP: setup issue"]
+    Z2 -->|"Ready"| A
+    Z3 --> A
+    Z -->|"cached"| A
+    A["Run ADO intake and write ado.json"] --> B["Agent reads and understands story"]
+    B --> C{"Checkpoint 1: understanding & domain match"}
     C -->|"human agrees"| D["Persist story-understanding.json"]
-    D --> E{"Complexity?"}
-    E -->|"small bug"| I["Implement surgical fix"]
-    E -->|"large change"| F["Agent proposes scope and plan"]
-    F --> G{"Checkpoint 2: plan approval"}
-    G -->|"human approves"| H["Persist approved-files.json"]
-    H --> I
-    I --> J{"Layer guard and drift check"}
-    J -->|"clear"| K["Delegate to aveva-rnd"]
-    J -->|"violation or drift"| X["Report and stop"]
-    K --> L["Render session summary"]
+    D --> E["Get domain skill catalog"]
+    E --> F["Agent matches bug pattern and reads key files"]
+    F --> G{"Complexity?"}
+    G -->|"small bug"| H["Implement surgical fix"]
+    G -->|"large change"| I["Agent proposes scope and plan"]
+    I --> J{"Checkpoint 2: plan approval"}
+    J -->|"human approves"| K["Persist approved-files.json"]
+    K --> H
+    H --> L["Run tests and verification"]
+    L --> M{"Layer guard and drift check"}
+    M -->|"clear"| N["Delegate to aveva-rnd"]
+    M -->|"violation or drift"| X["Report and stop"]
+    N --> O["Finalize session and render summary"]
+    X --> O
+    O --> P["Export session bundle if path configured"]
+    P --> Q["Ensure .ei-session-logs in .gitignore"]
+    Q --> R["Provide summary link to developer"]

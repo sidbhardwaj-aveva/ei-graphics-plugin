@@ -12,7 +12,7 @@ Strip the plugin to: ADO intake, story understanding (new), domain skills, layer
 
 ---
 
-## Target Architecture Diagram
+## Full Pipeline Diagram
 
 See [`docs/presentation/02-workflow.html`](presentation/02-workflow.html) for the branded, standalone diagram of the full pipeline, from the ADO story URL through both human checkpoints to the final delegate-or-report outcome.
 

@@ -1,24 +1,48 @@
 sequenceDiagram
     actor Dev as Developer
     participant Ag as EI Graphics agent
+    participant Dr as Doctor
     participant In as ADO intake
     participant Sk as Domain skill
     participant Sc as Core scripts
     participant Rn as aveva-rnd
 
     Dev->>Ag: story link
-    Ag->>In: fetch story, images, comments
-    In->>Sc: write ado.json
-    Ag->>Ag: read ado.json, draft understanding
-    Ag->>Dev: Checkpoint 1
-    Dev-->>Ag: agree
-    Ag->>Sc: write story-understanding.json
-    Ag->>Sk: match bug pattern, read key files
-    Ag->>Dev: Checkpoint 2 when large
-    Dev-->>Ag: approve
-    Ag->>Sc: write approved-files.json
-    Ag->>Ag: apply surgical fix, run tests
-    Ag->>Sc: layer guard and drift check
-    Ag->>Rn: review, commit, PR
-    Ag->>Sc: render session summary
-    Ag->>Dev: summary link
+    Ag->>Dr: check decision cache, run if absent
+    alt Doctor blocked
+        Dr-->>Ag: BLOCKED
+        Ag->>Dev: setup issue, cannot proceed
+    else Doctor ready
+        Dr-->>Ag: Ready
+        Ag->>In: fetch story, images, comments
+        In->>Sc: write ado.json
+        Ag->>Ag: read ado.json, draft understanding
+        Ag->>Sc: log phase: ado-intake
+        Ag->>Dev: Checkpoint 1
+        Dev-->>Ag: agree on understanding
+        Ag->>Sc: write story-understanding.json
+        Ag->>Sc: log phase: human-checkpoint
+        Ag->>Sc: get domain skill catalog
+        Ag->>Sk: match bug pattern, read key files
+        Ag->>Sc: log phase: understanding
+        Ag->>Dev: Checkpoint 2 when large
+        alt Large change
+            Dev-->>Ag: approve plan
+            Ag->>Sc: write approved-files.json
+        else Small bug
+            note over Ag: proceed to implementation
+        end
+        Ag->>Sc: log phase: implementation
+        Ag->>Ag: apply surgical fix, run tests
+        Ag->>Sc: layer guard and drift check
+        Ag->>Sc: log phase: validation
+        alt Clear
+            Ag->>Rn: review, commit, PR
+        else Violation or drift
+            Ag->>Dev: report violation and stop
+        end
+        Ag->>Sc: finalize session and render summary
+        Ag->>Sc: log phase: commit
+        Ag->>Sc: export session bundle (if path set)
+        Ag->>Dev: summary link
+    end
