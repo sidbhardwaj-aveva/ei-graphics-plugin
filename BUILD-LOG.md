@@ -2880,16 +2880,20 @@ is not being raised for this.
 - `plan.md`
 - `BUILD-PROGRESS.md`
 - `BUILD-LOG.md`
+- `tests/EverythingGreen.Tests.ps1`
 
 **Acceptance:** `Agent.Tests.ps1` passes with no skipped tests. The file stays at 80 lines or
 fewer. The progress check and full Pester suite exit 0.
 
 **Attempts:** One. Added a single convention line stating every `.ps1` script named in the file
 lives at `skills/ei-graphics-core/scripts/<name>.ps1`, and warning against a top-level `scripts/`
-guess. `Agent.Tests.ps1` passed 32/32 at 79 lines.
+guess. `Agent.Tests.ps1` passed 32/32 at 79 lines. Adding the T044 row raised the progress table
+from 43 to 44 rows, so `EverythingGreen.Tests.ps1`'s hardcoded row count needed the matching edit,
+same governed-count pattern as T024/T025.
 
 **Decisions:** Name the convention once rather than spelling the full path per script mention,
 to cover every wrapper script named in the file for the cost of one line.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE. `Test-BuildProgress.ps1` exits 0. The full Pester suite passes 635 tests with
+zero failures and zero skipped tests.
 
