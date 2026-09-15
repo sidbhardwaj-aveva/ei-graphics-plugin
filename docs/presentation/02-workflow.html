@@ -29,12 +29,8 @@
     text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
   h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 1.9rem); font-weight: 400;
     letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
-  p.sub { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 1rem; max-width: 66ch; }
+  h1 { margin-bottom: 1rem; }
   svg { width: 100%; min-width: 760px; display: block; }
-  .motion-note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
-    margin-bottom: 0.5rem; }
-  footer { margin-top: 1rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);
-    border-top: 1px solid rgba(45,49,66,0.12); padding-top: 0.75rem; }
 
   /* Reveal animation: CSS-only, plays once on load, ends complete. */
   [data-motion-item] {
@@ -56,12 +52,7 @@
 </head>
 <body>
 <div class="frame">
-  <p class="eyebrow">Flowchart · Diagram Design</p>
   <h1>End-to-end workflow — how a story becomes a fix</h1>
-  <p class="sub">The doctor readiness gate runs first. Two human checkpoints gate the run: understanding
-  and scope approval. Small bugs skip straight to implementation; large changes get a plan first. Only
-  scripts decide pass or fail on the guard.</p>
-  <p class="motion-note" aria-hidden="true">Plays once on load to show the sequential flow, then stays complete. Reduced-motion and print show the full diagram immediately.</p>
 
   <svg viewBox="0 0 1000 1100" xmlns="http://www.w3.org/2000/svg" role="img"
        aria-labelledby="workflow-title workflow-desc" data-motion-root data-motion-mode="reveal" data-step-count="8">
@@ -107,7 +98,7 @@
       <path d="M 490,328 V 360" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
       <rect x="452" y="336" width="76" height="12" rx="2" fill="#f5f5f5"/>
       <text x="490" y="345" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">AGREES</text>
-      <rect x="380" y="360" width="220" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="365" y="360" width="250" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
       <text x="490" y="386" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Persist understanding</text>
       <text x="490" y="402" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">story-understanding.json; matches domain skill</text>
     </g>
@@ -190,7 +181,6 @@
     <text x="716" y="1045" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">end: stopped</text>
   </svg>
 
-  <footer>docs/presentation/02-workflow.html · redrawn from 02-workflow.mmd · AVEVA brand tokens · animated reveal (mode=reveal)</footer>
 </div>
 </body>
 </html>

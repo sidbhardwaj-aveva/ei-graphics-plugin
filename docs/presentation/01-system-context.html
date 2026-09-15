@@ -44,30 +44,13 @@
     line-height: 1.15;
     margin-bottom: 0.5rem;
   }
-  p.sub {
-    font-family: var(--font-sans);
-    font-size: 0.9rem;
-    color: var(--color-muted);
-    margin-bottom: 1.5rem;
-    max-width: 62ch;
-  }
+  h1 { margin-bottom: 1rem; }
   svg { width: 100%; min-width: 900px; display: block; }
-  footer {
-    margin-top: 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    color: var(--color-muted);
-    border-top: 1px solid rgba(45,49,66,0.12);
-    padding-top: 0.75rem;
-  }
 </style>
 </head>
 <body>
 <div class="frame">
-  <p class="eyebrow">Architecture · Diagram Design</p>
   <h1>System context — what talks to what</h1>
-  <p class="sub">The plugin reads Azure DevOps read-only, edits the product code repo, gates on two human
-  approvals, and delegates review/commit/PR to aveva-rnd. Every step is appended to a session log.</p>
 
   <svg viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg" role="img"
        aria-labelledby="sys-ctx-title sys-ctx-desc">
@@ -193,7 +176,6 @@
     <text x="570" y="575" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">passive / return</text>
   </svg>
 
-  <footer>docs/presentation/01-system-context.html · redrawn from 01-system-context.mmd · AVEVA profile</footer>
 </div>
 </body>
 </html>
