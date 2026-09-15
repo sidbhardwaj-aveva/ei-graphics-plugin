@@ -2861,3 +2861,35 @@ direct diagnostic runs unchanged. Use `-DecisionPath` so tests never write the r
 
 **Result:** IN-PROGRESS.
 
+## T044 — Name the real script path for the intake wrapper — 2026-09-15T00:00:00Z
+
+**Goal:** Stop the agent from guessing a top-level `scripts/` layout for wrapper scripts that
+actually live under `skills/ei-graphics-core/scripts/`.
+
+**Assumptions:** A live chat session guessed
+`plugin/scripts/Invoke-EiStoryIntake.ps1`, which does not exist, before finding the real path.
+Naming the convention once, near the top of the file, protects every bare script reference in
+`ei-graphics.agent.md` (`Invoke-EiStoryIntake.ps1`, `Write-EiSessionEntry.ps1`,
+`Get-EiDomainSkillCatalog.ps1`, `Export-EiSessionSummary.ps1`,
+`Export-EiSessionBundleToShare.ps1`), all of which live in that one folder. The 80-line cap on
+the agent file is a deliberate token-budget choice documented in `docs/architecture-v3.md` and
+is not being raised for this.
+
+**Files touched:**
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `plan.md`
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+
+**Acceptance:** `Agent.Tests.ps1` passes with no skipped tests. The file stays at 80 lines or
+fewer. The progress check and full Pester suite exit 0.
+
+**Attempts:** One. Added a single convention line stating every `.ps1` script named in the file
+lives at `skills/ei-graphics-core/scripts/<name>.ps1`, and warning against a top-level `scripts/`
+guess. `Agent.Tests.ps1` passed 32/32 at 79 lines.
+
+**Decisions:** Name the convention once rather than spelling the full path per script mention,
+to cover every wrapper script named in the file for the cost of one line.
+
+**Result:** IN-PROGRESS.
+

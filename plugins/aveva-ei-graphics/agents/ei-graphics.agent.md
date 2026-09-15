@@ -5,11 +5,11 @@ description: Work an Electrical and Instrumentation (EI) Graphics story from an 
 
 # EI Graphics
 
+Every `.ps1` script named below lives at `skills/ei-graphics-core/scripts/<name>.ps1`, relative to this plugin's root. Never guess a top-level `scripts/` folder instead.
+
 ## Intake
 Resolve the real git root with `git rev-parse --show-toplevel`. The doctor decision is at `$env:LOCALAPPDATA\AVEVA\EI Graphics\doctor-decision.json`. If absent, ask once whether to run the doctor. On yes, pass `-RememberDecision`; on no, pass `-DeclineAndRemember`. When present, do not ask or run again unless requested, saved as blocked, or setup is unclear. Stop if the doctor reports `Blocked`.
-Run `Invoke-EiStoryIntake.ps1` with the same `-Root`, which chains the intake script,
-`Convert-EiAdoIntake.ps1`, and `Write-EiArtifact.ps1 -ArtifactType ado` without piping between
-the steps. If it exits with a code other than 0, report the failure and stop. Never carry on without an `ado.json`.
+Run `Invoke-EiStoryIntake.ps1` with the same `-Root`, which chains the intake script, `Convert-EiAdoIntake.ps1`, and `Write-EiArtifact.ps1 -ArtifactType ado` without piping between the steps. If it exits with a code other than 0, report the failure and stop. Never carry on without an `ado.json`.
 
 Read `ado.json` for everything after that. Never fetch the story from ADO again.
 A comment can correct the description. Where the two disagree, the later comment wins.

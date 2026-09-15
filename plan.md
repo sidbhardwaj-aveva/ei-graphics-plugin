@@ -2036,6 +2036,20 @@ agent carries the one-time policy.
 **Done when.** The doctor and agent focused suites pass with no skipped tests. The progress check
 and full Pester suite also exit 0.
 
+#### T044 — Name the real script path for the intake wrapper
+
+**Why this task exists.** A live session guessed a top-level `plugin/scripts/Invoke-EiStoryIntake.ps1`
+path because `ei-graphics.agent.md` named the wrapper without saying where it lives. Intake failed,
+no `ado.json` was written, and the agent had to search the installed bundle before it found the
+real location under `skills/ei-graphics-core/scripts/`.
+
+**Do this.** Add one line near the top of `ei-graphics.agent.md` stating that every `.ps1` script
+named in the file lives at `skills/ei-graphics-core/scripts/<name>.ps1`, relative to the plugin's
+root, and that a top-level `scripts/` folder is never correct. Keep the file at 80 lines or fewer.
+
+**Done when.** `Agent.Tests.ps1` passes with no skipped tests, the file is still 80 lines or fewer,
+the progress check exits 0, and the full Pester suite exits 0.
+
 ---
 
 ## Part 8 — When things go wrong
