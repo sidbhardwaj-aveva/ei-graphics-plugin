@@ -65,7 +65,7 @@ one file, so it runs before the five larger tasks queued ahead of it.
 | T057 | Cut the repeated prose from the intake skill | DONE | fee2891 | 2026-09-16T11:23:57Z |
 | T052 | Write down the ordering-regression pattern | DONE | cd2e2af | 2026-09-16T11:52:00Z |
 | T053 | Accept a local bug report without Azure DevOps | DONE | 985c63b | 2026-09-16T12:44:00Z |
-| T054 | Resolve script paths from the installed plugin | DONE | pending | 2026-09-16T13:58:00Z |
+| T054 | Resolve script paths from the installed plugin | DONE | caa9dca | 2026-09-16T13:58:00Z |
 | T055 | Prove the session lifecycle cannot be skipped | TODO | — | — |
 | T056 | Document the investigation order for maintainers | TODO | — | — |
 | T058 | Send the Azure DevOps token only to Azure DevOps | TODO | — | — |
