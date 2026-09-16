@@ -59,7 +59,7 @@ in `BUILD-LOG.md`.
 | T047 | Fail incomplete session completion | DONE | 7017dfe | 2026-09-16T14:28:21Z |
 | T048 | Show the session-close command | DONE | 398e499 | 2026-09-16T14:36:37Z |
 | T049 | Triage a regression before asking for a runtime log | DONE | fd4450d | 2026-09-16T09:31:58Z |
-| T050 | Separate historical confidence from runtime verification | TODO | — | — |
+| T050 | Separate historical confidence from runtime verification | IN-PROGRESS | — | — |
 | T051 | Map the termination-drawing phases and their owners | TODO | — | — |
 | T052 | Write down the ordering-regression pattern | TODO | — | — |
 | T053 | Accept a local bug report without Azure DevOps | TODO | — | — |

@@ -3070,3 +3070,26 @@ eight plan sections in the T049 start commit so the whole group is visible and e
 from the first task.
 
 **Result:** DONE. The triage runs before `needs-log`, and both suites prove the order.
+
+## T050 — Separate historical confidence from runtime verification — 2026-09-16T09:35:00Z
+
+**Goal:** Make the termination-drawing result say three separate things: how sure the root cause
+is, whether the behaviour was reproduced at run time, and whether the fix was verified. Add the
+statuses and the evidence path that go with them.
+
+**Assumptions:** History can name the commit that changed a behaviour. It cannot show the drawing
+is now right. The failed session reported a fix from history alone. The existing rule that a build
+is not a test result is the same defect in another place, so both rules are stated together. The
+output contract lives in `termination-drawing/SKILL.md` and is the only place the shape of a
+diagnosis is written down.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** Not started.
+
+**Decisions:** Keep `confidence` as the root-cause number and add `runtimeVerificationStatus`
+beside it, rather than inventing a second confidence number a reader would have to weigh.
+
+**Result:** IN-PROGRESS.
