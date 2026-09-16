@@ -3206,3 +3206,27 @@ a TODO row above the running one, and this task is smaller than the five ahead o
 comment in `BUILD-PROGRESS.md` says so, next to the existing note about T015 and T010.
 
 **Result:** DONE.
+
+## T052 — Write down the ordering-regression pattern — 2026-09-16T11:40:00Z
+
+**Goal:** Give the agent a pattern to match when equipment renders in the wrong mounting-rail
+order, including the check that compares the old and new ordering implementation, and a warning
+that the obvious fix of deleting plate ordering may itself be the regression.
+
+**Assumptions:** The reported case is the mounting rail expecting `TS-1, B-1, --134, IOM-1` and
+producing `--134, TS-1, B-1, IOM-1`. Plate ordering is assumed to be intended for the direct
+children of an enclosure, with the domain sequence governing nested rail and compartment contents,
+because that is the reading that explains both the old behaviour and the new. The pattern is
+written so that it holds even if that reading is wrong, by telling the reader to check rather than
+to delete.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** Not started.
+
+**Decisions:** Add it as pattern 8 in `references/bug-patterns.md` rather than a new file, so the
+existing "read the patterns" instruction reaches it without any change.
+
+**Result:** IN-PROGRESS.
