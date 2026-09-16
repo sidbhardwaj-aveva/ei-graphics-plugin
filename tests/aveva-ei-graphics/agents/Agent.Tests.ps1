@@ -105,6 +105,12 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:AgentFlat | Should -Match '(?i)artifact path and failed step'
     }
 
+    It 'shows the canonical installed-plugin session-close command' {
+        $script:Agent | Should -Match '\$pluginInstallRoot\s*='
+        $script:Agent | Should -Match 'plugins\\aveva-ei-graphics\\skills\\ei-graphics-core\\scripts\\Complete-EiSession\.ps1'
+        $script:Agent | Should -Match '& \$sessionClose -StoryId \$storyId -Root \$targetRoot -SessionOutcome \$outcome'
+    }
+
     It 'says a comment can override the description' {
         $script:AgentFlat | Should -Match '(?i)comment can correct the description'
     }

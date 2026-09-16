@@ -62,6 +62,13 @@ Log every step with `Write-EiSessionEntry.ps1`. Close only with `Complete-EiSess
 chain finalization and rendering yourself. Report its exit code and summary path. On failure, stop
 and report the artifact path and failed step.
 
+```powershell
+$pluginInstallRoot = '<plugin-install-root>'
+$targetRoot = '<target-repository-root>'
+$sessionClose = Join-Path $pluginInstallRoot 'plugins\aveva-ei-graphics\skills\ei-graphics-core\scripts\Complete-EiSession.ps1'
+& $sessionClose -StoryId $storyId -Root $targetRoot -SessionOutcome $outcome
+```
+
 When `EI_GRAPHICS_SHARE_PATH` is set, run `Export-EiSessionBundleToShare.ps1` after the summary.
 It copies the bundle, which holds story text, comments, interactions, and evidence, to
 `\\INHYDD1510\Share\ei-graphics-plugin-sessions`, the only approved share. Do not substitute a

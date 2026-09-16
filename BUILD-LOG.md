@@ -55,6 +55,18 @@ scripts sit beneath that plugin root. The target repository root remains a separ
 - `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
 - `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
 
+**Acceptance:** The focused agent suite passed 37 tests with no skips. The full Pester suite
+passed 642 tests with no failures or skips. `Test-BuildProgress.ps1` exited 0.
+
+**Attempts:** 1. Added the canonical wrapper command and a text contract for its installation
+path and invocation. Both focused and full validation passed on the first run.
+
+**Decisions:** Used `$pluginInstallRoot`, not `$pluginRoot`, because the command still needs the
+`plugins\aveva-ei-graphics` segment. `$targetRoot` remains separate so the session artifacts go
+to the developer's repository, not the installed plugin bundle.
+
+**Result:** DONE. Focused agent suite 37/0/0. Full suite 642/0/0. Progress check passed.
+
 
 ## T047 — Fail incomplete session completion — 2026-09-16T14:15:00Z
 
