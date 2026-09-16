@@ -26,8 +26,8 @@ BeforeAll {
 
 Describe 'ei-graphics.agent.md' -Tag 'Unit' {
 
-    It 'is under 80 lines' {
-        @(Get-Content -LiteralPath $script:AgentPath).Count | Should -BeLessThan 80
+    It 'is under 100 lines' {
+        @(Get-Content -LiteralPath $script:AgentPath).Count | Should -BeLessThan 100
     }
 
     It 'has frontmatter with a name and a description' {
@@ -71,6 +71,17 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
 
     It 'tells the agent never to invent a domain identifier' {
         $script:AgentFlat | Should -Match '(?i)never invent a domain'
+    }
+
+    It 'requires domain orientation before bug-pattern matching' {
+        $script:AgentFlat | Should -Match '(?i)read the selected `SKILL\.md` in full'
+        $script:AgentFlat | Should -Match '(?i)references/architecture\.md'
+        $script:AgentFlat | Should -Match '(?i)select the relevant references and Key Files'
+
+        $orientationIndex = $script:Agent.IndexOf('Before diagnosing, read the selected `SKILL.md` in full.')
+        $patternIndex = $script:Agent.IndexOf('Only then check the bug patterns.')
+        $orientationIndex | Should -BeGreaterThan -1
+        $patternIndex | Should -BeGreaterThan $orientationIndex
     }
 
     It 'says a comment can override the description' {

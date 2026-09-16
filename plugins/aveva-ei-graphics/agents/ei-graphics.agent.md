@@ -24,11 +24,12 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 "No matching domain skill", word for word.
 
 ## Implementation priority: skill-first, explore-second
-1. Check the domain skill's bug patterns. If one matches the symptom, use its documented cause and
-   files, and fix it directly. Do not search the codebase.
-2. If none matches, read the skill's Key Files table. Open those files first.
-3. Only search more widely when the skill says nothing about the situation.
-4. Every file you read that is not in the Key Files table probably means the skill has a gap.
+1. Before diagnosing, read the selected `SKILL.md` in full.
+2. Read its `references/architecture.md` next. Use its pipeline, file map and domain model to
+  classify the symptom and select the relevant references and Key Files.
+3. Only then check the bug patterns. A match narrows the diagnosis; it does not replace orientation.
+4. Only search more widely when the skill says nothing about the situation.
+5. Every file you read that is not in the Key Files table probably means the skill has a gap.
    Note it in the session log.
 
 ## Working

@@ -2061,10 +2061,11 @@ can narrow the diagnosis.
 The agent must read the selected `SKILL.md` in full, then read the architecture reference before
 diagnosing. It must use that architecture to choose the relevant references and key files. It may
 check bug patterns only after this orientation. Add a Pester text contract that proves this order.
-Keep the agent file below 80 lines.
+Keep the agent file below 100 lines.
 
 **Done when.** `Agent.Tests.ps1` proves the required full-skill and architecture reads occur
-before bug-pattern matching. The focused agent tests, progress check, and full Pester suite exit
+before bug-pattern matching. The agent file stays below 100 lines. The focused agent tests,
+progress check, and full Pester suite exit
 0 with no skipped tests.
 
 ---

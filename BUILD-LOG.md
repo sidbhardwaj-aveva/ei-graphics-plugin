@@ -57,6 +57,20 @@ files needed to classify the symptom. A text-contract test can enforce this inst
 - `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
 - `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
 
+**Acceptance:** The focused agent suite passed 33 tests with no skips. The full suite passed 636
+tests with no failures or skips. `Test-BuildProgress.ps1` exited 0.
+
+**Attempts:** 2. The first focused run found the file at the old 80-line ceiling. The requested
+100-line limit replaced that machine contract. The first full run found its fixed progress-row
+count at 44 after T045 added row 45. Updated that roster expectation and reran successfully.
+
+**Decisions:** The agent now reads the full selected skill, then its architecture reference,
+before it may use a bug pattern. Architecture selects the references and Key Files needed for the
+actual pipeline stage. Bug patterns now refine that grounded diagnosis. The active agent ceiling
+is 100 lines; past task records retain their original 80-line evidence.
+
+**Result:** DONE. Focused agent suite 33/0/0. Full suite 636/0/0. Progress check passed.
+
 
 ## T002 — The progress checker — 2026-08-31T16:20:00Z
 

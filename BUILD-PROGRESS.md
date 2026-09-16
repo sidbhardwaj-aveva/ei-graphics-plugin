@@ -2,7 +2,7 @@
 
 **Plan:** `plan.md`
 **Current task:** T045
-**Last verified green:** T044 (2026-09-15T12:09:58Z)
+**Last verified green:** T045 (2026-09-16T12:31:10Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -54,4 +54,4 @@ in `BUILD-LOG.md`.
 | T042 | Record Git history evidence in session summaries | DONE | e11977c | 2026-09-11T05:51:01Z |
 | T043 | Remember the doctor decision once per user | DONE | 1d4ece4 | 2026-09-11T06:03:29Z |
 | T044 | Name the real script path for the intake wrapper | DONE | 3e80068 | 2026-09-15T12:09:58Z |
-| T045 | Read the selected domain skill before diagnosing | IN-PROGRESS | — | — |
+| T045 | Read the selected domain skill before diagnosing | DONE | pending | 2026-09-16T12:31:10Z |
