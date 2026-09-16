@@ -41,6 +41,23 @@ progress row to mark `IN-PROGRESS` beforehand.
 
 **Result:** DONE at commit 7254028
 
+## T045 — Read the selected domain skill before diagnosing — 2026-09-16T12:17:00Z
+
+**Goal:** Make a selected domain skill establish its pipeline, file ownership and relevant
+references before the agent applies a symptom pattern.
+
+**Assumptions:** The selected skill document is the contract for its domain. Reading its
+architecture reference before its bug patterns gives the agent the pipeline stage, model and key
+files needed to classify the symptom. A text-contract test can enforce this instruction order.
+
+**Files touched:**
+- `plan.md`
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
+
+
 ## T002 — The progress checker — 2026-08-31T16:20:00Z
 
 **Goal:** Write `tools/Test-BuildProgress.ps1`, which decides whether `BUILD-PROGRESS.md` is in a

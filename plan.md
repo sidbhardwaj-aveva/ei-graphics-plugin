@@ -2050,6 +2050,23 @@ root, and that a top-level `scripts/` folder is never correct. Keep the file at 
 **Done when.** `Agent.Tests.ps1` passes with no skipped tests, the file is still 80 lines or fewer,
 the progress check exits 0, and the full Pester suite exits 0.
 
+#### T045 — Read the selected domain skill before diagnosing
+
+**Why this task exists.** A live termination-drawing session checked a symptom pattern before it
+read the skill's architecture and file map. It then treated a creation and layout problem as an
+update problem. A domain skill must establish its pipeline and source ownership before a pattern
+can narrow the diagnosis.
+
+**Do this.** Replace the agent's pattern-first domain priority with a required orientation step.
+The agent must read the selected `SKILL.md` in full, then read the architecture reference before
+diagnosing. It must use that architecture to choose the relevant references and key files. It may
+check bug patterns only after this orientation. Add a Pester text contract that proves this order.
+Keep the agent file below 80 lines.
+
+**Done when.** `Agent.Tests.ps1` proves the required full-skill and architecture reads occur
+before bug-pattern matching. The focused agent tests, progress check, and full Pester suite exit
+0 with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong
