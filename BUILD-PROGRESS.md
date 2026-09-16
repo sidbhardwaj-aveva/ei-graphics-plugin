@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T048
+**Current task:** T049
 **Last verified green:** T048 (2026-09-16T14:36:37Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -58,3 +58,11 @@ in `BUILD-LOG.md`.
 | T046 | Record domain-read and test evidence | DONE | 2bfed5e | 2026-09-16T14:09:27Z |
 | T047 | Fail incomplete session completion | DONE | 7017dfe | 2026-09-16T14:28:21Z |
 | T048 | Show the session-close command | DONE | 398e499 | 2026-09-16T14:36:37Z |
+| T049 | Triage a regression before asking for a runtime log | IN-PROGRESS | — | — |
+| T050 | Separate historical confidence from runtime verification | TODO | — | — |
+| T051 | Map the termination-drawing phases and their owners | TODO | — | — |
+| T052 | Write down the ordering-regression pattern | TODO | — | — |
+| T053 | Accept a local bug report without Azure DevOps | TODO | — | — |
+| T054 | Resolve script paths from the installed plugin | TODO | — | — |
+| T055 | Prove the session lifecycle cannot be skipped | TODO | — | — |
+| T056 | Document the investigation order for maintainers | TODO | — | — |

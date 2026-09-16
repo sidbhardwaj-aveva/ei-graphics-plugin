@@ -2110,6 +2110,160 @@ story ID and outcome. Add a Pester text contract for the path and invocation.
 **Done when.** The agent test proves the canonical command points at the wrapper. The progress
 check and full Pester suite exit 0 with no skipped tests.
 
+#### T049 — Triage a regression before asking for a runtime log
+
+**Why this task exists.** A Termination Drawing bug arrived as an attached report and a local
+folder, with no runtime `ts-diag.log`. The reported mounting-rail order was `TS-1, B-1, --134,
+IOM-1` and the drawing produced `--134, TS-1, B-1, IOM-1`. The workflow asked for the missing log.
+A plain coding model instead read local Git history, found the commit that changed the ordering
+code, and compared the old and new versions. The history was decisive and the log was not needed.
+The workflow has no step that looks there before it gives up.
+
+**Do this.** Add a fixed triage sequence to `termination-drawing/SKILL.md`, used whenever the
+symptom is an order, a position, a layout, a grouping, a rendering sequence, or any output that
+changed. The sequence is: classify the symptom as creation, update or both; name the owning
+pipeline phase from the architecture reference; search history for the symbols and the key files
+with `git log --all --oneline -S` and `git log --all --oneline --`; read the candidate commits
+with `git show <commit> -- <file>`; compare the current code with the last known-good version;
+only then decide whether a runtime log is needed. Add the bounded exception to the agent's
+skill-first rule: after the full skill and architecture read, at most one history hop, then back
+to the selected key files. Raise the agent file ceiling once, from 100 lines to 120, and record
+the old and new values in the log block.
+
+**Done when.** The termination-drawing and agent tests prove the triage sequence, the order of
+its steps, the one-hop bound, and that `needs-log` comes after triage rather than before it. The
+progress check and full Pester suite exit 0 with no skipped tests.
+
+#### T050 — Separate historical confidence from runtime verification
+
+**Why this task exists.** History can show which commit changed a behaviour. It cannot show that
+the drawing is now correct. The same failed session conflated the two, and earlier work already
+had to separate a passing build from an executed test. A result that reads "fixed" when nothing
+was regenerated is the same defect in a new place.
+
+**Do this.** Extend the termination-drawing output contract. Add `evidenceUsed`,
+`alternativeHypotheses`, `runtimeVerificationStatus` and a root-cause confidence that is reported
+apart from it. Add the statuses `setup-failed` and `verification-unconfirmed`. Write down the
+historical-regression evidence path: a runtime log stops being mandatory only when the symptom is
+clear, a relevant commit is found, the changed code controls the reported behaviour, old and new
+can be compared from source, and the proposed fix is narrow and testable. State that historical
+evidence is never runtime verification and a build is never a test result.
+
+**Done when.** The termination-drawing and agent tests prove the new fields, the new statuses, the
+five conditions, and both no-collapse rules. The progress check and full Pester suite exit 0 with
+no skipped tests.
+
+#### T051 — Map the termination-drawing phases and their owners
+
+**Why this task exists.** The failed session edited `ConnectedEquipmentGroupResolver.GetAllChildren()`,
+a later and broader abstraction, when the code that controls mounting-rail order sits in the model
+builder. The architecture reference did not say which phase owns ordering, which owns placement and
+which owns post-placement adjustment, so nothing stopped the wrong-layer edit.
+
+**Do this.** Document in `termination-drawing/references/architecture.md`: `OrderSequence()`,
+`ApplyPlateOrdering()`, `GetDwgPlateCollectionOrder()`,
+`ConnectedEquipmentGroupResolver.GetGroupableContainedEquipment()`,
+`ConnectedEquipmentGroupResolver.GetAllChildren()`, `PlaceLoc0Groups()`,
+`LayoutAdjustmentService.AdjustConnectedDeviceVerticalOverlaps()`, the relationship between
+`ContainedEquipment` and `CanHavePartEquipment`, and which phase owns ordering, placement and
+post-placement adjustment. Add the symptom-to-owner decision table. Add the pre-edit record the
+agent must write first: the symptom, the expected phase, the owning method, one falsifiable
+hypothesis, one cheaper alternative, and the evidence that would tell them apart. State the rule
+that follows from the log: when `MODEL-DONE` and `INSERT-START` already carry the expected order,
+model ordering code is not the place to edit; move one phase later.
+
+**Done when.** The termination-drawing tests prove every named method, the decision table rows, the
+pre-edit record and the one-phase-later rule. The progress check and full Pester suite exit 0 with
+no skipped tests.
+
+#### T052 — Write down the ordering-regression pattern
+
+**Why this task exists.** The bug patterns reference holds no entry for equipment rendered in the
+wrong mounting-rail order, so the agent had nothing to match and no warning about the trap in the
+obvious fix. Removing the plate ordering outright may be wrong: plate ordering may be intended for
+direct enclosure children while the domain sequence governs nested rail and compartment contents.
+
+**Do this.** Add an ordering-regression pattern to `termination-drawing/references/bug-patterns.md`
+with its symptom, the check that compares the previous and current `OrderSequence` implementation,
+the typical cause of a new policy that partitions plate-ordered items ahead of unplated ones
+instead of applying the domain sequence across all of them, the caution against blindly removing
+plate ordering, and the seven cases a fix must cover: all unplated, all plated, mixed, nested rail
+or compartment, the exact strip, barrier, instrument and module sequence, duplicate plate entries,
+and missing or empty plate data.
+
+**Done when.** The termination-drawing tests prove the pattern, its caution and all seven cases.
+The progress check and full Pester suite exit 0 with no skipped tests.
+
+#### T053 — Accept a local bug report without Azure DevOps
+
+**Why this task exists.** The bug arrived as an attached report and a local folder. Every intake
+path in the agent file starts at an Azure DevOps work item, so there was no supported route and
+the session produced no understanding artifact at all.
+
+**Do this.** Add a local-input route to the agent file and a new
+`ei-graphics-core/references/local-input.md`. It covers an attached report or image, a local bug
+folder, a pasted symptom and a local diagnostic log. It does not require `ado.json`. It writes a
+`story-understanding` artifact whose `inputSource` records the kind, the reference and why Azure
+DevOps was not used, and records the attachment or folder as evidence. Everything after intake is
+unchanged: the same checkpoint, domain selection, implementation, validation and close. Add
+`inputSource` to `story-understanding.schema.json` as an optional object, and allow the hash the
+artifact binds to be taken from the local input when there is no work item.
+
+**Done when.** The schema tests prove `inputSource` and the local binding, a script test writes a
+local-input understanding with no `ado.json` present, and the agent tests prove the route. The
+progress check and full Pester suite exit 0 with no skipped tests.
+
+#### T054 — Resolve script paths from the installed plugin
+
+**Why this task exists.** The failed session built a script path by hand, left out
+`plugins\aveva-ei-graphics`, and every logging command failed against a path that does not exist.
+The session ended empty. One resolver, used everywhere, removes the class of mistake.
+
+**Do this.** Add `Resolve-EiScriptPath.ps1` to `ei-graphics-core/scripts`. It resolves the scripts
+folder from `$PSScriptRoot`, returns the absolute path of a named script, and with no name checks
+that every core script is present. A missing script exits 1 and names it. Point the agent at it:
+run the preflight before the first session entry, never rebuild a script path by hand, and when
+the preflight fails, record a `setup-failed` entry, then stop and report the exact command, the
+exit code, the artifact path and the recovery command. Raise the script count from 14 to 15 in
+both places that hold it, and record the raise in the log block.
+
+**Parameters, exactly these 4:** `-Name`, `-ScriptRoot`, `-Json`, `-Help`.
+
+**Done when.** The new script's tests prove resolution from the installed layout, the roster check,
+a named missing script, and that a hand-built path without `plugins\aveva-ei-graphics` fails. The
+agent tests prove the preflight and the stop-and-report rule. The progress check and full Pester
+suite exit 0 with no skipped tests.
+
+#### T055 — Prove the session lifecycle cannot be skipped
+
+**Why this task exists.** T047 made the finalizer reject an empty session and made the wrapper
+reject a missing summary. Nothing yet proves the whole set of rules together, and the new routes
+in T053 and T054 add cases of their own.
+
+**Do this.** Add the missing coverage: a normal close of an empty session fails; a `setup-failed`
+close of an empty session succeeds; the close writes `session-summary.md`; a summary that was not
+written fails the close; `session.json` carries the finalized summary; the local-input route
+closes with no `ado.json`; history triage produces evidence a reader can check; and a run with no
+executed test reports runtime verification as unconfirmed rather than verified.
+
+**Done when.** The new tests pass with no skipped tests. The progress check and full Pester suite
+exit 0 with no skipped tests.
+
+#### T056 — Document the investigation order for maintainers
+
+**Why this task exists.** The order the workflow expects is spread across the agent file, two
+skills and several references. A maintainer reading the repository cannot see it in one place, and
+cannot tell which step the failed session skipped.
+
+**Do this.** Add the investigation order to `plugins/aveva-ei-graphics/README.md`: intake, local or
+Azure DevOps understanding, checkpoint, domain selection, the full skill and architecture read,
+bounded history triage, key-file inspection, hypothesis, smallest edit, focused validation, layer
+guard, `Complete-EiSession.ps1`, summary check. Add the mounting-rail ordering regression as a
+worked example. Write it as one example of the order, not as the only bug the workflow supports.
+
+**Done when.** The document tests prove the order and the worked example, the plain-language check
+passes on the changed file, the progress check and full Pester suite exit 0 with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong

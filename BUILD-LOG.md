@@ -3019,3 +3019,31 @@ to cover every wrapper script named in the file for the cost of one line.
 **Result:** DONE. `Test-BuildProgress.ps1` exits 0. The full Pester suite passes 635 tests with
 zero failures and zero skipped tests.
 
+
+## T049 — Triage a regression before asking for a runtime log — 2026-09-16T15:05:00Z
+
+**Goal:** Stop the workflow returning `needs-log` for an ordering, placement or layout symptom
+before it has looked at local Git history. Add a fixed triage sequence and a bounded one-hop
+exception to the skill-first rule.
+
+**Assumptions:** The reported bug is the mounting-rail order in a Termination Drawing: expected
+`TS-1, B-1, --134, IOM-1`, produced `--134, TS-1, B-1, IOM-1`. No runtime log and no work item
+were supplied. A plain coding model found the controlling commit from history alone, so the
+evidence was reachable without a log. The triage must stay a fixed list of commands, not open
+exploration, or it becomes repository wandering. The agent file is at 92 lines against a ceiling
+of 100, and seven more tasks in this group add lines to it, so the ceiling is raised once here
+from 100 to 120. Adding eight rows takes the progress table from 48 to 56, so the hardcoded row
+count in `EverythingGreen.Tests.ps1` is edited in the same governed way as T024, T025 and T044.
+T049 through T056 are all written into `plan.md` in this start commit, so the whole group is
+visible and the progress checker can see every row from the first task.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** Not started.
+
+**Decisions:** Put the triage sequence in the domain skill, not the agent file, because it is
+domain knowledge and the agent file has no room. The agent gets the one-hop bound only.
+
+**Result:** IN-PROGRESS.
