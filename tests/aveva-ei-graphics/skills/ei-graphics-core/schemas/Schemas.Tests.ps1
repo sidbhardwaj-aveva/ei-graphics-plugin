@@ -157,6 +157,70 @@ Describe 'ei-graphics-core schemas' -Tag 'Unit' {
         }
     }
 
+    Context 'story-understanding.schema.json binds to a local input too' {
+        BeforeEach {
+            $script:LocalUnderstanding = Copy-Payload $script:GoodUnderstanding
+            $script:LocalUnderstanding.Remove('adoHash')
+            $script:LocalUnderstanding.inputSource = [ordered]@{
+                kind              = 'attached-report'
+                reference         = '.ei-session-logs/local-1/report.pdf'
+                hash              = 'sha256:' + ('c' * 64)
+                adoNotUsedBecause = 'No work item exists for this report'
+            }
+        }
+
+        It 'accepts an understanding with inputSource and no adoHash' {
+            Test-AgainstSchema -Payload $script:LocalUnderstanding -SchemaName 'story-understanding.schema.json' | Should -BeTrue
+        }
+
+        It 'refuses a payload that has neither adoHash nor inputSource' {
+            $bad = Copy-Payload $script:GoodUnderstanding
+            $bad.Remove('adoHash')
+            Test-AgainstSchema -Payload $bad -SchemaName 'story-understanding.schema.json' | Should -BeFalse
+        }
+
+        It 'accepts all five kinds of local input' -ForEach @(
+            'attached-report', 'attached-image', 'local-folder', 'pasted-symptom', 'local-log') {
+            $payload = Copy-Payload $script:GoodUnderstanding
+            $payload.Remove('adoHash')
+            $payload.inputSource = [ordered]@{
+                kind              = $_
+                reference         = 'somewhere'
+                hash              = 'sha256:' + ('c' * 64)
+                adoNotUsedBecause = 'No work item exists for this report'
+            }
+            Test-AgainstSchema -Payload $payload -SchemaName 'story-understanding.schema.json' | Should -BeTrue
+        }
+
+        It 'refuses a kind it does not know' {
+            $script:LocalUnderstanding.inputSource.kind = 'email'
+            Test-AgainstSchema -Payload $script:LocalUnderstanding -SchemaName 'story-understanding.schema.json' | Should -BeFalse
+        }
+
+        It 'refuses an inputSource missing <_>' -ForEach @('kind', 'reference', 'hash', 'adoNotUsedBecause') {
+            $payload = Copy-Payload $script:GoodUnderstanding
+            $payload.Remove('adoHash')
+            $source = [ordered]@{
+                kind              = 'local-folder'
+                reference         = 'C:/exports/ept'
+                hash              = 'sha256:' + ('c' * 64)
+                adoNotUsedBecause = 'No work item exists for this report'
+            }
+            $source.Remove($_)
+            $payload.inputSource = $source
+            Test-AgainstSchema -Payload $payload -SchemaName 'story-understanding.schema.json' | Should -BeFalse
+        }
+
+        It 'refuses a local hash that is not sha256 and 64 lowercase hex characters' {
+            $script:LocalUnderstanding.inputSource.hash = 'sha256:NOTHEX'
+            Test-AgainstSchema -Payload $script:LocalUnderstanding -SchemaName 'story-understanding.schema.json' | Should -BeFalse
+        }
+
+        It 'still accepts a work item, so the Azure DevOps route is untouched' {
+            Test-AgainstSchema -Payload $script:GoodUnderstanding -SchemaName 'story-understanding.schema.json' | Should -BeTrue
+        }
+    }
+
     Context 'approved-files.schema.json' {
         It 'accepts a good payload' {
             Test-AgainstSchema -Payload $script:GoodApprovedFiles -SchemaName 'approved-files.schema.json' | Should -BeTrue

@@ -14,6 +14,13 @@ Run `Invoke-EiStoryIntake.ps1` with the same `-Root`, which chains the intake sc
 Read `ado.json` for everything after that. Never fetch the story from ADO again.
 A comment can correct the description. Where the two disagree, the later comment wins.
 
+## Intake without a work item
+A bug can arrive as an attached report or image, a local folder, a pasted symptom or a local log.
+When no work item exists, follow `references/local-input.md`. Do not run the intake script and
+do not expect an `ado.json`. Write a `story-understanding` artifact whose `inputSource` records the
+kind, the reference and why Azure DevOps was not used, and record the report or folder as evidence.
+Everything after intake is unchanged.
+
 ## Confirm the understanding
 Follow Checkpoint 1 in `references/checkpoint-templates.md` before you pick a domain skill.
 Log the exchange with `Write-EiSessionEntry.ps1 -Phase human-checkpoint`. Wait for agreement.
@@ -93,3 +100,4 @@ On the first run in a repository, add `.ei-session-logs/` to `.gitignore`.
 
 - `references/rnd-delegation.md` — read before review, commit or delivery.
 - `references/checkpoint-templates.md` — read before showing a plan to a person.
+- `references/local-input.md` — read when there is no work item.

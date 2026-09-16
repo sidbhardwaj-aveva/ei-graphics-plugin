@@ -4,9 +4,9 @@ Set-StrictMode -Version Latest
 # Discovery-time state. Pester needs -ForEach data before any BeforeAll block runs.
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 
-# The nine files T006 scans. Its list is hardcoded, because "is this human-facing?" cannot be read
-# off the filesystem. Asserting here that all nine now exist is what catches that list drifting.
-# The tenth, session-summary.md, is rendered at run time and covered by T009's golden files.
+# The files T006 scans. Its list is hardcoded, because "is this human-facing?" cannot be read
+# off the filesystem. Asserting here that all of them now exist is what catches that list drifting.
+# session-summary.md is rendered at run time and covered by T009's golden files.
 $PluginRoot = 'plugins/aveva-ei-graphics'
 $PlainLanguageTargets = @(
     "$PluginRoot/agents/ei-graphics.agent.md"
@@ -14,6 +14,7 @@ $PlainLanguageTargets = @(
     "$PluginRoot/skills/ei-azure-devops-cli-intake/SKILL.md"
     "$PluginRoot/skills/ei-graphics-doctor/SKILL.md"
     "$PluginRoot/skills/ei-graphics-core/references/rnd-delegation.md"
+    "$PluginRoot/skills/ei-graphics-core/references/local-input.md"
     "$PluginRoot/skills/ei-graphics-core/references/checkpoint-templates.md"
     "$PluginRoot/README.md"
     "$PluginRoot/INSTRUCTIONS.md"
@@ -95,9 +96,9 @@ Describe 'Everything green, before the live run' -Tag 'Unit' {
             Test-Path -LiteralPath (Join-Path $RepoRoot $_) | Should -BeTrue
         }
 
-        It 'all ten are present, not merely most of them' -TestCases @(@{ Paths = $PlainLanguageTargets }) {
-            $Paths.Count | Should -Be 10
-            @($Paths | Where-Object { Test-Path -LiteralPath (Join-Path $script:RepoRoot $_) }).Count | Should -Be 10
+        It 'all eleven are present, not merely most of them' -TestCases @(@{ Paths = $PlainLanguageTargets }) {
+            $Paths.Count | Should -Be 11
+            @($Paths | Where-Object { Test-Path -LiteralPath (Join-Path $script:RepoRoot $_) }).Count | Should -Be 11
         }
     }
 

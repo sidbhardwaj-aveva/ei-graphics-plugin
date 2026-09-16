@@ -14,6 +14,7 @@ $CoveredPaths = @(
     "$PluginRoot/skills/ei-azure-devops-cli-intake/SKILL.md"
     "$PluginRoot/skills/ei-graphics-doctor/SKILL.md"
     "$PluginRoot/skills/ei-graphics-core/references/rnd-delegation.md"
+    "$PluginRoot/skills/ei-graphics-core/references/local-input.md"
     "$PluginRoot/skills/ei-graphics-core/references/checkpoint-templates.md"
     "$PluginRoot/README.md"
     "$PluginRoot/INSTRUCTIONS.md"

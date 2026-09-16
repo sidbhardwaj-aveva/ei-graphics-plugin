@@ -8,10 +8,12 @@ BeforeAll {
     $references = Join-Path $plugin 'skills' 'ei-graphics-core' 'references'
     $script:DelegationPath = Join-Path $references 'rnd-delegation.md'
     $script:CheckpointPath = Join-Path $references 'checkpoint-templates.md'
+    $script:LocalInputPath = Join-Path $references 'local-input.md'
 
     $script:Agent = Get-Content -LiteralPath $script:AgentPath -Raw
     $script:Delegation = Get-Content -LiteralPath $script:DelegationPath -Raw
     $script:Checkpoints = Get-Content -LiteralPath $script:CheckpointPath -Raw
+    $script:LocalInput = Get-Content -LiteralPath $script:LocalInputPath -Raw
 
     # Phrases are matched against a flattened copy, so re-wrapping a line cannot break a check.
     $script:AgentFlat = $script:Agent -replace '\s+', ' '
@@ -43,6 +45,17 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
     It 'points at both reference files' {
         $script:Agent | Should -BeLike '*references/rnd-delegation.md*'
         $script:Agent | Should -BeLike '*references/checkpoint-templates.md*'
+    }
+
+    It 'offers a route for a bug that has no work item' {
+        $script:Agent | Should -Match '(?m)^## Intake without a work item\s*$'
+        $script:Agent | Should -BeLike '*references/local-input.md*'
+        foreach ($kind in @('attached report or image', 'local folder', 'pasted symptom', 'local log')) {
+            $script:AgentFlat | Should -Match ([regex]::Escape($kind))
+        }
+        $script:AgentFlat | Should -Match '(?i)Do not run the intake script and do not expect an `ado\.json`'
+        $script:AgentFlat | Should -Match '(?i)why Azure DevOps was not used'
+        $script:AgentFlat | Should -Match '(?i)Everything after intake is unchanged'
     }
 
     It 'carries a plain-language block naming short sentences and the next action' {
@@ -203,5 +216,35 @@ Describe 'the agent reference files' -Tag 'Unit' {
     It 'checkpoint-templates.md sends the approved list to the artifact writer' {
         $script:Checkpoints | Should -BeLike '*Write-EiArtifact.ps1 -ArtifactType approved-files*'
         $script:Checkpoints | Should -BeLike '*Test-EiScopeDrift.ps1*'
+    }
+
+    It 'local-input.md describes all five kinds' -ForEach @(
+        'attached-report', 'attached-image', 'local-folder', 'pasted-symptom', 'local-log') {
+        $script:LocalInput | Should -BeLike "*$_*"
+    }
+
+    It 'local-input.md forbids the Azure DevOps intake and the ado.json it would write' {
+        $script:LocalInput | Should -Match '(?i)Do not run `Invoke-EiStoryIntake\.ps1`'
+        $script:LocalInput | Should -Match '(?i)An absent `ado\.json` is correct on this route'
+    }
+
+    It 'local-input.md says what inputSource must carry' {
+        foreach ($field in @('inputSource.kind', 'inputSource.reference', 'inputSource.hash', 'inputSource.adoNotUsedBecause')) {
+            $script:LocalInput | Should -Match ([regex]::Escape($field))
+        }
+        $script:LocalInput | Should -Match '(?i)Leave `adoHash` out'
+        $script:LocalInput | Should -Match '(?i)refuses a payload that\s+carries neither'
+    }
+
+    It 'local-input.md keeps the rest of the workflow unchanged' {
+        $script:LocalInput | Should -Match '(?i)Checkpoint 1'
+        $script:LocalInput | Should -BeLike '*Get-EiDomainSkillCatalog.ps1*'
+        $script:LocalInput | Should -BeLike '*Complete-EiSession.ps1*'
+    }
+
+    It 'local-input.md asks for the input to be recorded as evidence' {
+        $script:LocalInput | Should -Match '(?m)^## Record the input as evidence\s*$'
+        $script:LocalInput | Should -Match '(?i)naming every file you read'
+        $script:LocalInput | Should -Match ([regex]::Escape('attachmentUnderstanding'))
     }
 }

@@ -108,6 +108,39 @@ Describe 'Write-EiArtifact' -Tag 'Unit' {
         (Invoke-Writer -Splat $splat).Result.hash | Should -Be (Invoke-Writer -Splat $splat).Result.hash
     }
 
+    It 'writes a local-input understanding with no ado.json anywhere' {
+        $local = New-Understanding
+        $local.Remove('adoHash')
+        $local.inputSource = [ordered]@{
+            kind              = 'attached-report'
+            reference         = 'report.pdf'
+            hash              = 'sha256:' + ('c' * 64)
+            adoNotUsedBecause = 'No work item exists for this report'
+        }
+        $run = Invoke-Writer -Splat @{
+            StoryId = 'local-1'; ArtifactType = 'story-understanding'
+            InputObject = $local; Root = $script:Root
+        }
+        $run.ExitCode | Should -Be 0
+        $folder = Join-Path $script:Root '.ei-session-logs' 'local-1'
+        Test-Path -LiteralPath (Join-Path $folder 'ado.json') | Should -BeFalse
+        $written = Get-Content -LiteralPath $run.Result.path -Raw | ConvertFrom-Json
+        $written.inputSource.kind | Should -Be 'attached-report'
+        $written.inputSource.adoNotUsedBecause | Should -Be 'No work item exists for this report'
+        $written.PSObject.Properties.Name | Should -Not -Contain 'adoHash'
+    }
+
+    It 'refuses an understanding that names no source at all' {
+        $bad = New-Understanding
+        $bad.Remove('adoHash')
+        $run = Invoke-Writer -Splat @{
+            StoryId = 'local-1'; ArtifactType = 'story-understanding'
+            InputObject = $bad; Root = $script:Root
+        }
+        $run.ExitCode | Should -Be 1
+        Test-Path -LiteralPath (Join-Path $script:Root '.ei-session-logs' 'local-1' 'story-understanding.json') | Should -BeFalse
+    }
+
     It 'gives the same hash when the input key order changes' {
         $forward = New-Understanding
         $reversed = [ordered]@{}

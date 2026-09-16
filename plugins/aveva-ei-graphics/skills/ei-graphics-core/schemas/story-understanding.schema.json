@@ -1,13 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "EI Graphics story understanding",
-  "description": "What the agent understood from the story, after a person confirmed it. Bound to one exact ado.json by adoHash, so an understanding can never drift away from the story it was read from.",
+  "description": "What the agent understood from the story, after a person confirmed it. Bound to one exact ado.json by adoHash, so an understanding can never drift away from the story it was read from. A story that never came from Azure DevOps carries inputSource instead, and binds to the hash of the local input.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schemaVersion",
     "storyId",
-    "adoHash",
     "status",
     "understanding",
     "proposedDomains",
@@ -15,10 +14,29 @@
     "complexity",
     "hash"
   ],
+  "anyOf": [
+    { "required": ["adoHash"] },
+    { "required": ["inputSource"] }
+  ],
   "properties": {
     "schemaVersion": { "type": "string", "minLength": 1 },
     "storyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
     "adoHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "inputSource": {
+      "type": "object",
+      "description": "Where the story came from when it did not come from Azure DevOps. Its hash binds the understanding the way adoHash does for a work item.",
+      "additionalProperties": false,
+      "required": ["kind", "reference", "hash", "adoNotUsedBecause"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["attached-report", "attached-image", "local-folder", "pasted-symptom", "local-log"]
+        },
+        "reference": { "type": "string", "minLength": 1 },
+        "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "adoNotUsedBecause": { "type": "string", "minLength": 1 }
+      }
+    },
     "status": { "type": "string", "enum": ["draft", "confirmed"] },
     "understanding": {
       "type": "object",
