@@ -2264,6 +2264,37 @@ worked example. Write it as one example of the order, not as the only bug the wo
 **Done when.** The document tests prove the order and the worked example, the plain-language check
 passes on the changed file, the progress check and full Pester suite exit 0 with no skipped tests.
 
+#### T057 — Cut the repeated prose from the intake skill
+
+**Why this task exists.** `ei-azure-devops-cli-intake/SKILL.md` says four things twice. Three of
+its six rules restate whole sections above them. The goal and the reference section both tell the
+reader not to read the identifier off the link. "Writes nothing to disk" and "takes no pipeline
+input" each appear in two places. A document that repeats itself is longer to read, and it drifts
+the day someone corrects only one of the copies. T032 also asked that the canonical block not be
+narrated, and the prose above it narrates it.
+
+This task runs before T052 because it only deletes prose from one file, and leaving it queued
+behind five larger tasks would let the repeats settle in.
+
+**Do this.** Remove the four repeats from
+`plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md`: the second "never read the
+identifier yourself" sentence, rules 1, 4 and 6, the second "writes nothing to disk" sentence, and
+the prose copy of "takes no pipeline input".
+
+Keep one copy of each statement, at the point the reader needs it. The disk statement belongs
+under `## Output contract`, because that is the contract. The pipeline-input warning belongs in
+the comment inside the canonical fence, because that is what a person copies. Delete no heading,
+change no behaviour, and leave the identifier precedence paragraph alone: it names an order the
+table above it does not.
+
+Add tests asserting that each of those four statements appears exactly once in the file, so the
+repeats cannot come back. Update the row count in `tests/EverythingGreen.Tests.ps1`, which this
+task's own row changes.
+
+**Done when.** The new tests pass, the `### Canonical invocation` tests still pass, and the
+plain-language check still passes for that file. The progress check and full Pester suite exit 0
+with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong

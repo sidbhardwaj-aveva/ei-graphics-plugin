@@ -3154,3 +3154,17 @@ The `Key Files` table was left at fourteen rows: no new file is named, only meth
 that are already listed.
 
 **Result:** DONE.
+
+## T057 — Cut the repeated prose from the intake skill — 2026-09-16T11:19:16Z
+
+**Goal:** Delete the four statements `ei-azure-devops-cli-intake/SKILL.md` makes twice, keep the
+copy that sits where the reader needs it, and add tests so the repeats cannot come back.
+
+**Assumptions:** The four repeats were found by reading the file, and a repository-wide search
+confirmed that nothing outside the file quotes the sentences being removed. The only historical
+mention is a `BUILD-LOG.md` entry, which is append-only and is not edited. The file carries no
+entry in `tests/data/ported-file-hashes.json`, and `plan.md` lists it under the files this build
+deliberately edits, so no hash check governs it. The identifier precedence paragraph is left
+alone: it looks like a repeat of the table above it, but it names an order the table never states.
+`tests/EverythingGreen.Tests.ps1` asserts the number of rows in the progress table, so this task's
+own row makes that assertion part of the work rather than a side effect.

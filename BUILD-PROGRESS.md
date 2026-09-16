@@ -1,12 +1,13 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T052
+**Current task:** T057
 **Last verified green:** T051 (2026-09-16T10:18:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
-in `BUILD-LOG.md`.
+in `BUILD-LOG.md`. T057 sits above T052 for a simpler reason: it only deletes repeated prose from
+one file, so it runs before the five larger tasks queued ahead of it.
 
 | ID | Task | Status | Commit | Acceptance verified at |
 |----|------|--------|--------|------------------------|
@@ -61,6 +62,7 @@ in `BUILD-LOG.md`.
 | T049 | Triage a regression before asking for a runtime log | DONE | fd4450d | 2026-09-16T09:31:58Z |
 | T050 | Separate historical confidence from runtime verification | DONE | a2a81d0 | 2026-09-16T09:52:00Z |
 | T051 | Map the termination-drawing phases and their owners | DONE | 99ce7fa | 2026-09-16T10:18:00Z |
+| T057 | Cut the repeated prose from the intake skill | IN-PROGRESS | — | — |
 | T052 | Write down the ordering-regression pattern | TODO | — | — |
 | T053 | Accept a local bug report without Azure DevOps | TODO | — | — |
 | T054 | Resolve script paths from the installed plugin | TODO | — | — |
