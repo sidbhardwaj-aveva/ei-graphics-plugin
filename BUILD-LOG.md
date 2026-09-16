@@ -57,6 +57,20 @@ that entry before diagnosis and distinguish a passing build from a passing targe
 - `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
 - `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
 
+**Acceptance:** The focused agent suite passed 35 tests with no skips. The full suite passed 638
+tests with no failures or skips. `Test-BuildProgress.ps1` exited 0.
+
+**Attempts:** 1. Added the pre-diagnosis record and validation rules. The focused contract passed
+on its first run. Added the required roster count for T046 before the full suite, which passed on
+its first run.
+
+**Decisions:** The record is a session entry rather than a new schema field. It names exactly
+what was read and makes unsupported domain claims auditable. A build remains compile evidence;
+targeted runtime validation requires discovered tests and zero failures. Empty output remains
+unconfirmed rather than passing evidence.
+
+**Result:** DONE. Focused agent suite 35/0/0. Full suite 638/0/0. Progress check passed.
+
 
 ## T045 — Read the selected domain skill before diagnosing — 2026-09-16T12:17:00Z
 

@@ -84,6 +84,20 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $patternIndex | Should -BeGreaterThan $orientationIndex
     }
 
+    It 'requires evidence of domain reading before diagnosis claims' {
+        $script:AgentFlat | Should -Match '(?i)before presenting a diagnosis'
+        $script:AgentFlat | Should -Match '(?i)implementation` session entry'
+        $script:AgentFlat | Should -Match '(?i)selected `SKILL\.md` read in full'
+        $script:AgentFlat | Should -Match '(?i)selected references and source files read in full'
+        $script:AgentFlat | Should -Match '(?i)Claim skill support only for conclusions tied to a listed supporting file'
+    }
+
+    It 'does not treat a build or empty test output as verification' {
+        $script:AgentFlat | Should -Match '(?i)a build is not a test result'
+        $script:AgentFlat | Should -Match '(?i)targeted test command reports discovered tests and zero failures'
+        $script:AgentFlat | Should -Match '(?i)execution is unconfirmed'
+    }
+
     It 'says a comment can override the description' {
         $script:AgentFlat | Should -Match '(?i)comment can correct the description'
     }

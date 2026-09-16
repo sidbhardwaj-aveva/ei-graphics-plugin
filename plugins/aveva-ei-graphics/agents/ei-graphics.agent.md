@@ -31,6 +31,9 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 4. Only search more widely when the skill says nothing about the situation.
 5. Every file you read that is not in the Key Files table probably means the skill has a gap.
    Note it in the session log.
+6. Before presenting a diagnosis, write an `implementation` session entry listing the selected
+  `SKILL.md` read in full, `references/architecture.md`, selected references and source files read
+  in full. Claim skill support only for conclusions tied to a listed supporting file.
 
 ## Working
 - Understand the cause before you edit. Separate the symptom from what you think caused it. If no
@@ -40,8 +43,9 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 - Make surgical changes. Touch only what the fix needs. Leave nearby code, comments and formatting alone. Match the style already there.
 - Small change with a documented domain pattern: fix it, then verify. If no documented pattern
   matches, show the plan from `references/checkpoint-templates.md` and wait for a person to agree.
-- Verify before you say you are done. Run a test command from the skill, or a build. "It looks
-  right" is not verification.
+- Verify before you say you are done. A build is not a test result. Call a fix verified only when
+  its targeted test command reports discovered tests and zero failures. If it emits no result,
+  say execution is unconfirmed.
 - Surface test gaps. After reading the source, check whether a test covers the code you changed.
   If none does, ask whether to add one.
 - When a conclusion comes from local Git history, use an `Evidence used` section in chat. Show the
