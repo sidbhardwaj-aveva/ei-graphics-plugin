@@ -55,4 +55,4 @@ in `BUILD-LOG.md`.
 | T043 | Remember the doctor decision once per user | DONE | 1d4ece4 | 2026-09-11T06:03:29Z |
 | T044 | Name the real script path for the intake wrapper | DONE | 3e80068 | 2026-09-15T12:09:58Z |
 | T045 | Read the selected domain skill before diagnosing | DONE | 88a13dd | 2026-09-16T12:31:10Z |
-| T046 | Record domain-read and test evidence | DONE | pending | 2026-09-16T14:09:27Z |
+| T046 | Record domain-read and test evidence | DONE | 2bfed5e | 2026-09-16T14:09:27Z |
