@@ -3168,3 +3168,41 @@ deliberately edits, so no hash check governs it. The identifier precedence parag
 alone: it looks like a repeat of the table above it, but it names an order the table never states.
 `tests/EverythingGreen.Tests.ps1` asserts the number of rows in the progress table, so this task's
 own row makes that assertion part of the work rather than a side effect.
+
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/SKILL.md` — four repeats removed:
+  the second "never read the identifier yourself" sentence, rules 1, 4 and 6, the second "writes
+  nothing to disk" sentence, and the prose copy of "takes no pipeline input". Two facts moved
+  rather than deleted: "resolves before any network call" into the reference paragraph, and
+  "`descriptionText` is plain text" into `### What feeds the story text`. Six rules became three.
+- `tests/aveva-ei-graphics/skills/ei-azure-devops-cli-intake/Skill.Tests.ps1` — a new context with
+  six tests: five once-only statements and the rule count.
+- `tests/EverythingGreen.Tests.ps1` — row count 56 to 57.
+
+**Acceptance:** Intake skill tests 8 of 8. `Test-BuildProgress.ps1` exit 0, 57 rows, 50 done.
+Full suite 673 passed, 0 failed, 0 skipped.
+
+**Attempts:** Two.
+1. `states an unread discussion is not an empty one exactly once` failed with a count of zero. The
+   pattern was `as an empty one`, taken from the rule being deleted, but the surviving sentence
+   says "never mistaken *for* an empty one". The assertion, not the document, was wrong. Widened
+   the pattern to `an empty one`, which is unique in the file.
+2. Green.
+
+**Decisions:** Two of the three deleted rules carried a fact no section above them stated. Rule 1
+said the reference resolves before any network call, and rule 4 said the returned text is plain,
+which `Get-PlainText` confirms by stripping tags and decoding entities. Both facts moved into the
+section that owns them instead of being dropped, so the file says each thing once and still says
+everything. Rule 6 was a word-for-word repeat and was simply deleted.
+
+The identifier precedence paragraph was left alone. It reads like a repeat of the table above it,
+but it names an order — explicit identifier, then link, then label — that the table never states.
+
+Each once-only test matches every wording the file has used for that statement, not just the
+current one, so a repeat cannot return under a rephrasing.
+
+The row sits above T052 rather than at the foot of the table, because the progress checker refuses
+a TODO row above the running one, and this task is smaller than the five ahead of it. The header
+comment in `BUILD-PROGRESS.md` says so, next to the existing note about T015 and T010.
+
+**Result:** DONE.

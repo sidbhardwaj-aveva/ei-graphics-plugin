@@ -32,8 +32,8 @@ You must supply either `workItemUrl` or `workItemId`.
 ### Accepted reference forms
 
 `scripts/helpers/EiWorkItemReference.ps1` owns the parsing, and it is deterministic. The same
-pasted text always gives the same identifier. Paste the reference through as it stands. Never read
-the identifier off the link yourself.
+pasted text always gives the same identifier. It resolves before any network call. Paste the
+reference through as it stands.
 
 | Form | Behaviour |
 |---|---|
@@ -95,6 +95,8 @@ read for its words but skipped for its pictures:
 `System.Title`, `System.Description`, `Microsoft.VSTS.Common.AcceptanceCriteria`,
 `Microsoft.VSTS.TCM.ReproSteps`, `System.ReproSteps`.
 
+`descriptionText` is plain text. The markup is stripped and the entities are decoded.
+
 Acceptance criteria is on that list because EI stories often keep the real requirement there,
 along with the screenshots, rather than in the description. Leaving it out made the agent fetch
 the work item again by hand. It also reported a story with images as having none.
@@ -128,25 +130,19 @@ out again must reformat rather than cast. `scripts/helpers/EiAdoTimestamp.ps1` o
 
 ## Rules
 
-1. Work out the reference before making any network call.
-2. Never print a token.
-3. Give an explicit reason for missing context, for a refused sign-in, and for a work item that
+1. Never print a token.
+2. Give an explicit reason for missing context, for a refused sign-in, and for a work item that
    was not found.
-4. Return plain text, assembled from the fields listed above.
-5. Decode an encoded `src` value before returning it, so an `&amp;` in an image link does not cut
+3. Decode an encoded `src` value before returning it, so an `&amp;` in an image link does not cut
    the download query short.
-6. Always report how the discussion fetch went. Never present an unread discussion as an empty one.
 
 ## What happens next
 
-This script only retrieves. It writes nothing to disk.
-
-Its output feeds `Convert-EiAdoIntake.ps1`, which turns it into the shape `ado.schema.json`
-wants and downloads the images. That result feeds `Write-EiArtifact.ps1 -ArtifactType ado`,
-which checks it against the schema and writes `ado.json`. Both live in the `ei-graphics-core`
-skill. Neither accepts pipeline input: pass each step's output explicitly, as the invocation
-below does. `Invoke-EiStoryIntake.ps1` runs all three steps in one call and is the recommended
-way to do this.
+This script's output feeds `Convert-EiAdoIntake.ps1`, which turns it into the shape
+`ado.schema.json` wants and downloads the images. That result feeds
+`Write-EiArtifact.ps1 -ArtifactType ado`, which checks it against the schema and writes
+`ado.json`. Both live in the `ei-graphics-core` skill. `Invoke-EiStoryIntake.ps1` runs all three
+steps in one call and is the recommended way to do this.
 
 If either of those two exits with a code other than 0, stop and report it. Never carry on to
 understanding the story without an `ado.json`.
