@@ -60,22 +60,57 @@ Return a JSON object:
 
 ```json
 {
-  "status": "diagnosed | needs-log | blocked | fixed",
+  "status": "diagnosed | fixed | needs-log | blocked | setup-failed | verification-unconfirmed",
   "issueClass": "model | insert | update-cleanup | connector-routing | metadata | layout",
   "rootCause": "<one sentence>",
   "affectedFiles": ["relative path", "..."],
+  "evidenceUsed": ["log line, commit, or file and line that supports the root cause"],
   "logEvidence": ["line or pattern that proves the root cause"],
+  "alternativeHypotheses": ["the cheaper explanation, and what would tell it apart"],
   "proposedFix": "<description of the code change>",
   "criticalRulesApplied": ["rule 1", "..."],
   "testCommand": "dotnet test ... --filter ...",
-  "confidence": 0.0
+  "confidence": 0.0,
+  "runtimeVerificationStatus": "verified | unavailable | unconfirmed"
 }
 ```
 
 - `status: needs-log` → the symptom alone is insufficient **and** the Step 1b triage found no
   commit that controls the reported behaviour. Request the log, and say what triage ruled out.
 - `status: blocked` → contradictory evidence; explain what is missing.
-- `confidence` in `[0, 1]`; anything below `0.7` must accompany a `blocked` or `needs-log` status.
+- `status: setup-failed` → a required script or path could not be resolved, so no work was done.
+- `status: verification-unconfirmed` → the fix is in place, but no executed test or regenerated
+  drawing confirms it.
+- `confidence` in `[0, 1]`. It measures the **root cause only**. Anything below `0.7` must
+  accompany a `blocked` or `needs-log` status.
+- `runtimeVerificationStatus` is separate from `confidence`. `unavailable` means no log and no
+  regeneration were possible. `unconfirmed` means the targeted test emitted no result.
+
+### Never collapse these two pairs
+
+A build is not a test result. Historical evidence is not runtime verification. Report the three
+facts separately, in these words:
+
+```text
+root-cause confidence: high
+runtime reproduction: unavailable
+fix verification: build passed, targeted test execution unconfirmed
+```
+
+Never say the drawing is fixed without a regenerated drawing or an executed targeted test.
+
+### The historical-regression evidence path
+
+A runtime log stops being mandatory only when **all five** of these hold:
+
+1. the symptom is clear;
+2. Step 1b found a relevant historical commit;
+3. the changed code directly controls the reported behaviour;
+4. the old and new behaviour can be compared from source;
+5. the proposed fix is narrow and testable.
+
+Miss any one of them and the answer is `needs-log`, not a diagnosis. When all five hold, return
+`diagnosed` with `runtimeVerificationStatus: unavailable`, never `fixed`.
 
 ---
 

@@ -3083,13 +3083,27 @@ is not a test result is the same defect in another place, so both rules are stat
 output contract lives in `termination-drawing/SKILL.md` and is the only place the shape of a
 diagnosis is written down.
 
-**Files touched:** In progress.
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/aveva-ei-graphics/skills/termination-drawing/TerminationDrawingSplit.Tests.ps1`
+- `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
+- `BUILD-PROGRESS.md`, `BUILD-LOG.md`
 
-**Acceptance:** In progress.
+**Acceptance:** The focused termination-drawing and agent suites pass 72/72 with zero skipped
+tests. `Test-BuildProgress.ps1` exits 0. The full suite passes 657 tests with zero failures and
+zero skipped tests. The skill file sits at 239 lines and 2755 estimated tokens, inside both
+ceilings. The agent file sits at 95 lines.
 
-**Attempts:** Not started.
+**Attempts:** Two. The first run failed one assertion: the test looked for `all **five**` while
+the document says `**all five**`. The document was right and the regex was wrong, so the test was
+corrected rather than the prose.
 
 **Decisions:** Keep `confidence` as the root-cause number and add `runtimeVerificationStatus`
-beside it, rather than inventing a second confidence number a reader would have to weigh.
+beside it, rather than inventing a second confidence number a reader would have to weigh. Put the
+two no-collapse rules in one block, because they are the same mistake in two places. The five
+conditions return `diagnosed`, never `fixed`, so no history-only answer can ever read as a
+finished repair.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE. A diagnosis now states the root cause, the runtime reproduction and the fix
+verification as three separate facts, and both suites prove it.

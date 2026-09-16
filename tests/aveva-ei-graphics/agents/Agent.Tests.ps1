@@ -111,6 +111,11 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:AgentFlat | Should -Match '(?i)execution is unconfirmed'
     }
 
+    It 'keeps historical evidence apart from runtime verification' {
+        $script:AgentFlat | Should -Match '(?i)Historical evidence is not\s+runtime verification'
+        $script:AgentFlat | Should -Match '(?i)root-cause\s+confidence, runtime reproduction and fix verification as three separate lines'
+    }
+
     It 'requires wrapper-only session completion with reported evidence' {
         $script:AgentFlat | Should -Match '(?i)Close only with `Complete-EiSession\.ps1`'
         $script:AgentFlat | Should -Match '(?i)never chain finalization and rendering yourself'

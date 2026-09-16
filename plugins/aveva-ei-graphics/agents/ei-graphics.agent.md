@@ -45,9 +45,10 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 - Make surgical changes. Touch only what the fix needs. Leave nearby code, comments and formatting alone. Match the style already there.
 - Small change with a documented domain pattern: fix it, then verify. If no documented pattern
   matches, show the plan from `references/checkpoint-templates.md` and wait for a person to agree.
-- Verify before you say you are done. A build is not a test result. Call a fix verified only when
-  its targeted test command reports discovered tests and zero failures. If it emits no result,
-  say execution is unconfirmed.
+- Verify before you say you are done. A build is not a test result. Historical evidence is not
+  runtime verification. Call a fix verified only when its targeted test command reports discovered
+  tests and zero failures. If it emits no result, say execution is unconfirmed. Report root-cause
+  confidence, runtime reproduction and fix verification as three separate lines.
 - Surface test gaps. After reading the source, check whether a test covers the code you changed.
   If none does, ask whether to add one.
 - When a conclusion comes from local Git history, use an `Evidence used` section in chat. Show the

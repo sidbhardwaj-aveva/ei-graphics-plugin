@@ -213,4 +213,52 @@ Describe 'termination-drawing split' -Tag 'Unit' {
             $script:SkillRaw | Should -Match '(?i)run Step 1b before you ask for the diagnostic log'
         }
     }
+
+    Context 'the result separates root cause from runtime verification' {
+        BeforeAll {
+            $script:Contract = [regex]::Match(
+                (Get-Content -LiteralPath $script:SkillPath -Raw),
+                '(?ms)^## Output Contract\s*$.*?(?=^## |\z)').Value
+        }
+
+        It 'carries the six statuses, including the two this task adds' {
+            foreach ($status in @('diagnosed', 'fixed', 'needs-log', 'blocked', 'setup-failed', 'verification-unconfirmed')) {
+                $script:Contract | Should -BeLike "*$status*"
+            }
+        }
+
+        It 'carries every field a reader needs to weigh the diagnosis' {
+            foreach ($field in @(
+                    'status', 'issueClass', 'rootCause', 'affectedFiles', 'evidenceUsed',
+                    'alternativeHypotheses', 'proposedFix', 'confidence',
+                    'runtimeVerificationStatus', 'testCommand')) {
+                $script:Contract | Should -BeLike "*`"$field`"*"
+            }
+        }
+
+        It 'says confidence measures the root cause only, and verification is separate' {
+            $script:Contract | Should -Match '(?i)It measures the \*\*root cause only\*\*'
+            $script:Contract | Should -Match '(?i)`runtimeVerificationStatus` is separate from `confidence`'
+        }
+
+        It 'refuses both collapses in the same place' {
+            $script:Contract | Should -Match '(?i)A build is not a test result\. Historical evidence is not\s+runtime verification'
+            $script:Contract | Should -Match '(?i)Never say the drawing is fixed without a regenerated drawing or an executed targeted test'
+        }
+
+        It 'shows the three-line report a person reads' {
+            $script:Contract | Should -BeLike '*root-cause confidence:*'
+            $script:Contract | Should -BeLike '*runtime reproduction:*'
+            $script:Contract | Should -BeLike '*fix verification:*'
+        }
+
+        It 'lists all five conditions that make a runtime log optional' {
+            $path = [regex]::Match($script:Contract,
+                '(?ms)^### The historical-regression evidence path\s*$.*?(?=^### |\z)').Value
+            $path | Should -Match '(?i)\*\*all five\*\*'
+            @([regex]::Matches($path, '(?m)^\d\.\s')).Count | Should -Be 5
+            $path | Should -Match '(?i)Miss any one of them and the answer is `needs-log`'
+            $path | Should -Match '(?i)return\s+`diagnosed` with `runtimeVerificationStatus: unavailable`, never `fixed`'
+        }
+    }
 }
