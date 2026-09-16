@@ -3220,13 +3220,26 @@ because that is the reading that explains both the old behaviour and the new. Th
 written so that it holds even if that reading is wrong, by telling the reader to check rather than
 to delete.
 
-**Files touched:** In progress.
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/termination-drawing/references/bug-patterns.md` — pattern 8,
+  with Symptom, Check, Typical cause, Caution and the seven cases.
+- `tests/aveva-ei-graphics/skills/termination-drawing/TerminationDrawingSplit.Tests.ps1` — one new
+  context of five tests, and the pattern count raised from 7 to 8.
 
-**Acceptance:** In progress.
+**Acceptance:** Termination-drawing suite 48 of 48. `Test-BuildProgress.ps1` exit 0, 60 rows,
+51 done. Full suite 678 passed, 0 failed, 0 skipped.
 
-**Attempts:** Not started.
+**Attempts:** One. The focused suite passed first time.
+
+**Governed counts changed:** `all 7 bug patterns moved together` became `the 7 copied bug patterns
+are still there, with the ordering one added`, asserting 8. The test was renamed rather than
+edited in place, because its old name claimed something about the copy from v2 that is no longer
+what it measures.
 
 **Decisions:** Add it as pattern 8 in `references/bug-patterns.md` rather than a new file, so the
-existing "read the patterns" instruction reaches it without any change.
+existing "read the patterns" instruction reaches it without any change. The Check step points at
+Step 1b rather than repeating the git commands, so there is one copy of them. The Caution is
+phrased as a question to settle, not as a rule, because which collection each ordering rule
+governs is not established here and a false rule would be worse than none.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.

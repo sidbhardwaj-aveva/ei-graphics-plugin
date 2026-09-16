@@ -127,6 +127,57 @@ Describe 'termination-drawing split' -Tag 'Unit' {
         }
     }
 
+    Context 'the ordering regression has a pattern of its own' {
+        BeforeAll {
+            $script:Ordering = [regex]::Match(
+                (Get-Content -LiteralPath (Join-Path $script:ReferenceFolder 'bug-patterns.md') -Raw),
+                '(?ms)^### 8\. Equipment in the wrong mounting-rail order\s*$.*?(?=^### |^---|\z)').Value
+        }
+
+        It 'describes the symptom with the reported sequence' {
+            $script:Ordering | Should -Match '(?m)^\*\*Symptom\*\*:'
+            $script:Ordering | Should -Match ([regex]::Escape('TS-1, B-1, --134, IOM-1'))
+            $script:Ordering | Should -Match ([regex]::Escape('--134, TS-1, B-1, IOM-1'))
+        }
+
+        It 'sends the reader to compare the old and new ordering implementation' {
+            $script:Ordering | Should -Match '(?m)^\*\*Check\*\*:'
+            $script:Ordering | Should -Match '(?i)Step 1b history triage'
+            $script:Ordering | Should -Match ([regex]::Escape('OrderSequence'))
+            $script:Ordering | Should -Match ([regex]::Escape('ApplyPlateOrdering()'))
+            $script:Ordering | Should -Match '(?i)Read both before forming a hypothesis'
+        }
+
+        It 'names the partitioning cause' {
+            $script:Ordering | Should -Match '(?m)^\*\*Typical cause\*\*:'
+            $script:Ordering | Should -Match '(?i)ahead of the items that do not'
+            $script:Ordering | Should -Match '(?i)instead of applying the domain sequence across all of'
+        }
+
+        It 'warns against deleting the plate ordering' {
+            $script:Ordering | Should -Match '(?m)^\*\*Caution\*\*:'
+            $script:Ordering | Should -Match '(?i)Do not simply delete the plate ordering'
+            $script:Ordering | Should -Match '(?i)nested rail and compartment contents'
+            $script:Ordering | Should -Match '(?i)breaks every drawing that relies on a configured plate order'
+        }
+
+        It 'lists all seven cases a fix must cover' {
+            $cases = [regex]::Match($script:Ordering,
+                '(?ms)^\*\*A fix must hold for all seven cases\*\*:\s*$.*').Value
+            @([regex]::Matches($cases, '(?m)^\d\.\s')).Count | Should -Be 7
+            foreach ($case in @(
+                    'every item unplated'
+                    'every item plated'
+                    'a mix of plated and unplated items'
+                    'nested inside a rail or a compartment'
+                    'strip, barrier, instrument and module sequence'
+                    'the same plate named twice'
+                    'plate data that is missing or empty')) {
+                $cases | Should -Match ([regex]::Escape($case))
+            }
+        }
+    }
+
     Context 'the pieces the plan calls out by number' {
         It 'the Key Files table still has all 14 rows' {
             $architecture = Get-Content -LiteralPath (Join-Path $script:ReferenceFolder 'architecture.md') -Raw
@@ -135,9 +186,9 @@ Describe 'termination-drawing split' -Tag 'Unit' {
             ($rows.Count - 1) | Should -Be 14
         }
 
-        It 'all 7 bug patterns moved together' {
+        It 'the 7 copied bug patterns are still there, with the ordering one added' {
             $patterns = Get-Content -LiteralPath (Join-Path $script:ReferenceFolder 'bug-patterns.md') -Raw
-            @([regex]::Matches($patterns, '(?m)^### \d+\.\s')).Count | Should -Be 7
+            @([regex]::Matches($patterns, '(?m)^### \d+\.\s')).Count | Should -Be 8
         }
 
         It 'all 10 critical rules stayed in SKILL.md' {

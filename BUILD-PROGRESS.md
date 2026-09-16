@@ -1,8 +1,8 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T052
-**Last verified green:** T057 (2026-09-16T11:23:57Z)
+**Current task:** T053
+**Last verified green:** T052 (2026-09-16T11:52:00Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -63,7 +63,7 @@ one file, so it runs before the five larger tasks queued ahead of it.
 | T050 | Separate historical confidence from runtime verification | DONE | a2a81d0 | 2026-09-16T09:52:00Z |
 | T051 | Map the termination-drawing phases and their owners | DONE | 99ce7fa | 2026-09-16T10:18:00Z |
 | T057 | Cut the repeated prose from the intake skill | DONE | fee2891 | 2026-09-16T11:23:57Z |
-| T052 | Write down the ordering-regression pattern | IN-PROGRESS | — | — |
+| T052 | Write down the ordering-regression pattern | DONE | pending | 2026-09-16T11:52:00Z |
 | T053 | Accept a local bug report without Azure DevOps | TODO | — | — |
 | T054 | Resolve script paths from the installed plugin | TODO | — | — |
 | T055 | Prove the session lifecycle cannot be skipped | TODO | — | — |
