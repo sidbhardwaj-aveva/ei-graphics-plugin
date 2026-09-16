@@ -2295,6 +2295,65 @@ task's own row changes.
 plain-language check still passes for that file. The progress check and full Pester suite exit 0
 with no skipped tests.
 
+#### T058 — Send the Azure DevOps token only to Azure DevOps
+
+**Why this task exists.** `Get-Attachment` inside `Convert-EiAdoIntake.ps1` asks `az` for an
+access token, then attaches it as a bearer header to whatever address the work item payload
+carried. Nothing checks where that address points. Anyone who can put a link in a work item
+description can have the script post a live token to a host of their choosing, and the person
+running it sees only a download that worked.
+
+**Do this.** Before the header is attached, check the address. Accept only `https`, and only a host
+that ends in `.visualstudio.com` or is `dev.azure.com`. An address that fails the check is skipped
+with a warning on stderr that names the address and says the attachment was not downloaded, and
+the rest of the run carries on exactly as it does for a failed download today.
+
+Say in `ei-graphics-core/SKILL.md`, under `Convert-EiAdoIntake.ps1`, that only Azure DevOps hosts
+are contacted and that anything else is skipped.
+
+The script sits on its 160-line ceiling in `tests/ScriptContract.Tests.ps1`. Raise it in both
+copies of `$LineCeilings`, and record the new number and the reason in `BUILD-LOG.md`.
+
+**Done when.** Tests prove a `dev.azure.com` address is accepted, a `visualstudio.com` address is
+accepted, a plain `http` address is refused, an address on another host is refused, and that a
+refusal leaves the other attachments untouched and never sends the header. The progress check and
+full Pester suite exit 0 with no skipped tests.
+
+#### T059 — Save an attachment under a name it cannot choose
+
+**Why this task exists.** The same function takes the file name from the `fileName` query
+parameter, decodes it, and joins it to the attachments folder. A name holding `..` escapes that
+folder, so a work item can decide where the script writes. The `$index-` prefix stops two
+attachments colliding; it does not stop one of them leaving the folder.
+
+**Do this.** Reduce the decoded name to its leaf, strip the characters the file system rejects,
+and fall back to `image-<index>.png` when nothing usable is left. Keep the index prefix. Then
+confirm the path that will be written still sits inside the attachments folder, and skip the
+attachment with a warning naming the file when it does not.
+
+**Done when.** Tests prove that a traversing name, an absolute path, an encoded separator and an
+empty name each land inside the attachments folder or are skipped, that an ordinary name is still
+saved unchanged apart from its prefix, and that two attachments sharing a name still both arrive.
+The progress check and full Pester suite exit 0 with no skipped tests.
+
+#### T060 — Say which scripts are safe to run twice
+
+**Why this task exists.** `ei-graphics-core/SKILL.md` promises that running any of its commands
+twice is safe. That is true of the scripts that read, and of the ones that overwrite a file, but
+not of the two that write. `Write-EiSessionEntry.ps1` appends, so a repeat adds a second entry and
+inflates the totals `-Finalize` derives from the entries. `Export-EiSessionBundleToShare.ps1`
+stamps a new folder name from the time and a fresh identifier, so a repeat leaves a second full
+copy of the story text on the review share. A promise that is wrong for the two commands that
+matter most is worse than no promise.
+
+**Do this.** Replace the blanket sentence in `ei-graphics-core/SKILL.md` with a statement per
+script. Say plainly which ones may be run again with no effect, and for the two that cannot, say
+what a second run leaves behind and what to do instead. No script behaviour changes in this task.
+
+**Done when.** Tests prove the blanket sentence is gone, that every one of the nine scripts carries
+a repeat statement, and that the two writers name their consequence. The plain-language check
+still passes for that file. The progress check and full Pester suite exit 0 with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong
