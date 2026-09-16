@@ -3000,3 +3000,28 @@ and an attached image are separate `kind` values. `local-input.md` was added to 
 scan, because it is read by a person as often as by the agent.
 
 **Result:** DONE.
+
+## T054 — Resolve script paths from the installed plugin — 2026-09-16T13:05:00Z
+
+**Goal:** Give the agent one way to turn a script name into an absolute path, and one preflight
+that says up front whether the installed layout is complete, so a hand-built path can no longer
+send every logging command at a folder that does not exist.
+
+**Assumptions:** The roster is the scripts in `ei-graphics-core/scripts`, which is ten once the
+resolver counts itself. The doctor script lives in another skill and is deliberately outside the
+roster, because a session never calls it by path. `-ScriptRoot` defaults to `$PSScriptRoot`, so the
+installed layout needs no argument and a test can still point the resolver somewhere wrong.
+A folder that is not a core scripts folder is a failure even when it holds a file of the right
+name, because that is exactly the mistake the failed session made.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** Not started.
+
+**Decisions:** Record the ceiling raises here: the script count under `plugins` goes from 14 to 15,
+and the `ei-graphics-core/SKILL.md` ceiling from 140 lines, because the new script needs its own
+parameter, output and exit-code section like every other one.
+
+**Result:** IN-PROGRESS.
