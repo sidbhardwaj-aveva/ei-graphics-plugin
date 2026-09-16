@@ -3121,14 +3121,36 @@ the bug report. They are documented as the map the agent reads, not verified aga
 checkout, because this repository holds the plugin and not the product source. The decision table
 is the shortest form of the rule and is the part the agent reads first.
 
-**Files touched:** In progress.
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/termination-drawing/references/architecture.md` — new
+  `## Phase Ownership` section: a five-row phase table, the three ordering methods, the two
+  resolver methods, `ContainedEquipment` against `CanHavePartEquipment`, the six-row
+  symptom-to-owner table and the one-phase-later rule.
+- `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md` — new `Step 3b`, the six-line
+  pre-edit record, and the one-phase-later rule repeated where the edit happens.
+- `tests/aveva-ei-graphics/skills/termination-drawing/TerminationDrawingSplit.Tests.ps1` — two new
+  contexts, nine tests.
 
-**Acceptance:** In progress.
+**Acceptance:** Termination-drawing suite 43 of 43. `Test-BuildProgress.ps1` exit 0, 56 rows,
+49 done. Full suite 667 passed, 0 failed, 0 skipped.
 
-**Attempts:** Not started.
+**Attempts:** Three.
+1. Wrote the phase section by replacing the `---` and heading that opened `## Core Concepts`, and
+   dropped the heading itself. Caught on the next read and restored in place.
+2. `carries all six rows of the symptom-to-owner table` failed. The table was correct; the
+   assertion was not. In a PowerShell wildcard a backtick is the escape character, so `-BeLike`
+   with '*Wrong `MODEL-DONE` order*' searched for the text without its backticks. Switched that
+   loop to `Should -Match ([regex]::Escape($symptom))` and left a comment saying why.
+3. The full suite failed on `NoOrphanReferences`, because the run log had been written to
+   `t051-full.txt` inside the repository and it names retired identifiers. Deleted it and wrote
+   the log to `$env:TEMP` instead. A test-run artifact inside the working tree is scanned like
+   any other file.
 
 **Decisions:** Put the phase map and the decision table in `references/architecture.md`, which the
 agent already has to read before diagnosing, and put the pre-edit record in `SKILL.md`, where the
-edit actually happens.
+edit actually happens. The one-phase-later rule appears in both, because the reference is read at
+diagnosis time and the skill is read at edit time, and the rule has to survive either entry point.
+The `Key Files` table was left at fourteen rows: no new file is named, only methods inside files
+that are already listed.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.

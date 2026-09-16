@@ -261,4 +261,104 @@ Describe 'termination-drawing split' -Tag 'Unit' {
             $path | Should -Match '(?i)return\s+`diagnosed` with `runtimeVerificationStatus: unavailable`, never `fixed`'
         }
     }
+
+    Context 'the phase map says who owns what' {
+        BeforeAll {
+            $script:Architecture = Get-Content -LiteralPath (Join-Path $script:ReferenceFolder 'architecture.md') -Raw
+            $script:PhaseSection = [regex]::Match(
+                $script:Architecture, '(?ms)^## Phase Ownership\s*$.*?(?=^## |\z)').Value
+        }
+
+        It 'names every method a wrong-layer edit could reach for' {
+            foreach ($method in @(
+                    'OrderSequence()'
+                    'ApplyPlateOrdering()'
+                    'GetDwgPlateCollectionOrder()'
+                    'ConnectedEquipmentGroupResolver.GetGroupableContainedEquipment()'
+                    'ConnectedEquipmentGroupResolver.GetAllChildren()'
+                    'PlaceLoc0Groups()'
+                    'LayoutAdjustmentService.AdjustConnectedDeviceVerticalOverlaps()')) {
+                $script:PhaseSection | Should -BeLike "*$method*"
+            }
+        }
+
+        It 'separates ordering, placement and post-placement adjustment' {
+            foreach ($phase in @('Model ordering', 'Group resolution', 'Placement', 'Post-placement adjustment')) {
+                $script:PhaseSection | Should -BeLike "*$phase*"
+            }
+        }
+
+        It 'explains ContainedEquipment against CanHavePartEquipment' {
+            $script:PhaseSection | Should -Match '(?m)^### ContainedEquipment and CanHavePartEquipment\s*$'
+            $script:PhaseSection | Should -Match '(?i)The first is data, the second is a capability'
+            $script:PhaseSection | Should -Match '(?i)ignores nested rail and compartment contents'
+        }
+
+        It 'carries all six rows of the symptom-to-owner table' {
+            $table = [regex]::Match($script:PhaseSection,
+                '(?ms)^### Which owner to inspect first\s*$.*?(?=^### |\z)').Value
+            $rows = @([regex]::Matches($table, '(?m)^\|(?!\s*-).*\|\s*$'))
+            ($rows.Count - 1) | Should -Be 6
+            foreach ($symptom in @(
+                    'Wrong `MODEL-DONE` order'
+                    'Correct `MODEL-DONE`, wrong position'
+                    'Correct model, missing shape'
+                    'Update-only stale shape'
+                    'Wrong connector visibility'
+                    'Duplicate connected equipment')) {
+                # -BeLike would eat the backticks: in a wildcard pattern a backtick is the escape
+                # character, so '`MODEL-DONE`' would look for MODEL-DONE without them.
+                $table | Should -Match ([regex]::Escape($symptom))
+            }
+        }
+
+        It 'warns that the shared resolver is almost never the right place' {
+            $script:PhaseSection | Should -Match '(?i)broader abstraction, and\s+it is shared'
+            $script:PhaseSection | Should -Match '(?i)almost\s+never the right place to fix a symptom seen on one rail'
+        }
+
+        It 'states the one-phase-later rule and its no-log exception' {
+            $rule = [regex]::Match($script:PhaseSection,
+                '(?ms)^### The one-phase-later rule\s*$.*?(?=^### |\z)').Value
+            $rule | Should -Match '(?i)is not the place to edit'
+            $rule | Should -Match '(?i)Move one phase later'
+            $rule | Should -Match '(?i)Label runtime confirmation as missing'
+        }
+    }
+
+    Context 'the hypothesis is recorded before the edit' {
+        BeforeAll {
+            $script:PreEdit = [regex]::Match(
+                (Get-Content -LiteralPath $script:SkillPath -Raw),
+                '(?ms)^### Step 3b — Record the Hypothesis Before You Edit\s*$.*?(?=^### |\z)').Value
+        }
+
+        It 'sits between reading the source and implementing the fix' {
+            $raw = Get-Content -LiteralPath $script:SkillPath -Raw
+            $read = $raw.IndexOf('### Step 3 — Read Source Before Touching It')
+            $record = $raw.IndexOf('### Step 3b — Record the Hypothesis Before You Edit')
+            $implement = $raw.IndexOf('### Step 4 — Implement the Fix')
+            $record | Should -BeGreaterThan $read
+            $implement | Should -BeGreaterThan $record
+        }
+
+        It 'asks for all six lines' {
+            @([regex]::Matches($script:PreEdit, '(?m)^\d\.\s')).Count | Should -Be 6
+            foreach ($item in @(
+                    'the symptom', 'the expected phase', 'the owning method',
+                    'falsifiable hypothesis', 'cheaper alternative hypothesis',
+                    'discriminating evidence')) {
+                $script:PreEdit | Should -BeLike "*$item*"
+            }
+        }
+
+        It 'blocks the edit when the discriminating evidence cannot be named' {
+            $script:PreEdit | Should -Match '(?i)you are not ready to edit'
+        }
+
+        It 'repeats the one-phase-later rule where the edit happens' {
+            $script:PreEdit | Should -Match '(?i)do not change model ordering code'
+            $script:PreEdit | Should -Match '(?i)move one\s+phase later'
+        }
+    }
 }

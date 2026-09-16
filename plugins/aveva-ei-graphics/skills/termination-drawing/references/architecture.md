@@ -54,6 +54,67 @@ runtime model, the answer is usually "symbol-controlled".
 
 ---
 
+## Phase Ownership
+
+Three different phases can produce a wrong-looking drawing, and each has its own owner. Decide the
+phase before you decide the file. Editing a later phase to correct an earlier one leaves the bug
+in place and adds a second one.
+
+| Phase | What it decides | Owning code |
+|-------|-----------------|-------------|
+| Model ordering | The sequence equipment appears in, per mounting rail | `TerminationDrawingModelBuilder.OrderSequence()`, `ApplyPlateOrdering()`, `GetDwgPlateCollectionOrder()` |
+| Group resolution | Which equipment is gathered into a group, and what counts as a child | `ConnectedEquipmentGroupResolver.GetGroupableContainedEquipment()`, `ConnectedEquipmentGroupResolver.GetAllChildren()` |
+| Placement | Where a resolved group lands on the sheet | `PlaceLoc0Groups()`, `CanvasEquipmentData` |
+| Post-placement adjustment | Nudging what is already placed so it does not overlap | `LayoutAdjustmentService.AdjustConnectedDeviceVerticalOverlaps()` |
+| Insertion | Turning the model into shapes on the drawing | `TerminationDrawingInserter`, `EquipmentInserter` |
+
+### The ordering methods
+
+- `OrderSequence()` decides the domain order for a rail: strip, barrier, instrument, module. It is
+  the only place the domain sequence is expressed. A change here changes every drawing.
+- `ApplyPlateOrdering()` applies the mounting-plate order on top of that. The trap is partitioning:
+  concatenating plate-ordered items ahead of unplated ones re-sorts the whole rail, because the
+  unplated items are pushed to the end regardless of their domain order.
+- `GetDwgPlateCollectionOrder()` supplies the plate order those two consume. An empty or partial
+  plate list here is not an error; it means the rail is ordered by domain sequence alone.
+
+### The resolver methods
+
+- `GetGroupableContainedEquipment()` answers what can be gathered into one group.
+- `GetAllChildren()` walks the containment tree beneath an item. It is the broader abstraction, and
+  it is shared. A change here affects grouping, placement and insertion at once, so it is almost
+  never the right place to fix a symptom seen on one rail.
+
+### ContainedEquipment and CanHavePartEquipment
+
+`ContainedEquipment` is what an enclosure actually holds right now. `CanHavePartEquipment` is
+whether a thing is allowed to hold parts at all. The first is data, the second is a capability
+flag. A rail, a compartment and a plate can each be true for `CanHavePartEquipment` while holding
+different `ContainedEquipment`, so nesting is normal. Any ordering rule that only reads the direct
+`ContainedEquipment` of the enclosure silently ignores nested rail and compartment contents.
+
+### Which owner to inspect first
+
+| Symptom | First owner to inspect |
+|---------|------------------------|
+| Wrong `MODEL-DONE` order | Model builder ordering |
+| Correct `MODEL-DONE`, wrong position | `LayoutAdjustmentService` / `CanvasEquipmentData` |
+| Correct model, missing shape | Inserter / `EquipmentInserter` |
+| Update-only stale shape | `UpdateDrawing` / metadata |
+| Wrong connector visibility | Wire, core and link inserters |
+| Duplicate connected equipment | Resolver and deduplication |
+
+### The one-phase-later rule
+
+When the log shows `MODEL-DONE` and `INSERT-START` already carrying the expected order, the model
+ordering code is correct and is not the place to edit. Move one phase later and inspect placement
+and post-placement adjustment instead.
+
+When there is no log, but Step 1b history triage identifies an ordering change, a model-builder fix
+may be proposed. Label runtime confirmation as missing when you do.
+
+---
+
 ## Core Concepts
 
 ### LOC (Level of Connectivity)

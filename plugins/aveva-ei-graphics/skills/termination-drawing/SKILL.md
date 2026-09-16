@@ -160,6 +160,25 @@ for history. It shows provenance, not proof that the story or every scenario is 
 Before modifying any file, call `read_file` on the full relevant source file.  
 Identify the exact method and line where the bug lives using `grep_search`.
 
+### Step 3b — Record the Hypothesis Before You Edit
+
+Write these six lines before the first edit, and put them in the session log:
+
+1. the symptom, in the words the reporter used;
+2. the expected phase, from the phase table in `references/architecture.md`;
+3. the owning method you selected;
+4. one falsifiable hypothesis;
+5. one cheaper alternative hypothesis;
+6. the discriminating evidence that would tell the two apart.
+
+If you cannot name the discriminating evidence, you are not ready to edit.
+
+Apply the one-phase-later rule in `references/architecture.md`. When the log shows `MODEL-DONE`
+and `INSERT-START` already holding the expected order, do not change model ordering code; move one
+phase later and inspect placement and post-placement adjustment. When there is no log but Step 1b
+identifies an ordering change, a model-builder fix may be proposed with runtime confirmation
+labelled as missing.
+
 ### Step 4 — Implement the Fix
 
 - Apply only the change that fixes the root cause. Do not refactor surrounding code.
