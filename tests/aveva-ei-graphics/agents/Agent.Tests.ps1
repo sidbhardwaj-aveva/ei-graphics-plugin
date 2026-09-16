@@ -26,8 +26,8 @@ BeforeAll {
 
 Describe 'ei-graphics.agent.md' -Tag 'Unit' {
 
-    It 'is under 100 lines' {
-        @(Get-Content -LiteralPath $script:AgentPath).Count | Should -BeLessThan 100
+    It 'is under 120 lines' {
+        @(Get-Content -LiteralPath $script:AgentPath).Count | Should -BeLessThan 120
     }
 
     It 'has frontmatter with a name and a description' {
@@ -82,6 +82,19 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $patternIndex = $script:Agent.IndexOf('Only then check the bug patterns.')
         $orientationIndex | Should -BeGreaterThan -1
         $patternIndex | Should -BeGreaterThan $orientationIndex
+    }
+
+    It 'allows one bounded history hop between orientation and bug patterns' {
+        $script:AgentFlat | Should -Match '(?i)run the skill''s history triage before asking for a runtime log'
+        $script:AgentFlat | Should -Match '(?i)at most one history hop'
+        $script:AgentFlat | Should -Match '(?i)return to the selected Key Files'
+
+        $architectureIndex = $script:Agent.IndexOf('Read its `references/architecture.md` next.')
+        $triageIndex = $script:Agent.IndexOf('run the skill''s history triage')
+        $patternIndex = $script:Agent.IndexOf('Only then check the bug patterns.')
+        $architectureIndex | Should -BeGreaterThan -1
+        $triageIndex | Should -BeGreaterThan $architectureIndex
+        $patternIndex | Should -BeGreaterThan $triageIndex
     }
 
     It 'requires evidence of domain reading before diagnosis claims' {

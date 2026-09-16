@@ -27,11 +27,13 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 1. Before diagnosing, read the selected `SKILL.md` in full.
 2. Read its `references/architecture.md` next. Use its pipeline, file map and domain model to
   classify the symptom and select the relevant references and Key Files.
-3. Only then check the bug patterns. A match narrows the diagnosis; it does not replace orientation.
-4. Only search more widely when the skill says nothing about the situation.
-5. Every file you read that is not in the Key Files table probably means the skill has a gap.
+3. When the symptom may be a regression, run the skill's history triage before asking for a
+  runtime log. Take at most one history hop, then return to the selected Key Files.
+4. Only then check the bug patterns. A match narrows the diagnosis; it does not replace orientation.
+5. Only search more widely when the skill says nothing about the situation.
+6. Every file you read that is not in the Key Files table probably means the skill has a gap.
    Note it in the session log.
-6. Before presenting a diagnosis, write an `implementation` session entry listing the selected
+7. Before presenting a diagnosis, write an `implementation` session entry listing the selected
   `SKILL.md` read in full, `references/architecture.md`, selected references and source files read
   in full. Claim skill support only for conclusions tied to a listed supporting file.
 

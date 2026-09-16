@@ -72,7 +72,8 @@ Return a JSON object:
 }
 ```
 
-- `status: needs-log` → symptom alone is insufficient; request log.
+- `status: needs-log` → the symptom alone is insufficient **and** the Step 1b triage found no
+  commit that controls the reported behaviour. Request the log, and say what triage ruled out.
 - `status: blocked` → contradictory evidence; explain what is missing.
 - `confidence` in `[0, 1]`; anything below `0.7` must accompany a `blocked` or `needs-log` status.
 
@@ -81,9 +82,33 @@ Return a JSON object:
 ## Invocation Workflow
 ### Step 1 — Understand the Problem
 - Determine whether the bug is a **CREATION** issue (first generation) or an **UPDATE** issue (re-generation).
-- If only a symptom is supplied and confidence < 0.7, request the diagnostic log before proceeding.
+- If only a symptom is supplied, run Step 1b before you ask for the diagnostic log.
 - Check `MODEL-DONE` to understand what's in the model.
 - Check `INSERT-START` to confirm insertion order.
+
+### Step 1b — Regression Triage
+
+Run this fixed sequence whenever the symptom is an order, a position, a layout, a grouping, a
+rendering sequence, or any output that used to be right and has changed. Run it before you return
+`needs-log`. Run the steps in order.
+
+a. Classify the symptom as creation, update, or both.
+b. Name the owning pipeline phase from `references/architecture.md`.
+c. Search local history for the symbols and key files that phase owns:
+
+```powershell
+git log --all --oneline -S "<symbol>" -- <key file> <key file>
+git log --all --oneline -- <key file> <key file>
+```
+
+d. Read each candidate commit: `git show <commit> -- <key file>`.
+e. Compare the current implementation with the last known-good one. Name the method that changed
+   and what the change did to the reported behaviour.
+f. Only now decide whether a runtime log is needed.
+
+This is a fixed list, not an invitation to explore. Take at most one history hop, then return to
+the Key Files the architecture reference selected. If the sequence finds no commit that touches
+the reported behaviour, say so and ask for the log.
 
 ### Step 2 — Analyse the Log
 

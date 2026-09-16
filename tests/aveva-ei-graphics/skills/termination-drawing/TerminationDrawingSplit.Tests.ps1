@@ -48,8 +48,8 @@ BeforeAll {
 Describe 'termination-drawing split' -Tag 'Unit' {
 
     Context 'the skill document stays small' {
-        It 'is under 180 lines' {
-            @(Get-Content -LiteralPath $script:SkillPath).Count | Should -BeLessThan 180
+        It 'is under 260 lines' {
+            @(Get-Content -LiteralPath $script:SkillPath).Count | Should -BeLessThan 260
         }
 
         It 'is under 5000 tokens, estimated as characters divided by 4' {
@@ -160,6 +160,57 @@ Describe 'termination-drawing split' -Tag 'Unit' {
             $step | Should -BeLike '*references/log-analysis.md*'
             Get-Content -LiteralPath (Join-Path $script:ReferenceFolder 'log-analysis.md') -Raw |
                 Should -BeLike '*SKIP-DUPLICATE*'
+        }
+    }
+
+    Context 'regression triage runs before the log is demanded' {
+        BeforeAll {
+            $script:SkillRaw = Get-Content -LiteralPath $script:SkillPath -Raw
+            $script:TriageStep = [regex]::Match(
+                $script:SkillRaw, '(?ms)^### Step 1b — Regression Triage\s*$.*?(?=^### |\z)').Value
+        }
+
+        It 'has its own step, between understanding the problem and analysing the log' {
+            $script:TriageStep | Should -Not -BeNullOrEmpty
+            $understanding = $script:SkillRaw.IndexOf('### Step 1 — Understand the Problem')
+            $triage = $script:SkillRaw.IndexOf('### Step 1b — Regression Triage')
+            $analysis = $script:SkillRaw.IndexOf('### Step 2 — Analyse the Log')
+            $triage | Should -BeGreaterThan $understanding
+            $analysis | Should -BeGreaterThan $triage
+        }
+
+        It 'names every symptom class that triggers it' {
+            foreach ($symptom in @('order', 'position', 'layout', 'grouping', 'rendering sequence')) {
+                $script:TriageStep | Should -BeLike "*$symptom*"
+            }
+            $script:TriageStep | Should -Match '(?i)before you return\s+`needs-log`'
+        }
+
+        It 'lists the six triage steps in order' {
+            $letters = @([regex]::Matches($script:TriageStep, '(?m)^([a-f])\.\s') |
+                    ForEach-Object { $_.Groups[1].Value })
+            ($letters -join '') | Should -Be 'abcdef'
+        }
+
+        It 'gives the exact history commands, not a suggestion to look around' {
+            $script:TriageStep | Should -BeLike '*git log --all --oneline -S*'
+            $script:TriageStep | Should -BeLike '*git log --all --oneline --*'
+            $script:TriageStep | Should -BeLike '*git show <commit> -- <key file>*'
+        }
+
+        It 'bounds the search to one hop and sends the agent back to the key files' {
+            $script:TriageStep | Should -Match '(?i)fixed list, not an invitation to explore'
+            $script:TriageStep | Should -Match '(?i)at most one history hop'
+            $script:TriageStep | Should -Match '(?i)return to\s+the Key Files'
+        }
+
+        It 'makes needs-log conditional on the triage finding nothing' {
+            $script:SkillRaw | Should -Match '(?i)`status: needs-log`.*Step 1b triage found no'
+        }
+
+        It 'no longer sends the agent straight to the log from a bare symptom' {
+            $script:SkillRaw | Should -Not -Match '(?i)request the diagnostic log before proceeding'
+            $script:SkillRaw | Should -Match '(?i)run Step 1b before you ask for the diagnostic log'
         }
     }
 }

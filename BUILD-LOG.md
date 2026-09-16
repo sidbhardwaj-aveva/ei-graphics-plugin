@@ -3037,13 +3037,36 @@ count in `EverythingGreen.Tests.ps1` is edited in the same governed way as T024,
 T049 through T056 are all written into `plan.md` in this start commit, so the whole group is
 visible and the progress checker can see every row from the first task.
 
-**Files touched:** In progress.
+**Files touched:**
+- `plugins/aveva-ei-graphics/skills/termination-drawing/SKILL.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/aveva-ei-graphics/skills/termination-drawing/TerminationDrawingSplit.Tests.ps1`
+- `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
+- `tests/EverythingGreen.Tests.ps1`
+- `plan.md`, `BUILD-PROGRESS.md`, `BUILD-LOG.md`
 
-**Acceptance:** In progress.
+**Acceptance:** The focused termination-drawing and agent suites pass 65/65 with zero skipped
+tests. `Test-BuildProgress.ps1` exits 0 at 56 rows. The full suite passes 650 tests with zero
+failures and zero skipped tests.
 
-**Attempts:** Not started.
+**Attempts:** One. Added `### Step 1b — Regression Triage` with the six lettered steps, the three
+exact history commands, the one-hop bound, and the return to the Key Files. Changed the Step 1
+bullet that sent a bare symptom straight to the log, and made `needs-log` conditional on triage
+finding no controlling commit. Added the agent's one-hop rule between the architecture read and
+the bug-pattern check, renumbering that list from six items to seven.
+
+**Ceilings raised:** The termination-drawing `SKILL.md` line ceiling, 180 to 260, in
+`TerminationDrawingSplit.Tests.ps1`. The file was at 179 lines with no room for the triage step.
+The binding budget for that file is the token check, which sits at 2456 of 5000 after this task,
+so the line count was the weaker of the two limits. The agent file ceiling, 100 to 120, in
+`Agent.Tests.ps1`, because seven more tasks in this group add lines to that file.
+
+**Governed counts:** `EverythingGreen.Tests.ps1` row count, 48 to 56, for the eight rows this
+group adds. Same pattern as T024, T025 and T044.
 
 **Decisions:** Put the triage sequence in the domain skill, not the agent file, because it is
-domain knowledge and the agent file has no room. The agent gets the one-hop bound only.
+domain knowledge and the agent file has no room. The agent gets the one-hop bound only. Wrote all
+eight plan sections in the T049 start commit so the whole group is visible and every row exists
+from the first task.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE. The triage runs before `needs-log`, and both suites prove the order.
