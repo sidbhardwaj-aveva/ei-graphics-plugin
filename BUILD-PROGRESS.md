@@ -57,4 +57,4 @@ in `BUILD-LOG.md`.
 | T045 | Read the selected domain skill before diagnosing | DONE | 88a13dd | 2026-09-16T12:31:10Z |
 | T046 | Record domain-read and test evidence | DONE | 2bfed5e | 2026-09-16T14:09:27Z |
 | T047 | Fail incomplete session completion | DONE | 7017dfe | 2026-09-16T14:28:21Z |
-| T048 | Show the session-close command | DONE | pending | 2026-09-16T14:36:37Z |
+| T048 | Show the session-close command | DONE | 398e499 | 2026-09-16T14:36:37Z |
