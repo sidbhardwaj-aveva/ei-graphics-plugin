@@ -3243,3 +3243,26 @@ phrased as a question to settle, not as a rule, because which collection each or
 governs is not established here and a false rule would be worse than none.
 
 **Result:** DONE.
+
+## T053 — Accept a local bug report without Azure DevOps — 2026-09-16T12:05:00Z
+
+**Goal:** Give a bug that arrived as an attached report, a local folder, a pasted symptom or a
+local log the same supported route as a work item, so it produces an understanding artifact and a
+session that can be closed.
+
+**Assumptions:** The understanding artifact must still be bound to something fixed, so a local
+route computes its own hash over the local input instead of over `ado.json`. `adoHash` keeps its
+name and its meaning; it simply stops being required when `inputSource` is present. The four kinds
+in the plan are the whole list, so the schema states them as an enumeration rather than free text.
+`Test-Json` was checked against a probe schema first and does honour `anyOf`.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** Not started.
+
+**Decisions:** Express the choice as `anyOf` over `adoHash` and `inputSource`, so a payload with
+neither is refused by the schema rather than by prose.
+
+**Result:** IN-PROGRESS.
