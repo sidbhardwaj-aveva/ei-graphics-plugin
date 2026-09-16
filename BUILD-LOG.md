@@ -3107,3 +3107,28 @@ finished repair.
 
 **Result:** DONE. A diagnosis now states the root cause, the runtime reproduction and the fix
 verification as three separate facts, and both suites prove it.
+
+## T051 — Map the termination-drawing phases and their owners — 2026-09-16T09:56:00Z
+
+**Goal:** Say in the architecture reference which phase owns ordering, which owns placement and
+which owns post-placement adjustment, name the methods in each, and make the agent write a
+pre-edit record so a wrong-layer edit has to be argued for before it is made.
+
+**Assumptions:** The failed session edited `ConnectedEquipmentGroupResolver.GetAllChildren()`, a
+later and broader abstraction, when mounting-rail order is decided in the model builder. The
+method names in this task come from the reported evidence and from the historical commit named in
+the bug report. They are documented as the map the agent reads, not verified against a local
+checkout, because this repository holds the plugin and not the product source. The decision table
+is the shortest form of the rule and is the part the agent reads first.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** Not started.
+
+**Decisions:** Put the phase map and the decision table in `references/architecture.md`, which the
+agent already has to read before diagnosing, and put the pre-edit record in `SKILL.md`, where the
+edit actually happens.
+
+**Result:** IN-PROGRESS.
