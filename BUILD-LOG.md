@@ -41,6 +41,21 @@ progress row to mark `IN-PROGRESS` beforehand.
 
 **Result:** DONE at commit 7254028
 
+## T048 — Show the session-close command — 2026-09-16T14:35:00Z
+
+**Goal:** Give developers a canonical installed-plugin command for closing a session.
+
+**Assumptions:** The installed plugin root contains `plugins\aveva-ei-graphics`. Its core
+scripts sit beneath that plugin root. The target repository root remains a separate argument.
+
+**Files touched:**
+- `plan.md`
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
+
+
 ## T047 — Fail incomplete session completion — 2026-09-16T14:15:00Z
 
 **Goal:** Make incomplete session completion fail before it can look like a valid delivery.

@@ -2097,6 +2097,19 @@ report its exit code and artifact path. Add focused Pester coverage.
 **Done when.** The targeted script and agent tests pass. The progress check and full Pester suite
 exit 0 with no skipped tests.
 
+#### T048 — Show the session-close command
+
+**Why this task exists.** The agent requires `Complete-EiSession.ps1`, but a developer can still
+mistype its installed path when closing a session. A short canonical command makes the required
+wrapper runnable without reconstructing its inner dependencies.
+
+**Do this.** Add a PowerShell example that derives the wrapper from the installation root through
+`plugins\aveva-ei-graphics`. Use clear variable names for the installation root, target root,
+story ID and outcome. Add a Pester text contract for the path and invocation.
+
+**Done when.** The agent test proves the canonical command points at the wrapper. The progress
+check and full Pester suite exit 0 with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong
