@@ -2083,6 +2083,20 @@ and zero failures. Add Pester text contracts for all three rules.
 **Done when.** The focused agent suite proves the evidence record, claim boundary and test-result
 rule. The progress check and full Pester suite exit 0 with no skipped tests.
 
+#### T047 — Fail incomplete session completion
+
+**Why this task exists.** A missing manually constructed script path left an empty session log.
+The finalizer accepted it and the agent did not use the session-close wrapper. A completed session
+must have recorded work and a rendered summary.
+
+**Do this.** Reject an empty session when finalizing, except for explicit `aborted` and
+`setup-failed` outcomes. Make the close wrapper reject a successful renderer response when its
+summary path does not exist. Require the agent to close through `Complete-EiSession.ps1` and
+report its exit code and artifact path. Add focused Pester coverage.
+
+**Done when.** The targeted script and agent tests pass. The progress check and full Pester suite
+exit 0 with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong

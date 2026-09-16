@@ -41,6 +41,24 @@ progress row to mark `IN-PROGRESS` beforehand.
 
 **Result:** DONE at commit 7254028
 
+## T047 — Fail incomplete session completion — 2026-09-16T14:15:00Z
+
+**Goal:** Make incomplete session completion fail before it can look like a valid delivery.
+
+**Assumptions:** A session with no recorded entries is incomplete unless it explicitly records
+an aborted or setup-failed outcome. The writer owns that rule. The close wrapper owns verifying
+the summary file returned by the renderer.
+
+**Files touched:**
+- `plan.md`
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Write-EiSessionEntry.ps1`
+- `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Complete-EiSession.ps1`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- focused Pester tests
+
+
 ## T046 — Record domain-read and test evidence — 2026-09-16T12:35:00Z
 
 **Goal:** Prevent an agent from claiming domain-skill support or test verification without
