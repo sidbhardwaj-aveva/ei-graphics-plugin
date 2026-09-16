@@ -2068,6 +2068,21 @@ before bug-pattern matching. The agent file stays below 100 lines. The focused a
 progress check, and full Pester suite exit
 0 with no skipped tests.
 
+#### T046 — Record domain-read and test evidence
+
+**Why this task exists.** A termination-drawing response claimed a full skill read and verified
+tests without showing either. It read only part of the main skill file, did not identify the
+architecture reference, and its test command emitted no test result.
+
+**Do this.** Require a pre-diagnosis session entry that lists the full selected `SKILL.md`, its
+architecture reference, other selected references, and full source files read. The agent may not
+claim that a skill supports a conclusion unless that record names the supporting file. A build is
+not a test result. Do not say a fix is verified until the targeted test command reports discovery
+and zero failures. Add Pester text contracts for all three rules.
+
+**Done when.** The focused agent suite proves the evidence record, claim boundary and test-result
+rule. The progress check and full Pester suite exit 0 with no skipped tests.
+
 ---
 
 ## Part 8 — When things go wrong

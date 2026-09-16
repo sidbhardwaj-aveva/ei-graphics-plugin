@@ -41,6 +41,23 @@ progress row to mark `IN-PROGRESS` beforehand.
 
 **Result:** DONE at commit 7254028
 
+## T046 — Record domain-read and test evidence — 2026-09-16T12:35:00Z
+
+**Goal:** Prevent an agent from claiming domain-skill support or test verification without
+recorded evidence.
+
+**Assumptions:** The existing session writer can record an implementation action, outcome,
+reasoning and evidence without a schema change. A text contract can require the agent to create
+that entry before diagnosis and distinguish a passing build from a passing targeted test.
+
+**Files touched:**
+- `plan.md`
+- `BUILD-PROGRESS.md`
+- `BUILD-LOG.md`
+- `plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`
+- `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`
+
+
 ## T045 — Read the selected domain skill before diagnosing — 2026-09-16T12:17:00Z
 
 **Goal:** Make a selected domain skill establish its pipeline, file ownership and relevant

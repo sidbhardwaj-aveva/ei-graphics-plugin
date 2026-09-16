@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T045
+**Current task:** T046
 **Last verified green:** T045 (2026-09-16T12:31:10Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -55,3 +55,4 @@ in `BUILD-LOG.md`.
 | T043 | Remember the doctor decision once per user | DONE | 1d4ece4 | 2026-09-11T06:03:29Z |
 | T044 | Name the real script path for the intake wrapper | DONE | 3e80068 | 2026-09-15T12:09:58Z |
 | T045 | Read the selected domain skill before diagnosing | DONE | 88a13dd | 2026-09-16T12:31:10Z |
+| T046 | Record domain-read and test evidence | IN-PROGRESS | — | — |
