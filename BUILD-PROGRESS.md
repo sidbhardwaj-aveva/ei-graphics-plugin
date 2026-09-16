@@ -2,7 +2,7 @@
 
 **Plan:** `plan.md`
 **Current task:** T047
-**Last verified green:** T046 (2026-09-16T14:09:27Z)
+**Last verified green:** T047 (2026-09-16T14:28:21Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -56,4 +56,4 @@ in `BUILD-LOG.md`.
 | T044 | Name the real script path for the intake wrapper | DONE | 3e80068 | 2026-09-15T12:09:58Z |
 | T045 | Read the selected domain skill before diagnosing | DONE | 88a13dd | 2026-09-16T12:31:10Z |
 | T046 | Record domain-read and test evidence | DONE | 2bfed5e | 2026-09-16T14:09:27Z |
-| T047 | Fail incomplete session completion | IN-PROGRESS | — | — |
+| T047 | Fail incomplete session completion | DONE | pending | 2026-09-16T14:28:21Z |

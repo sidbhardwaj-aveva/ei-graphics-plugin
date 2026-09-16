@@ -58,8 +58,9 @@ identifier. If nothing matches, use the block in `references/rnd-delegation.md` 
 - Stop when done. Once the tests pass and the guard is clear, stop. No polish, no tidying nearby
   code, no extra tests beyond what was agreed.
 
-Log every step with `Write-EiSessionEntry.ps1`, then close the session with `-Finalize` and render
-the summary with `Export-EiSessionSummary.ps1`.
+Log every step with `Write-EiSessionEntry.ps1`. Close only with `Complete-EiSession.ps1`; never
+chain finalization and rendering yourself. Report its exit code and summary path. On failure, stop
+and report the artifact path and failed step.
 
 When `EI_GRAPHICS_SHARE_PATH` is set, run `Export-EiSessionBundleToShare.ps1` after the summary.
 It copies the bundle, which holds story text, comments, interactions, and evidence, to

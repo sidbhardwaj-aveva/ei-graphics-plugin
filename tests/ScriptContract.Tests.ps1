@@ -11,7 +11,7 @@ $PluginsRoot = Join-Path $RepoRoot 'plugins'
 # for the comment-deviation field on the summary.
 $LineCeilings = @{
     'Write-EiArtifact'         = 120
-    'Write-EiSessionEntry'     = 275
+    'Write-EiSessionEntry'     = 300
     'Export-EiSessionSummary'  = 250
     'Export-EiSessionBundleToShare' = 120
     'Get-EiDomainSkillCatalog' = 120
@@ -57,7 +57,7 @@ BeforeAll {
 
     $script:LineCeilings = @{
         'Write-EiArtifact'         = 120
-        'Write-EiSessionEntry'     = 275
+        'Write-EiSessionEntry'     = 300
         'Export-EiSessionSummary'  = 250
         'Export-EiSessionBundleToShare' = 120
         'Get-EiDomainSkillCatalog' = 120

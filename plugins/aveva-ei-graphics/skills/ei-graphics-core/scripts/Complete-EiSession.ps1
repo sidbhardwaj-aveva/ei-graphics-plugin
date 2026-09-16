@@ -80,6 +80,10 @@ if ($LASTEXITCODE -ne 0) {
 
 $summary = $summaryJson -join "`n" | ConvertFrom-Json
 $summaryPath = $summary.path
+if (-not $summaryPath -or -not (Test-Path -LiteralPath $summaryPath -PathType Leaf)) {
+    Write-Problem "Step 2 failed: Export-EiSessionSummary.ps1 did not create session-summary.md at '$summaryPath'. Check the renderer output and retry the close command."
+    exit 1
+}
 
 $bundlePath = $null
 $shareStatus = 'skipped'

@@ -58,7 +58,11 @@ Set-StrictMode -Version Latest
 if ($Help) { 'SYNOPSIS'; exit 0 }
 $callLog = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))))) 'call-log.json'
 @{ step = 'summary'; StoryId = $StoryId } | ConvertTo-Json -Compress | Add-Content -LiteralPath $callLog -Encoding utf8
-Write-Output '{"path":"stub/session-summary.md","storyId":"4965976","verbosity":"verbose"}'
+$sessionFolder = Join-Path (Split-Path -Parent $callLog) '.ei-session-logs' $StoryId
+$null = New-Item -ItemType Directory -Path $sessionFolder -Force
+$summaryPath = Join-Path $sessionFolder 'session-summary.md'
+Set-Content -LiteralPath $summaryPath -Value '# Session summary' -Encoding utf8
+@{ path = $summaryPath; storyId = $StoryId; verbosity = 'verbose' } | ConvertTo-Json -Compress | Write-Output
 exit 0
 '@
 
@@ -116,7 +120,7 @@ Describe 'Complete-EiSession' -Tag 'Unit' {
             $out = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' -Json 2>&1
             $LASTEXITCODE | Should -Be 0
             $result = ($out -join "`n") | ConvertFrom-Json
-            $result.summaryPath | Should -Be 'stub/session-summary.md'
+            $result.summaryPath | Should -Be (Join-Path $box.SandboxRoot '.ei-session-logs' '4965976' 'session-summary.md')
             $result.bundlePath | Should -BeNullOrEmpty
             $result.shareStatus | Should -Be 'skipped'
             (Get-CallSteps -Path $box.CallLog) | Should -Be @('finalize', 'summary')
@@ -128,7 +132,7 @@ Describe 'Complete-EiSession' -Tag 'Unit' {
             $out = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' -Json 2>&1
             $LASTEXITCODE | Should -Be 0
             $result = ($out -join "`n") | ConvertFrom-Json
-            $result.summaryPath | Should -Be 'stub/session-summary.md'
+            $result.summaryPath | Should -Be (Join-Path $box.SandboxRoot '.ei-session-logs' '4965976' 'session-summary.md')
             $result.bundlePath | Should -Be 'stub/share/4965976-001'
             $result.shareStatus | Should -Be 'exported'
             (Get-CallSteps -Path $box.CallLog) | Should -Be @('finalize', 'summary', 'bundle')
@@ -174,6 +178,23 @@ exit 1
             ($err -join "`n") | Should -Match '(?i)Export-EiSessionSummary\.ps1'
         }
 
+        It 'exits 1 when the renderer reports a summary that does not exist' {
+            $missingSummary = @'
+[CmdletBinding()]
+param([string]$StoryId, [string]$Root='.', [switch]$Json, [switch]$Help)
+Set-StrictMode -Version Latest
+if ($Help) { 'SYNOPSIS'; exit 0 }
+Write-Output '{"path":"C:/missing/session-summary.md","storyId":"4965976"}'
+exit 0
+'@
+            $box = New-Sandbox -Shims @{ Finalize = $script:HappyFinalizeShim; Summary = $missingSummary; Bundle = $script:HappyBundleShim }
+            $err = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' 2>&1
+            $LASTEXITCODE | Should -Be 1
+            ($err -join "`n") | Should -Match '(?i)Step 2 failed'
+            ($err -join "`n") | Should -Match '(?i)did not create session-summary\.md'
+            (Get-CallSteps -Path $box.CallLog) | Should -Be @('finalize')
+        }
+
         It 'warns but still exits 0 when the share export fails' {
             $failingBundle = @'
 [CmdletBinding()]
@@ -194,7 +215,7 @@ exit 1
             for ($i = $lines.Count - 1; $i -ge 0; $i--) { if ($lines[$i] -match '^\s*\{\s*$') { $openAt = $i; break } }
             $openAt | Should -BeGreaterOrEqual 0 -Because "the wrapper's -Json output must be on the stream"
             $result = ($lines[$openAt..($lines.Count - 1)] -join "`n") | ConvertFrom-Json
-            $result.summaryPath | Should -Be 'stub/session-summary.md'
+            $result.summaryPath | Should -Be (Join-Path $box.SandboxRoot '.ei-session-logs' '4965976' 'session-summary.md')
             $result.bundlePath | Should -BeNullOrEmpty
             $result.shareStatus | Should -Be 'failed'
         }

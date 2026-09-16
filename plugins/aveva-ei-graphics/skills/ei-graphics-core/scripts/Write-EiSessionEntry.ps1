@@ -188,6 +188,10 @@ if (Test-Path -LiteralPath $target) {
 
 if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
     $entries = @($session['entries'])
+    if ($entries.Count -eq 0 -and $SessionOutcome -notin @('aborted', 'setup-failed')) {
+        Write-Problem "The session for story $StoryId has no entries. Append the work performed before finalizing, or use -SessionOutcome aborted or setup-failed."
+        exit 1
+    }
     $durations = @($entries | ForEach-Object { if ($_.Contains('durationMs')) { $_['durationMs'] } } | Where-Object { $null -ne $_ })
     $tokens = @($entries | ForEach-Object { if ($_.Contains('tokensUsed')) { $_['tokensUsed'] } } | Where-Object { $null -ne $_ })
     $touched = @($entries | ForEach-Object { if ($_.Contains('filesModified')) { $_['filesModified'] } })

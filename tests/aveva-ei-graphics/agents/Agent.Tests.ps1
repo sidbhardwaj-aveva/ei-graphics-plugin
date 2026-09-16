@@ -98,6 +98,13 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:AgentFlat | Should -Match '(?i)execution is unconfirmed'
     }
 
+    It 'requires wrapper-only session completion with reported evidence' {
+        $script:AgentFlat | Should -Match '(?i)Close only with `Complete-EiSession\.ps1`'
+        $script:AgentFlat | Should -Match '(?i)never chain finalization and rendering yourself'
+        $script:AgentFlat | Should -Match '(?i)Report its exit code and summary path'
+        $script:AgentFlat | Should -Match '(?i)artifact path and failed step'
+    }
+
     It 'says a comment can override the description' {
         $script:AgentFlat | Should -Match '(?i)comment can correct the description'
     }

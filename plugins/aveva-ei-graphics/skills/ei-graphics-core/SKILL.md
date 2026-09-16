@@ -135,4 +135,5 @@ and when `EI_GRAPHICS_SHARE_PATH` is set, `Export-EiSessionBundleToShare.ps1 -Sh
 **Output:** the summary path and, when the share export ran, the exported bundle path.
 
 **Exit codes:** 0 on success. 1 when finalize or summary fails, with the failing step named
-on stderr. A share-export failure is a warning on stderr, not fatal.
+on stderr. It rejects a renderer response unless the reported summary file exists. A share-export
+failure is a warning on stderr, not fatal.

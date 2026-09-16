@@ -325,6 +325,15 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
     }
 
     Context '-Finalize tells a measured zero from no measurement at all' {
+        It 'rejects an empty session unless the outcome records why' {
+            $run = Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'blocked-needs-log' })
+            $run.ExitCode | Should -Be 1
+
+            $run = Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'setup-failed' })
+            $run.ExitCode | Should -Be 0
+            @((Get-Session -Root $script:Root | ConvertFrom-Json).entries).Count | Should -Be 0
+        }
+
         It 'omits totalTokens when no entry recorded one' {
             # Nothing here can count tokens, so reporting 0 would claim the run was free.
             Invoke-Entry -Splat ($script:Base + @{
