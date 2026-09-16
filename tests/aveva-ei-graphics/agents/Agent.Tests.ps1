@@ -47,6 +47,22 @@ Describe 'ei-graphics.agent.md' -Tag 'Unit' {
         $script:Agent | Should -BeLike '*references/checkpoint-templates.md*'
     }
 
+    It 'runs the preflight before it writes anything' {
+        $script:Agent | Should -Match '(?m)^## Preflight\s*$'
+        $script:AgentFlat | Should -Match '(?i)Before the first session entry, run `Resolve-EiScriptPath\.ps1`'
+        $script:AgentFlat | Should -Match '(?i)with no `-Name`'
+        $script:AgentFlat | Should -Match '(?i)Never rebuild a script path by hand'
+    }
+
+    It 'stops and reports four things when the preflight fails' {
+        $script:AgentFlat | Should -Match '(?i)preflight exits 1'
+        $script:AgentFlat | Should -Match ([regex]::Escape('-SessionOutcome setup-failed'))
+        foreach ($item in @('the exact command you ran', 'its exit code', 'the artifact path', 'the command that recovers')) {
+            $script:AgentFlat | Should -Match ([regex]::Escape($item))
+        }
+        $script:AgentFlat | Should -Match '(?i)Do not carry on with a path you assembled yourself'
+    }
+
     It 'offers a route for a bug that has no work item' {
         $script:Agent | Should -Match '(?m)^## Intake without a work item\s*$'
         $script:Agent | Should -BeLike '*references/local-input.md*'

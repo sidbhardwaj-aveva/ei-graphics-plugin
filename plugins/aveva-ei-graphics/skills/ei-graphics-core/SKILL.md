@@ -1,14 +1,29 @@
 ---
 name: ei-graphics-core
-description: Usage reference for the nine core scripts of an Electrical and Instrumentation (EI) Graphics session, from ADO intake through the shared session bundle.
+description: Usage reference for the ten core scripts of an Electrical and Instrumentation (EI) Graphics session, from ADO intake through the shared session bundle.
 ---
 # EI Graphics Core
-Nine scripts, all in `scripts/`. The schemas they check against are in `schemas/`.
+Ten scripts, all in `scripts/`. The schemas they check against are in `schemas/`.
 They all behave the same way. JSON goes to stdout and messages go to stderr. Exit code 0 means it
 worked and 1 means it did not. Running the same command twice is safe. Nothing prompts for input.
 `-Help` prints the synopsis and exits 0.
 Artifacts are written under `<Root>/.ei-session-logs/<storyId>/`. `-Root` defaults to the current
 folder, so you rarely pass it.
+## `Resolve-EiScriptPath.ps1`
+Turns the name of a core script into the absolute path of the installed file.
+
+**Parameters:** `-Name`, `-ScriptRoot`, `-Json`, `-Help`. `-ScriptRoot` defaults to the folder the
+script sits in, so the installed layout needs no argument.
+
+With no `-Name` it checks the whole roster instead, which is what the preflight runs. A folder that
+does not end `plugins\aveva-ei-graphics\skills\ei-graphics-core\scripts` is refused. That holds
+even when it contains files of the right names, so a path built by hand cannot quietly succeed.
+
+**Output:** with `-Name`, the status, the name, the resolved path and the scripts folder. Without
+it, the status, the scripts folder and the full roster of paths.
+
+**Exit codes:** 0 when the roster is complete and any named script resolved. 1 when the folder is
+missing, is not the core scripts folder, is short a script, or the name is not a core script.
 ## `Write-EiArtifact.ps1`
 Checks a payload against its schema, then writes it as JSON.
 

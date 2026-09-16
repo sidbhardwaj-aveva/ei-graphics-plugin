@@ -9,6 +9,7 @@ BeforeAll {
     $script:Raw = Get-Content -LiteralPath $script:SkillPath -Raw
 
     $script:CoreScripts = @(
+        'Resolve-EiScriptPath.ps1'
         'Write-EiArtifact.ps1'
         'Write-EiSessionEntry.ps1'
         'Export-EiSessionSummary.ps1'
@@ -38,11 +39,12 @@ Describe 'ei-graphics-core SKILL.md' -Tag 'Unit' {
         $declared | Should -Be (Split-Path -Leaf $script:SkillFolder)
     }
 
-    It 'is 140 lines or fewer' {
-        $script:Lines.Count | Should -BeLessOrEqual 140
+    It 'is 160 lines or fewer' {
+        $script:Lines.Count | Should -BeLessOrEqual 160
     }
 
     It 'names <_>' -ForEach @(
+        'Resolve-EiScriptPath.ps1'
         'Write-EiArtifact.ps1'
         'Write-EiSessionEntry.ps1'
         'Export-EiSessionSummary.ps1'

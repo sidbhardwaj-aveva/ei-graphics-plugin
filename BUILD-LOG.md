@@ -3014,14 +3014,33 @@ installed layout needs no argument and a test can still point the resolver somew
 A folder that is not a core scripts folder is a failure even when it holds a file of the right
 name, because that is exactly the mistake the failed session made.
 
-**Files touched:** In progress.
+**Files touched:** a new `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Resolve-EiScriptPath.ps1`,
+a new `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Resolve-EiScriptPath.Tests.ps1`,
+`plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md`,
+`plugins/aveva-ei-graphics/agents/ei-graphics.agent.md`, `tests/ScriptContract.Tests.ps1`,
+`tests/EverythingGreen.Tests.ps1`, `tests/aveva-ei-graphics/skills/ei-graphics-core/Skill.Tests.ps1`
+and `tests/aveva-ei-graphics/agents/Agent.Tests.ps1`.
 
-**Acceptance:** In progress.
+**Acceptance:** Twenty-one tests cover the new script. They prove resolution from the installed
+layout with no argument, every name on the roster resolving to a file that exists, a name that is
+not a core script being refused with the list printed, the roster check reporting all ten, a named
+missing script reported by name, a named lookup failing while the roster is short, a folder that
+leaves out `plugins\aveva-ei-graphics` refused, a top-level `scripts` folder refused, and a folder
+that does not exist saying where to look. Two agent tests cover the preflight and the
+stop-and-report rule. The contract tests now hold the eleventh script, its ceiling and its owning
+task, and the roster parser reads its four parameters straight out of plan.md. Progress check
+exit 0. Full suite 738 passed, 0 failed, 0 skipped.
 
-**Attempts:** Not started.
+**Attempts:** One. The only correction was a 27-word sentence in `SKILL.md`, split in two.
 
-**Decisions:** Record the ceiling raises here: the script count under `plugins` goes from 14 to 15,
-and the `ei-graphics-core/SKILL.md` ceiling from 140 lines, because the new script needs its own
-parameter, output and exit-code section like every other one.
+**Decisions:** Record the ceiling raises here. The script count under `plugins` goes from 14 to 15
+in `tests/ScriptContract.Tests.ps1` and `tests/EverythingGreen.Tests.ps1`. The
+`ei-graphics-core/SKILL.md` ceiling goes from 140 lines to 160, because the new script needs its
+own parameter, output and exit-code section like every other one; the file is 154 lines now. The
+new script's own ceiling is 120 lines and it is 89. Correcting this entry's own plan reading:
+`setup-failed` is a session outcome, not a phase, so the agent closes with
+`Complete-EiSession.ps1 -SessionOutcome setup-failed` rather than writing an entry with that phase.
+The roster deliberately includes the resolver itself, so a half-copied install is caught even when
+the resolver is the only file that arrived.
 
-**Result:** IN-PROGRESS.
+**Result:** DONE.

@@ -109,9 +109,9 @@ Describe 'Everything green, before the live run' -Tag 'Unit' {
             ($skills -join ',') | Should -Be 'ei-azure-devops-cli-intake,ei-graphics-core,ei-graphics-doctor,ei-layer-guard,termination-drawing'
         }
 
-        It 'the script count under plugins is 14 or fewer' {
+        It 'the script count under plugins is 15 or fewer' {
             @(Get-ChildItem -LiteralPath (Join-Path $script:RepoRoot 'plugins') -File -Recurse -Filter '*.ps1').Count |
-                Should -BeLessOrEqual 14
+                Should -BeLessOrEqual 15
         }
     }
 }
