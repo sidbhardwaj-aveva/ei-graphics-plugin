@@ -58,7 +58,7 @@ in `BUILD-LOG.md`.
 | T046 | Record domain-read and test evidence | DONE | 2bfed5e | 2026-09-16T14:09:27Z |
 | T047 | Fail incomplete session completion | DONE | 7017dfe | 2026-09-16T14:28:21Z |
 | T048 | Show the session-close command | DONE | 398e499 | 2026-09-16T14:36:37Z |
-| T049 | Triage a regression before asking for a runtime log | DONE | pending | 2026-09-16T09:31:58Z |
+| T049 | Triage a regression before asking for a runtime log | DONE | fd4450d | 2026-09-16T09:31:58Z |
 | T050 | Separate historical confidence from runtime verification | TODO | — | — |
 | T051 | Map the termination-drawing phases and their owners | TODO | — | — |
 | T052 | Write down the ordering-regression pattern | TODO | — | — |
