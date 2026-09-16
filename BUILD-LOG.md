@@ -3044,3 +3044,25 @@ The roster deliberately includes the resolver itself, so a half-copied install i
 the resolver is the only file that arrived.
 
 **Result:** DONE.
+
+## T055 — Prove the session lifecycle cannot be skipped — 2026-09-16T12:30:46Z
+
+**Goal:** Run the real close sequence end to end and prove the eight rules the plan names, so a
+session can no longer end empty, unsummarised, or claiming a test result it never ran.
+
+**Assumptions:** The proof belongs in one new test file, because the point of the task is the
+rules holding together rather than each script holding on its own. Every step calls the real
+scripts, with one exception: proving that an unwritten summary fails the close needs a renderer
+that reports a path it never wrote, so that one test copies the whole skill folder and replaces
+the renderer inside the copy. The wrapper takes no test counts, so a closed session records no
+test run, and "runtime verification unconfirmed" is proved by the summary refusing to claim a
+pass. History triage is proved through the evidence path, because a quote the writer checked
+against the file on disk is the thing a reader can check.
+
+**Files touched:** a new `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/SessionLifecycle.Tests.ps1`.
+
+**Attempts:** In progress.
+
+**Decisions:** In progress.
+
+**Result:** In progress.
