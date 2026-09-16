@@ -3061,8 +3061,28 @@ against the file on disk is the thing a reader can check.
 
 **Files touched:** a new `tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/SessionLifecycle.Tests.ps1`.
 
-**Attempts:** In progress.
+**Acceptance:** Ten tests cover the eight rules. A normal close of an empty session exits 1, names
+the missing entries and leaves neither `session.json` nor a summary behind. A `setup-failed` close
+of the same empty session exits 0 and renders a summary saying no steps were recorded. A worked
+session writes `session-summary.md` beside `session.json`, and `session.json` carries the outcome,
+the completion time and the changed file. A close with no test recorded says no test run was
+recorded and never says tests passed, while a finalize carrying counts renders them. A history
+entry renders a link and the quoted text, and a quote the file does not hold is refused with
+nothing written. A real finalize followed by a renderer that writes nothing exits 1, names the
+missing summary, and leaves the finalized session intact. A local-input session closes with no
+`ado.json` anywhere. Focused suite 10 passed. Progress check exit 0. Full suite 749 passed,
+0 failed, 0 skipped.
 
-**Decisions:** In progress.
+**Attempts:** One. The focused suite was green on the first run.
 
-**Result:** In progress.
+**Decisions:** Every test drives the real scripts, with one exception. Proving that an unwritten
+summary fails the close needs a renderer that reports a path it never wrote, so that test copies
+the whole `ei-graphics-core` folder and replaces the renderer inside the copy. The finalize step in
+that test is still the real one, which is what separates it from the wrapper's own unit test, where
+every step is a stub. Runtime verification is proved through the summary rather than a status
+field, because `Complete-EiSession.ps1` takes no test counts: a closed session therefore records no
+test run, and the rule worth proving is that the summary refuses to claim a pass it never saw.
+History triage is proved through the evidence path, because a quote the writer checked against the
+file on disk is exactly the thing a reader can check.
+
+**Result:** DONE.
