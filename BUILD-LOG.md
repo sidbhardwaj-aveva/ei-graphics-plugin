@@ -3143,3 +3143,36 @@ are taken from the plan, and match the two the `aveva-rnd` plugin recognises in 
 The refusal path is the existing failed-download path: a warning on stderr, the attachment left out
 of the result, and the run carrying on.
 
+**Files touched:** `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.ps1`,
+`plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md`, `tests/ScriptContract.Tests.ps1`,
+`tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.Tests.ps1`.
+
+**Acceptance:** `Test-AdoAddress` parses the address and refuses anything that is not `https` on
+`dev.azure.com` or on a host ending `.visualstudio.com`. A refused address is reported on stderr by
+name and skipped, exactly as a failed download is. Tests prove a `dev.azure.com` address and a
+`visualstudio.com` address are both downloaded with the header, and that four addresses are refused
+with nothing sent: a plain `http` one, `dev.azure.com.attacker.example`, an address carrying
+`dev.azure.com` in its query, and `notvisualstudio.com`. A mixed run downloads the good address,
+leaves one file in the attachments folder, and records one request. Focused suite 137 passed.
+Progress check exit 0. Full suite 758 passed, 0 failed, 0 skipped.
+
+**Ceiling raised:** `Convert-EiAdoIntake` from 160 to 180 in both copies of `$LineCeilings`. The
+check and its helper are fourteen lines, taking the file to 174. The rest is headroom for T059,
+which reworks the same function and raises no ceiling of its own.
+
+**Attempts:** Two. The first focused run failed one test: it read `$RefusedAddresses[0]`, a
+discovery-time variable, inside an `It` body. Pester fills `-ForEach` from that list at discovery
+but does not carry the list itself into the run phase, so the array was null there. The address is
+now written out in that test. Caught before any run: the first draft of the helper assigned
+`$uri.Host` to `$host`, which is an automatic variable and read-only.
+
+**Decisions:** The check parses with `[System.Uri]::TryCreate` and compares `Host`, rather than
+matching the address as text. Two of the refusal tests exist to hold that line: both carry the words
+a pattern would look for. `EndsWith` is called with `OrdinalIgnoreCase`, so the result cannot move
+with the culture. The token call and the request are the only two things replaced in the tests, and
+both are replaced with local functions rather than mocks, because nothing else in this repository
+mocks and the script is still driven for real. Console error output is captured by swapping
+`[Console]::Error` for a writer, which is what makes the warning readable without starting a second
+process.
+
+**Result:** DONE.

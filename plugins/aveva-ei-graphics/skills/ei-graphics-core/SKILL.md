@@ -127,6 +127,10 @@ It also downloads the images attached to the work item into
 `.ei-session-logs/<storyId>/attachments/` and records where each one landed. A download that fails
 is a warning, and the rest carry on. `-SkipAttachmentDownload` turns the whole step off.
 
+The download carries an Azure DevOps token, so only Azure DevOps is contacted. An address is used
+only when it is `https` and its host is `dev.azure.com` or ends `.visualstudio.com`. Any other
+address is skipped with a warning naming it, and no token is sent to it.
+
 **Exit codes:** 0 on success. 1 when the intake did not retrieve the story, when the description
 is empty, or when the work item id is not a positive number.
 ## `Invoke-EiStoryIntake.ps1`

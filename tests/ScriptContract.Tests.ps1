@@ -8,7 +8,8 @@ $PluginsRoot = Join-Path $RepoRoot 'plugins'
 # The ceilings live here, not in plan.md. A ceiling may be raised once, with the script, the old
 # value, the new value and the reason recorded in that task's BUILD-LOG.md block. Two were raised
 # in T024, which added evidence to the session log and to the rendered summary. Both rose again
-# for the comment-deviation field on the summary.
+# for the comment-deviation field on the summary. Convert-EiAdoIntake rose in T058, which checks
+# where the Azure DevOps token is sent, with room left for the file-name work in T059.
 $LineCeilings = @{
     'Write-EiArtifact'         = 120
     'Write-EiSessionEntry'     = 300
@@ -16,7 +17,7 @@ $LineCeilings = @{
     'Export-EiSessionBundleToShare' = 120
     'Get-EiDomainSkillCatalog' = 120
     'Test-EiScopeDrift'        = 100
-    'Convert-EiAdoIntake'      = 160
+    'Convert-EiAdoIntake'      = 180
     'Invoke-EiGraphicsDoctor'  = 800
     'Invoke-EiStoryIntake'     = 100
     'Complete-EiSession'       = 120
@@ -64,7 +65,7 @@ BeforeAll {
         'Export-EiSessionBundleToShare' = 120
         'Get-EiDomainSkillCatalog' = 120
         'Test-EiScopeDrift'        = 100
-        'Convert-EiAdoIntake'      = 160
+        'Convert-EiAdoIntake'      = 180
         'Invoke-EiGraphicsDoctor'  = 800
         'Invoke-EiStoryIntake'     = 100
         'Complete-EiSession'       = 120

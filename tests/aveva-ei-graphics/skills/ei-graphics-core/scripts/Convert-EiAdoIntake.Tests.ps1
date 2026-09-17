@@ -1,6 +1,16 @@
 #Requires -Version 7.0
 Set-StrictMode -Version Latest
 
+# Discovery-time data. Pester needs -ForEach filled before any BeforeAll block runs.
+# The middle two are the reason the check parses the host instead of matching text: both carry
+# the words an unanchored pattern looks for, and neither is Azure DevOps.
+$RefusedAddresses = @(
+    'https://dev.azure.com.attacker.example/_apis/wit/attachments/1?fileName=a.png'
+    'https://attacker.example/collect?u=dev.azure.com&fileName=a.png'
+    'https://notvisualstudio.com/_apis/wit/attachments/1?fileName=a.png'
+    'http://dev.azure.com/org/_apis/wit/attachments/1?fileName=a.png'
+)
+
 BeforeAll {
     $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..' '..' '..')).Path
     $core = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills' 'ei-graphics-core'
@@ -130,6 +140,89 @@ Describe 'Convert-EiAdoIntake' -Tag 'Unit' {
         It 'exits 1 when no story id is given' {
             $null = & $script:ScriptPath -IntakeJson $script:FixtureText -SkipAttachmentDownload
             $LASTEXITCODE | Should -Be 1
+        }
+    }
+
+    Context 'it sends the token only to Azure DevOps' {
+        BeforeAll {
+            # The download step is driven for real. Only the two things that leave this machine are
+            # replaced: the token call, and the request itself, which records what it was given.
+            function az {
+                $global:LASTEXITCODE = 0
+                '{"accessToken":"test-token"}'
+            }
+
+            function Invoke-WebRequest {
+                param([string] $Uri, $Headers, [string] $OutFile, $ErrorAction)
+                $global:EiRequested.Add([pscustomobject]@{
+                    Uri           = $Uri
+                    Authorization = $Headers['Authorization']
+                })
+                Set-Content -LiteralPath $OutFile -Value 'image bytes' -Encoding utf8NoBOM
+            }
+
+            function Invoke-Download {
+                param([string[]] $Address)
+
+                $global:EiRequested = [System.Collections.Generic.List[object]]::new()
+                $intake = Get-Intake
+                $intake.attachmentUrls = @($Address | ForEach-Object {
+                    [pscustomobject]@{ url = $_; source = 'field:System.Description' }
+                })
+
+                $root = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+                $null = New-Item -ItemType Directory -Path $root -Force
+
+                # Write-Problem goes to the console error stream, which no PowerShell redirection
+                # catches. Swapping the writer is what makes the warning readable in process.
+                $writer = [System.IO.StringWriter]::new()
+                $original = [Console]::Error
+                [Console]::SetError($writer)
+                try {
+                    $artifact = & $script:ScriptPath -IntakeJson ($intake | ConvertTo-Json -Depth 20) -StoryId '4965976' -Root $root
+                } finally {
+                    [Console]::SetError($original)
+                }
+
+                [pscustomobject]@{
+                    Attachments = @($artifact.attachments)
+                    Requested   = @($global:EiRequested)
+                    Warnings    = $writer.ToString()
+                    Folder      = Join-Path $root '.ei-session-logs' '4965976' 'attachments'
+                }
+            }
+        }
+
+        It 'downloads from <_> and sends the header there' -ForEach @(
+            'https://dev.azure.com/avevagroup/EI/_apis/wit/attachments/1111?fileName=rail.png'
+            'https://avevagroup.visualstudio.com/EI/_apis/wit/attachments/1111?fileName=rail.png'
+        ) {
+            $run = Invoke-Download -Address $_
+            $run.Requested.Count | Should -Be 1
+            $run.Requested[0].Uri | Should -Be $_
+            $run.Requested[0].Authorization | Should -Be 'Bearer test-token'
+            $run.Attachments.Count | Should -Be 1
+            $run.Attachments[0].url | Should -Be $_
+        }
+
+        It 'refuses <_>, and sends nothing to it' -ForEach $RefusedAddresses {
+            $run = Invoke-Download -Address $_
+            $run.Requested.Count | Should -Be 0
+            $run.Attachments.Count | Should -Be 0
+            $run.Warnings | Should -Match ([regex]::Escape($_))
+            @(Get-ChildItem -LiteralPath $run.Folder -File).Count | Should -Be 0
+        }
+
+        It 'a refused address leaves the other attachments untouched' {
+            $bad = 'https://dev.azure.com.attacker.example/_apis/wit/attachments/1?fileName=a.png'
+            $good = 'https://dev.azure.com/avevagroup/EI/_apis/wit/attachments/2222?fileName=after.png'
+            $run = Invoke-Download -Address @($bad, $good)
+
+            $run.Requested.Count | Should -Be 1
+            $run.Requested[0].Uri | Should -Be $good
+            $run.Attachments.Count | Should -Be 1
+            $run.Attachments[0].url | Should -Be $good
+            @(Get-ChildItem -LiteralPath $run.Folder -File).Count | Should -Be 1
         }
     }
 

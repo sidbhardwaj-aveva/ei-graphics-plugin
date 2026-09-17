@@ -44,6 +44,16 @@ function Get-OrNull {
     $value
 }
 
+function Test-AdoAddress {
+    # The host is parsed, never matched as text: a work item can put dev.azure.com in a query.
+    param([string] $Url)
+    $uri = $null
+    if (-not [System.Uri]::TryCreate($Url, [System.UriKind]::Absolute, [ref] $uri)) { return $false }
+    if ($uri.Scheme -ne 'https') { return $false }
+    $hostName = $uri.Host
+    $hostName -eq 'dev.azure.com' -or $hostName.EndsWith('.visualstudio.com', [System.StringComparison]::OrdinalIgnoreCase)
+}
+
 function Get-Attachment {
     # Downloads each attached image and reports only the ones that arrived.
     param($Entries, [string] $Folder)
@@ -71,6 +81,10 @@ function Get-Attachment {
             if ($found) { $source = $found }
         }
         if (-not $url) { continue }
+        if (-not (Test-AdoAddress -Url ([string] $url))) {
+            Write-Problem "The attachment address $url is not an Azure DevOps https address. Nothing was sent to it, and the attachment was not downloaded."
+            continue
+        }
         $name = "image-$index.png"
         $query = [regex]::Match([string] $url, '[?&]fileName=([^&]+)')
         if ($query.Success) { $name = [System.Uri]::UnescapeDataString($query.Groups[1].Value) }
