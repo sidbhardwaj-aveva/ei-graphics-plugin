@@ -2231,6 +2231,27 @@ own row.
 
 **Result:** DONE.
 
+## T056 — Document the investigation order for maintainers — 2026-09-17T09:59:53Z
+
+**Goal:** Put the full investigation order in the plugin readme and show it through the
+mounting-rail ordering regression, so maintainers can identify the step a failed session skipped.
+
+**Assumptions:** The order belongs in one numbered section after the skill overview and before the
+folder tree. The worked example follows every numbered step, but stays clearly labelled as one
+example rather than the only bug this workflow supports. The document tests will assert the
+ordered step names and the example's ordering-specific evidence. The existing plain-language
+suite remains the acceptance check for the changed readme.
+
+**Files touched:** In progress.
+
+**Acceptance:** In progress.
+
+**Attempts:** In progress.
+
+**Decisions:** In progress.
+
+**Result:** In progress.
+
 ## T031 — Confirm the understanding, wired into the agent file — 2026-09-09T05:48:20Z
 
 **Goal:** Close the Checkpoint 1 gap the story 3774939 review uncovered. The reference file
