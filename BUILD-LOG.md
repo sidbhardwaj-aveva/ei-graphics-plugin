@@ -3407,3 +3407,46 @@ open and close this task are bookkeeping and are counted separately.
 The two human checkpoints pause for the person driving this session, who answers in chat. The
 readability check is the one item no test and no agent can settle, and it stays open until a person
 who has never worked on the plugin reads `session-summary.md`.
+
+**Attempts:** One run, against bug 5049211 in `C:\Git\dabacon-products`.
+
+**What the run produced.** All five artifacts exist under `.ei-session-logs/5049211/`: `ado.json`
+(2687 bytes), `story-understanding.json` (2600), `approved-files.json` (688), `session.json` (3421)
+and `session-summary.md` (2859). The three story images downloaded to the paths recorded in
+`ado.json`, at 22378, 25486 and 44767 bytes. Both checkpoints paused and were answered: the first
+chose a fresh diagnosis over trusting the comment that claims the bug is fixed, and the second
+agreed to write no code. `Complete-EiSession.ps1` exited 0 and reported `shareStatus skipped`.
+
+**The diagnosis the run reached.** The old `ApplyPlateOrdering()` ends with
+`orderedByPlate.Concat(notInPlateOrder)`, which partitions the rail so that every plated item
+precedes every unplated one. Only `--134` carries a plate, so it is hoisted to the front while the
+other three keep their relative order, giving exactly the reported `--134, TS-1, B-1, IOM-1`. This
+is bug pattern 8 in `termination-drawing/references/bug-patterns.md`, which names the same tags. A
+fix already exists at `edcd2d78c60` on `origin/bugfix/eig/instsequence`, so the run wrote no code.
+
+**Result: BLOCKED.** Two acceptance items are not met.
+
+The command budget is the first. The task allows fewer than ten terminal commands and the run used
+fourteen. Nine of those were the work itself; the other five were a duplicated `-HumanInput` that
+bound nothing, a schema rejection, a retry after an interrupted command, and a final listing to
+confirm the artifacts. The budget is not a rounding error here, and calling it a pass would be
+false.
+
+The readability check is the second. Nobody outside this work has read `session-summary.md`, and no
+test can stand in for that.
+
+**Three defects the run found, for T023 to fix.**
+
+First, `Complete-EiSession.ps1` forwards only `-SessionOutcome`. It has no parameter for the domain
+skill used or the bug pattern matched, so a session closed the way the agent instructs always ends
+with "No domain skill was recorded" in the maintainer section. This run matched bug pattern 8 by
+name and still could not say so. The wrapper is the only supported way to close, so this cannot be
+worked around.
+
+Second, `approved-files.schema.json` sets `minItems: 1` on `files`. A session that correctly decides
+to change nothing cannot record that decision. The run had to approve the one file a fix would be
+allowed to touch and leave it unchanged, which `Test-EiScopeDrift.ps1` will report as approved but
+unchanged.
+
+Third, the summary header reads "Duration: not recorded | Tokens: not recorded" because nothing in
+the close path supplies them. Every session closed through the wrapper will say this.
