@@ -3100,11 +3100,30 @@ rewrite, so this task verifies what is on disk against the plan instead of writi
 BUILD-LOG.md is append only, so the deleted block is not restored; this block records what
 happened instead.
 
-**Files touched:** none. `plugins/aveva-ei-graphics/README.md` and `tests/Documents.Tests.ps1`
-already carry the work, from `eedc5fb`.
+**Files touched:** `tests/PlainLanguage.Tests.ps1`, restored from `06e581e` after this session
+destroyed it. `plugins/aveva-ei-graphics/README.md` and `tests/Documents.Tests.ps1` already carried
+the work, from `eedc5fb`, and were not edited again.
 
-**Attempts:** In progress.
+**Acceptance:** The `Investigation order` section lists the thirteen steps the plan names, in that
+order, and the worked example takes the mounting-rail ordering regression through all thirteen. The
+document check reads the section and asserts each step follows the one before it. A second check
+reads the example, counts its thirteen numbered lines, and asserts the sentence saying this is one
+example rather than the only bug the workflow supports. The plain-language check passes on the
+README. Focused suite 41 passed. Progress check exit 0. Full suite 751 passed, 0 failed, 0 skipped.
 
-**Decisions:** In progress.
+**Attempts:** Two. The first attempt wrecked `tests/PlainLanguage.Tests.ps1` and then committed the
+wreckage in this task's start commit. The cause is worth naming, because it has cost this build two
+tasks: the focused check ran as `pwsh -File ./tests/Invoke-PesterTests.ps1 -Path ./tests/A.Tests.ps1
+./tests/B.Tests.ps1`. `-Path` takes only the first file, and the second binds positionally to the
+next parameter, `-CoverageOutputPath`. That switches coverage on and writes the JaCoCo report over
+the named test file. The second attempt passed the paths as one array to an in-process call and
+ran clean, and a scan proved no other `.ps1` file in the repository starts with an XML header.
 
-**Result:** In progress.
+**Decisions:** Correcting the T042 entry, which recorded this as an unexplained collision between
+coverage output and test files during broad harness runs: it is neither unexplained nor tied to
+broad runs. It is the invocation above, and any run that names two paths after `-File` will do it
+again. Until the harness refuses a positional second path, run several files with
+`& ./tests/Invoke-PesterTests.ps1 -Path @('a','b')`, never with `-File`. The harness itself is left
+alone here, because it belongs to T003 and hardening it is not this task's work.
+
+**Result:** DONE.
