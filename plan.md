@@ -1583,9 +1583,9 @@ from current documents. The build-progress check and the Pester suite exit 0.
 
 ### Phase 6 — The live run, with a human watching
 
-#### T022 — Dry run against story 4965976
+#### T022 — Dry run against bug 5049211
 
-**Do this.** Run the agent end to end against the real story, with `az` logged in and the target
+**Do this.** Run the agent end to end against the real bug, with `az` logged in and the target
 repo cloned. Do not merge anything. Stop before creating a PR.
 
 Record the run in `BUILD-LOG.md`.
@@ -1594,11 +1594,11 @@ Record the run in `BUILD-LOG.md`.
 
 - fewer than 10 terminal commands were used
 - `ado.json`, `story-understanding.json`, `approved-files.json`, `session.json` and
-  `session-summary.md` all appear under `.ei-session-logs/4965976/`
+  `session-summary.md` all appear under `.ei-session-logs/5049211/`
 - both human checkpoints actually paused for input
 - **attachments were downloaded.** If the story has images, the `attachments` array is populated
   and every `localPath` points at a file that exists under
-  `.ei-session-logs/4965976/attachments/`. This is the one place the download path in T012 gets
+  `.ei-session-logs/5049211/attachments/`. This is the one place the download path in T012 gets
   exercised. If the story has no images, say so in the log rather than leaving it blank.
 - **the readability check no test can make.** Give `session-summary.md` to someone who has never
   worked on this plugin. Ask them what the agent did, and what they should do next. If they
@@ -2353,6 +2353,38 @@ what a second run leaves behind and what to do instead. No script behaviour chan
 **Done when.** Tests prove the blanket sentence is gone, that every one of the ten scripts carries
 a repeat statement, and that the two writers name their consequence. The plain-language check
 still passes for that file. The progress check and full Pester suite exit 0 with no skipped tests.
+
+#### T061 — Correct the script count the READMEs still give
+
+**Why this task exists.** `ei-graphics-core` has held ten scripts since T054. Three places a
+reader meets first still say nine: the skill table and the folder tree in
+`plugins/aveva-ei-graphics/README.md`, and the component diagram in `docs/presentation`. The core
+skill pins its own count, so nothing noticed the drift for six tasks.
+
+**Do this.** Correct the count in those files, including the rendered HTML beside the diagram
+source. Then add a test that counts the scripts on disk and fails when any of those files
+disagrees, so the next script to join the roster cannot leave them stale again.
+
+**Done when.** The new test fails when a count is wrong, and passes once they are corrected. The
+progress check and full Pester suite exit 0 with no skipped tests.
+
+#### T062 — Refuse to finalize a session that is already finalized
+
+**Why this task exists.** T060 recorded that closing a session twice leaves a second copy of the
+story text on the review share. The cause is that nothing refuses the second close.
+`Write-EiSessionEntry.ps1 -Finalize` replaces the summary block without asking, so
+`Complete-EiSession.ps1` runs the whole sequence again, share export included. T060 was asked to
+describe the hazard. This task removes it.
+
+**Do this.** Make `-Finalize` exit 1 when `session.json` already holds a `summary` with a
+`completedAt`, naming the story and saying the session is already closed. Add `-Force` for the one
+case that needs it, a session finalized with the wrong outcome. `Complete-EiSession.ps1` passes
+`-Force` through and changes nothing else. Correct the repeat statements T060 wrote, because two of
+them will no longer be true.
+
+**Done when.** Tests prove a second finalize exits 1 and leaves `session.json` byte for byte as it
+was, that `-Force` replaces the summary, and that a second `Complete-EiSession.ps1` run stops
+before it reaches the share. The progress check and full Pester suite exit 0 with no skipped tests.
 
 ---
 

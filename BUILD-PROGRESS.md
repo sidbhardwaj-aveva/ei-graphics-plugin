@@ -1,7 +1,7 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** none
+**Current task:** T061
 **Last verified green:** T060 (2026-09-17T11:31:51Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
@@ -39,7 +39,7 @@ one file, so it runs before the five larger tasks queued ahead of it.
 | T028 | Set the approved shared-session path | DONE | d9e79e4 | 2026-09-03T13:15:20Z |
 | T029 | Agent reasoning escalation | DONE | 3deb23f | 2026-09-07T00:00:00Z |
 | T030 | Integrate the EI Graphics doctor | DONE | bd4c04c | 2026-09-07T11:45:26Z |
-| T022 | Dry run against story 3408091 | BLOCKED | — | — |
+| T022 | Dry run against bug 5049211 | BLOCKED | — | — |
 | T023 | Read the summary, improve the skill | DONE | b3d5edb | 2026-09-09T05:30:10Z |
 | T031 | Confirm the understanding, wired into the agent file | DONE | 39a5c93 | 2026-09-09T06:00:24Z |
 | T032 | Canonical intake invocation in ei-azure-devops-cli-intake SKILL.md | DONE | 7543dca | 2026-09-09T06:04:35Z |
@@ -71,3 +71,5 @@ one file, so it runs before the five larger tasks queued ahead of it.
 | T058 | Send the Azure DevOps token only to Azure DevOps | DONE | 635aca7 | 2026-09-17T11:13:27Z |
 | T059 | Save an attachment under a name it cannot choose | DONE | 596f953 | 2026-09-17T11:22:38Z |
 | T060 | Say which scripts are safe to run twice | DONE | f9a1f1c | 2026-09-17T11:31:51Z |
+| T061 | Correct the script count the READMEs still give | TODO | — | — |
+| T062 | Refuse to finalize a session that is already finalized | TODO | — | — |
