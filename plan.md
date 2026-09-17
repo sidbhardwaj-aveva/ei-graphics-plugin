@@ -769,6 +769,9 @@ copied `ado.schema.json` sets `additionalProperties: false` and declares no `has
 stamping one would make every `ado.json` fail. ADO content is tied down a different way: through
 the `adoHash` field inside `story-understanding.json`, computed over the written `ado.json`.
 
+T063 makes this script stamp `adoHash` too, whenever the artifact is `story-understanding` and an
+`ado.json` is already on disk beside it. Same digest, stamped before `hash` so `hash` covers it.
+
 Reject an invalid payload with exit 1 and a list of schema errors.
 
 **Done when.** `$P -Path ./tests/.../Write-EiArtifact.Tests.ps1` exits 0. Tests cover: a valid
@@ -1840,8 +1843,11 @@ The wrapper does not add its own session entries. It does not rewrite artifacts.
 touch attachments, comments, or hyperlinks in `ado.json` or `story-understanding.json`. Stderr
 from every sub-script is forwarded unaltered.
 
-**Parameters, exactly these 6:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Force`, `-Json`, `-Help`.
-`-Force` arrived in T062 and is passed straight through to `Write-EiSessionEntry.ps1`.
+**Parameters, exactly these 12:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Force`,
+`-DomainSkillUsed`, `-BugPatternMatched`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
+`-CommentDeviations`, `-Json`, `-Help`. `-Force` arrived in T062. The six after it arrived in T063,
+which made the wrapper forward every field `-Finalize` accepts. All of them pass straight through
+to `Write-EiSessionEntry.ps1`.
 
 Follow the standard header: `#Requires -Version 7.0`, `Set-StrictMode -Version Latest`,
 `$ErrorActionPreference = 'Stop'`. Paths resolve from `$PSScriptRoot`. JSON goes to stdout,
@@ -2387,6 +2393,60 @@ them will no longer be true.
 **Done when.** Tests prove a second finalize exits 1 and leaves `session.json` byte for byte as it
 was, that `-Force` replaces the summary, and that a second `Complete-EiSession.ps1` run stops
 before it reaches the share. The progress check and full Pester suite exit 0 with no skipped tests.
+
+#### T063 — Close the three gaps the T022 dry run found
+
+**Why this task exists.** T022 ran the agent against a real bug and three things it could not do
+turned into three defects. Each one is reachable by any session, not just that one.
+
+`adoHash` binds `story-understanding.json` to the exact `ado.json` it was read from, and T007 says
+it is "computed over the written `ado.json`". Nothing computes it. The agent has to work it out by
+hand, and every other hash in this plugin is a canonical-JSON digest, so a hand-computed file
+digest binds nothing: two agents will produce two different numbers for the same story and neither
+can tell the other is wrong.
+
+`approved-files.schema.json` sets `minItems: 1` on `files`. A session that reaches the right
+answer and decides to change nothing cannot say so. T022 had to approve a file it then left
+untouched, which is a claim nobody made.
+
+`Complete-EiSession.ps1` forwards only `-SessionOutcome`. The agent is told to close through the
+wrapper and never to chain the steps by hand, so every field `-Finalize` accepts and the wrapper
+does not pass on is unreachable. T022 matched a named bug pattern and the summary still printed
+"No domain skill was recorded".
+
+**Do this.** Three changes, in the order listed.
+
+Make `Write-EiArtifact.ps1` stamp `adoHash` itself when the artifact is `story-understanding` and
+`.ei-session-logs/<StoryId>/ado.json` exists, using the same canonical digest it already uses for
+`hash`. Stamp it before `hash`, so `hash` covers it. Leave the payload alone when there is no
+`ado.json`, because a local-input session carries `inputSource` instead. A caller-supplied value is
+replaced, not honoured: the field exists to record what is on disk.
+
+Change `minItems` on `files` to `0`. `Test-EiScopeDrift.ps1` already does the right thing with an
+empty list, treating every change as unapproved, so no code changes with it.
+
+Widen `Complete-EiSession.ps1` to forward every finalize-only field:
+`-DomainSkillUsed`, `-BugPatternMatched`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions` and
+`-CommentDeviations`. Pass each one only when the caller gave it, so an omitted field stays omitted
+in the summary rather than arriving as an empty string.
+
+**Parameters for `Complete-EiSession.ps1`, exactly these 12:** `-StoryId`, `-SessionOutcome`,
+`-Root`, `-Force`, `-DomainSkillUsed`, `-BugPatternMatched`, `-TestsRun`, `-TestsPassed`,
+`-HumanInteractions`, `-CommentDeviations`, `-Json`, `-Help`.
+
+Raise the T020 line ceilings: `Write-EiArtifact` to 150, `Complete-EiSession` to 170. Update the
+T007 and T036 rosters above and the script list in `SKILL.md` where either script is described.
+
+**Not a defect.** T022 also reported that the summary header reads "Duration: not recorded". It is
+right that it does. `-DurationMs` and `-TokensUsed` are per-entry fields that `-Finalize` already
+sums, and the run passed neither. Nothing in the scripts needs changing for that one.
+
+**Done when.** Tests prove `adoHash` is stamped from a real `ado.json`, that it matches the digest
+of that file's canonical form, that it is left alone when no `ado.json` exists, and that a
+caller-supplied value is replaced. Tests prove an empty `files` array validates and that
+`Test-EiScopeDrift.ps1` calls any change against it drift. Tests prove each forwarded field reaches
+`Write-EiSessionEntry.ps1` and that an omitted one is not passed. The progress check and full
+Pester suite exit 0 with no skipped tests.
 
 ---
 

@@ -3450,3 +3450,28 @@ unchanged.
 
 Third, the summary header reads "Duration: not recorded | Tokens: not recorded" because nothing in
 the close path supplies them. Every session closed through the wrapper will say this.
+
+## T063 — Close the three gaps the T022 dry run found — 2026-09-17
+
+**Assumptions:**
+
+The three findings T022 recorded are worth fixing in code rather than documenting as limits, and
+the person who ran T022 has confirmed `session-summary.md` reads well to a stranger, so the
+readability item on T022 is satisfied and only its command budget is still open.
+
+`adoHash` should use the canonical-JSON digest `Write-EiArtifact.ps1` already computes for `hash`,
+not a raw file digest. The plugin has one hashing convention and a second one binds nothing. The
+hand-computed value T022 wrote into `story-understanding.json` is therefore wrong by this rule and
+will be replaced the next time that artifact is written.
+
+Stamping `adoHash` from disk overrides whatever the caller passed. The field records which
+`ado.json` the understanding was read from, so the file on disk is the only honest source.
+
+An empty `files` array in `approved-files.json` means "approved to change nothing", not "not filled
+in yet". `Test-EiScopeDrift.ps1` reads it that way already, so nothing but the schema changes.
+
+**Correcting the third finding in the T062 entry above.** It called the missing duration and token
+totals a defect in the close path. That is wrong. `-DurationMs` and `-TokensUsed` are per-entry
+parameters that `-Finalize` already sums, and it omits the totals deliberately when no entry
+carried a measurement, because a measured zero and no measurement are different things. The T022
+run simply passed neither. No script changes for this one.
