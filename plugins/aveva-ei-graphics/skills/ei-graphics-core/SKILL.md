@@ -92,8 +92,7 @@ Copies a completed local session bundle to an internal review share.
 **Parameters:** `-StoryId`, `-Root`, `-SharePath`, `-Json`, `-Help`.
 
 It copies `ado.json`, `story-understanding.json`, `approved-files.json`, `session.json`, and
-`session-summary.md` into a unique directory under `-SharePath`. Full bundles contain story text,
-comments, interaction records, and evidence. Use only a share approved for that material.
+`session-summary.md` into a unique directory under `-SharePath`. Use only an approved share.
 
 **Output:** the local path, the remote path when copied, and a status.
 **Exit codes:** 0 after export, or when a share problem leaves the local bundle ready to retry. 1
