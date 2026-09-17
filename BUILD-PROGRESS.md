@@ -73,4 +73,4 @@ one file, so it runs before the five larger tasks queued ahead of it.
 | T060 | Say which scripts are safe to run twice | DONE | f9a1f1c | 2026-09-17T11:31:51Z |
 | T061 | Correct the script count the READMEs still give | DONE | 8ac899d | 2026-09-17T11:59:31Z |
 | T062 | Refuse to finalize a session that is already finalized | DONE | 54d76bf | 2026-09-17T12:13:19Z |
-| T063 | Close the three gaps the T022 dry run found | DONE | pending | 2026-09-17T12:43:51Z |
+| T063 | Close the three gaps the T022 dry run found | DONE | d5dd841 | 2026-09-17T12:43:51Z |
