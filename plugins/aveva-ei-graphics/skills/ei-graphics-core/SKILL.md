@@ -6,7 +6,7 @@ description: Usage reference for the ten core scripts of an Electrical and Instr
 Ten scripts, all in `scripts/`. The schemas they check against are in `schemas/`.
 They all behave the same way. JSON goes to stdout and messages go to stderr. Exit code 0 means it
 worked and 1 means it did not. Nothing prompts for input. `-Help` prints the synopsis and exits 0.
-Each script says below what a second run of it does. Three of them leave something behind.
+Each script says below what a second run of it does. Two of them leave something behind.
 Artifacts are written under `<Root>/.ei-session-logs/<storyId>/`. `-Root` defaults to the current
 folder, so you rarely pass it.
 ## `Resolve-EiScriptPath.ps1`
@@ -48,7 +48,7 @@ Appends one entry to the session log, and creates the log on the first call.
 **Shared parameters:** `-StoryId`, `-Root`, `-Json`, `-Help`.
 **To append an entry:** `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`,
 `-TokensUsed`, `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`, `-Evidence`.
-**To close the session:** `-Finalize`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
+**To close the session:** `-Finalize`, `-Force`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
 `-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`, `-CommentDeviations`.
 
 The two sets are mutually exclusive. Passing one from each is an error, not a partial write.
@@ -66,8 +66,9 @@ append cannot truncate it.
 **Exit codes:** 0 on success. 1 when the phase is unknown, or the result would not validate.
 **Run again:** not safe. A repeated append leaves a second entry, and the totals `-Finalize` works
 out from the entries then count it twice. Check the entry count in the output before appending the
-same entry again, and remove a duplicate from `session.json` before finalizing. Repeating
-`-Finalize` itself is safe, because it replaces the summary block rather than adding to it.
+same entry again, and remove a duplicate from `session.json` before finalizing. `-Finalize` itself
+refuses a session that already holds a summary, and exits 1 rather than replacing it. Pass `-Force`
+when the recorded outcome is wrong and you mean to replace it.
 ## `Export-EiSessionSummary.ps1`
 Renders `session-summary.md` from `session.json`.
 
@@ -164,13 +165,14 @@ stderr.
 Runs `Write-EiSessionEntry.ps1 -Finalize -SessionOutcome`, then `Export-EiSessionSummary.ps1`,
 and when `EI_GRAPHICS_SHARE_PATH` is set, `Export-EiSessionBundleToShare.ps1 -SharePath`.
 
-**Parameters:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Json`, `-Help`.
+**Parameters:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Force`, `-Json`, `-Help`.
 
 **Output:** the summary path and, when the share export ran, the exported bundle path.
 
 **Exit codes:** 0 on success. 1 when finalize or summary fails, with the failing step named
 on stderr. It rejects a renderer response unless the reported summary file exists. A share-export
 failure is a warning on stderr, not fatal.
-**Run again:** not safe once `EI_GRAPHICS_SHARE_PATH` is set, because it calls the bundle export and
-so leaves a second copy on the share. Delete the extra folder, as the export above says. The
-finalize and the summary steps are both safe to repeat.
+**Run again:** safe. The finalize step refuses a session that is already closed, so a second run
+stops there, exits 1, and never reaches the share. `-Force` is the exception. It goes through to the
+share and leaves a second copy of the story text there. Use it only to replace a summary recorded
+with the wrong outcome, and delete the extra folder afterwards.

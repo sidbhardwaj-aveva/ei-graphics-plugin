@@ -3357,3 +3357,32 @@ second bundle and the repeat statement must say so.
 **Honest note on order:** the guard and the wrapper pass-through were edited before this block was
 appended, which is the wrong order. Nothing was committed before this start commit, and no check
 was run against the edits, so the work below still proves itself from scratch.
+
+**Acceptance:** `-Finalize` now reads the summary before it writes one. A `completedAt` already
+there means the session is closed, and the run exits 1 naming the story and the time it was closed.
+`-Force` is the way past, and `Complete-EiSession.ps1` passes it straight through. Focused suites
+73 passed after one fix. Progress check exit 0. Full suite 780 passed, 0 failed, 0 skipped.
+
+**Proof the new checks bite:** with the guard condition replaced by `if ($false)`, two tests failed,
+"Expected 1, but got 0" on the exit code and the empty stderr on the message. The script was
+restored from a copy and the suite went green again.
+
+**Attempts:** Three against the checks. First, the message test captured nothing, because the
+refusal goes to the console error stream, which an in-process call cannot redirect; it now runs the
+script as a child process. Second, `ScriptContract.Tests.ps1` reads the allowed parameter list out
+of `plan.md`, so both rosters, T008 and T036, had to gain `-Force` before the scripts were allowed
+to declare it. Third, the plain-language check caught a 35-word sentence in the new repeat
+statement, which was split in two.
+
+**Decisions:** A finalize that exits 1 writes nothing, so it does not count as a close. The test
+"does not count a refused finalize as a close" holds that line, because a guard that treated a
+failed attempt as a closure would lock a session nobody had finished.
+
+The refusal names the time the session was closed, not just the fact of it. Someone who closed it a
+minute ago and someone looking at yesterday's session need different things next.
+
+`Complete-EiSession.ps1` moves off the not-safe list, because its first step now stops it. It does
+not become silently repeatable: the second run exits 1. `-Force` is the one path that still reaches
+the share twice, and the repeat statement says so.
+
+**Result:** DONE.

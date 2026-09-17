@@ -322,6 +322,53 @@ Describe 'Write-EiSessionEntry' -Tag 'Unit' {
             $summary = (Get-Session -Root $script:Root | ConvertFrom-Json).summary
             $summary.PSObject.Properties.Name | Should -Not -Contain 'commentDeviations'
         }
+
+        It 'refuses a second finalize and leaves session.json byte for byte as it was' {
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+            $before = Get-Session -Root $script:Root
+
+            $run = Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'wont-fix' })
+            $run.ExitCode | Should -Be 1
+            Get-Session -Root $script:Root | Should -BeExactly $before
+        }
+
+        It 'names the story and the time it was closed when it refuses' {
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+            $closedAt = [regex]::Match((Get-Session -Root $script:Root), '"completedAt":\s*"([^"]+)"').Groups[1].Value
+
+            # The refusal goes to the console error stream directly, which an in-process call
+            # cannot redirect. A child process can.
+            $stderr = pwsh -NoProfile -File $script:ScriptPath -StoryId '4965976' -Root $script:Root -Finalize -SessionOutcome 'wont-fix' 2>&1
+            $joined = (@($stderr) -join ' ')
+            $joined | Should -Match '4965976'
+            $joined | Should -Match ([regex]::Escape($closedAt))
+            $joined | Should -Match '(?i)-Force'
+        }
+
+        It 'replaces the summary when -Force is given, and still validates' {
+            Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' }) | Out-Null
+            (Get-Session -Root $script:Root | ConvertFrom-Json).summary.outcome | Should -Be 'fixed'
+
+            $run = Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; Force = $true; SessionOutcome = 'wont-fix' })
+            $run.ExitCode | Should -Be 0
+
+            $raw = Get-Session -Root $script:Root
+            $raw | Test-Json -Schema $script:SchemaText | Should -BeTrue
+            ($raw | ConvertFrom-Json).summary.outcome | Should -Be 'wont-fix'
+        }
+
+        It 'does not count a refused finalize as a close, so the next one is allowed' {
+            # The first attempt fails on its comment deviation and writes nothing. That must not
+            # leave the session looking closed to the attempt that follows.
+            $run = Invoke-Entry -Splat ($script:Base + @{
+                Finalize = $true; SessionOutcome = 'fixed'; CommentDeviations = @(@{ commentId = '7' })
+            })
+            $run.ExitCode | Should -Be 1
+
+            $run = Invoke-Entry -Splat ($script:Base + @{ Finalize = $true; SessionOutcome = 'fixed' })
+            $run.ExitCode | Should -Be 0
+            (Get-Session -Root $script:Root | ConvertFrom-Json).summary.outcome | Should -Be 'fixed'
+        }
     }
 
     Context '-Finalize tells a measured zero from no measurement at all' {

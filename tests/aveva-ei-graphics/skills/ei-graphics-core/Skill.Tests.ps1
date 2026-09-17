@@ -2,13 +2,12 @@
 Set-StrictMode -Version Latest
 
 # Discovery-time data. Pester needs -ForEach filled before any BeforeAll block runs.
-# The three scripts a second run does not leave alone, what it leaves, and what the reader is told
-# to do about it. Write-EiSessionEntry appends; the other two reach the share, one of them through
-# the first.
+# The two scripts a second run does not leave alone, what it leaves, and what the reader is told to
+# do about it. Write-EiSessionEntry appends; the other reaches the share. Complete-EiSession used to
+# belong here and no longer does, because T062 made its finalize step refuse a closed session.
 $NotRepeatable = @(
     @{ Script = 'Write-EiSessionEntry.ps1'; Leaves = '(?i)second entry'; Remedy = '(?i)remove a duplicate' }
     @{ Script = 'Export-EiSessionBundleToShare.ps1'; Leaves = '(?i)second copy'; Remedy = '(?i)delete the extra folder' }
-    @{ Script = 'Complete-EiSession.ps1'; Leaves = '(?i)second copy'; Remedy = '(?i)delete the extra folder' }
 )
 
 BeforeAll {
@@ -107,5 +106,24 @@ Describe 'ei-graphics-core SKILL.md' -Tag 'Unit' {
         $statement | Should -Match '(?i)not safe'
         $statement | Should -Match $Leaves
         $statement | Should -Match $Remedy
+    }
+
+    It 'says the close command refuses a second run, and what -Force costs' {
+        $section = [regex]::Match($script:Raw, '(?ms)^## `Complete-EiSession\.ps1`\s*$.*?(?=^## |\z)')
+        $statement = [regex]::Match($section.Value, '(?ms)^\*\*Run again:\*\*\s+(.*?)(?=\r?\n\r?\n|\z)').Groups[1].Value
+        $statement = ($statement -replace '\s+', ' ').Trim()
+
+        $statement | Should -Not -Match '(?i)not safe'
+        $statement | Should -Match '(?i)refuses'
+        $statement | Should -Match '(?i)exits 1'
+        $statement | Should -Match '(?i)-Force'
+        $statement | Should -Match '(?i)second copy'
+    }
+
+    It 'says the finalize step refuses a session that is already closed' {
+        $section = [regex]::Match($script:Raw, '(?ms)^## `Write-EiSessionEntry\.ps1`\s*$.*?(?=^## |\z)')
+        $section.Value | Should -Not -Match '(?i)repeating `-Finalize` itself is safe'
+        $statement = [regex]::Match($section.Value, '(?ms)^\*\*Run again:\*\*\s+(.*?)(?=\r?\n\r?\n|\z)').Groups[1].Value
+        ($statement -replace '\s+', ' ') | Should -Match '(?i)refuses a session that already holds a summary'
     }
 }

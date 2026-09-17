@@ -787,16 +787,17 @@ create the envelope: `schemaVersion`, `storyId`, `startedAt`, `agent`, `verbosit
 
 Appending must be atomic. Write a temporary file, then move it.
 
-**Parameters, exactly these 24, in two mutually exclusive sets.**
+**Parameters, exactly these 25, in two mutually exclusive sets.**
 
 - Shared by both (4): `-StoryId`, `-Root`, `-Json`, `-Help`
 - Append set (12): `-Phase`, `-Action`, `-Reasoning`, `-Outcome`, `-DurationMs`, `-TokensUsed`,
   `-FilesRead`, `-FilesModified`, `-HumanInput`, `-ScriptOutput`, `-Evidence`, `-Status`
-- Finalize set (8): `-Finalize`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
+- Finalize set (9): `-Finalize`, `-Force`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
   `-SessionOutcome`, `-DomainSkillUsed`, `-BugPatternMatched`, `-CommentDeviations`
 
 `-Evidence` arrived in T024. Read that task before changing it. `-Status` arrived in T035 and
-must match the `session.schema.json` enum (`pass`, `fail`, `informational`).
+must match the `session.schema.json` enum (`pass`, `fail`, `informational`). `-Force` arrived in
+T062, which made `-Finalize` refuse a session that is already closed.
 
 **`-SessionOutcome` is deliberately not called `-Outcome`.** In JSON, the entry field and the
 summary field are both named `outcome`. One PowerShell parameter cannot carry two meanings.
@@ -1839,7 +1840,8 @@ The wrapper does not add its own session entries. It does not rewrite artifacts.
 touch attachments, comments, or hyperlinks in `ado.json` or `story-understanding.json`. Stderr
 from every sub-script is forwarded unaltered.
 
-**Parameters, exactly these 5:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Json`, `-Help`.
+**Parameters, exactly these 6:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Force`, `-Json`, `-Help`.
+`-Force` arrived in T062 and is passed straight through to `Write-EiSessionEntry.ps1`.
 
 Follow the standard header: `#Requires -Version 7.0`, `Set-StrictMode -Version Latest`,
 `$ErrorActionPreference = 'Stop'`. Paths resolve from `$PSScriptRoot`. JSON goes to stdout,

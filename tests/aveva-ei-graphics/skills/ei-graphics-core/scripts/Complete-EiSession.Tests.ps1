@@ -36,7 +36,7 @@ BeforeAll {
     $script:HappyFinalizeShim = @'
 [CmdletBinding()]
 param(
-    [string]$StoryId, [string]$Root='.', [switch]$Finalize, [string]$SessionOutcome,
+    [string]$StoryId, [string]$Root='.', [switch]$Finalize, [switch]$Force, [string]$SessionOutcome,
     [string]$Phase, [string]$Action, [string]$Outcome, [string]$Reasoning,
     [object[]]$Evidence, [string]$Status, [string]$BugPatternMatched, [string]$DomainSkillUsed,
     [object[]]$CommentDeviations, [int]$DurationMs, [int]$TokensUsed, [int]$FilesRead,
@@ -46,7 +46,7 @@ param(
 Set-StrictMode -Version Latest
 if ($Help) { 'SYNOPSIS'; exit 0 }
 $callLog = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))))) 'call-log.json'
-@{ step = 'finalize'; StoryId = $StoryId; SessionOutcome = $SessionOutcome; Finalize = [bool]$Finalize } | ConvertTo-Json -Compress | Add-Content -LiteralPath $callLog -Encoding utf8
+@{ step = 'finalize'; StoryId = $StoryId; SessionOutcome = $SessionOutcome; Finalize = [bool]$Finalize; Force = [bool]$Force } | ConvertTo-Json -Compress | Add-Content -LiteralPath $callLog -Encoding utf8
 Write-Output '{"path":"stub/session.json","storyId":"4965976"}'
 exit 0
 '@
@@ -150,7 +150,7 @@ Describe 'Complete-EiSession' -Tag 'Unit' {
         It 'exits 1 and names the failing step when finalize fails' {
             $failingFinalize = @'
 [CmdletBinding()]
-param([string]$StoryId, [string]$Root='.', [switch]$Finalize, [string]$SessionOutcome, [switch]$Json, [switch]$Help)
+param([string]$StoryId, [string]$Root='.', [switch]$Finalize, [switch]$Force, [string]$SessionOutcome, [switch]$Json, [switch]$Help)
 Set-StrictMode -Version Latest
 [Console]::Error.WriteLine('finalize broke on purpose')
 exit 1
@@ -161,6 +161,42 @@ exit 1
             ($err -join "`n") | Should -Match '(?i)Step 1 failed'
             ($err -join "`n") | Should -Match '(?i)Write-EiSessionEntry\.ps1'
             (Get-CallSteps -Path $box.CallLog) | Should -BeNullOrEmpty
+        }
+
+        It 'stops at the finalize step when the session is already closed, and never reaches the share' {
+            # The refusal is the real guard's job. The shim stands in for it, so this test proves
+            # only what the wrapper does with a finalize that exits 1: nothing further runs.
+            $refusingFinalize = @'
+[CmdletBinding()]
+param([string]$StoryId, [string]$Root='.', [switch]$Finalize, [switch]$Force, [string]$SessionOutcome, [switch]$Json, [switch]$Help)
+Set-StrictMode -Version Latest
+if ($Force) { Write-Output '{"path":"stub/session.json"}'; exit 0 }
+[Console]::Error.WriteLine("The session for story $StoryId was already closed at 2026-09-17T12:00:00Z.")
+exit 1
+'@
+            $box = New-Sandbox -Shims @{ Finalize = $refusingFinalize; Summary = $script:HappySummaryShim; Bundle = $script:HappyBundleShim }
+            $env:EI_GRAPHICS_SHARE_PATH = 'D:/review-share'
+            $err = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' 2>&1
+            $LASTEXITCODE | Should -Be 1
+            ($err -join "`n") | Should -Match '(?i)already closed'
+            (Get-CallSteps -Path $box.CallLog) | Should -Not -Contain 'bundle'
+            (Get-CallSteps -Path $box.CallLog) | Should -Not -Contain 'summary'
+        }
+
+        It 'passes -Force through to the finalize step, and then runs the rest' {
+            $box = New-Sandbox -Shims @{ Finalize = $script:HappyFinalizeShim; Summary = $script:HappySummaryShim; Bundle = $script:HappyBundleShim }
+            $null = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' -Force 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $record = @(Get-Content -LiteralPath $box.CallLog | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq 'finalize' })[0]
+            $record.Force | Should -BeTrue
+        }
+
+        It 'leaves -Force off the finalize step when it was not asked for' {
+            $box = New-Sandbox -Shims @{ Finalize = $script:HappyFinalizeShim; Summary = $script:HappySummaryShim; Bundle = $script:HappyBundleShim }
+            $null = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $record = @(Get-Content -LiteralPath $box.CallLog | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq 'finalize' })[0]
+            $record.Force | Should -BeFalse
         }
 
         It 'exits 1 and names the failing step when summary fails' {

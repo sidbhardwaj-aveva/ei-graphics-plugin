@@ -147,15 +147,15 @@ BeforeAll {
 
 Describe 'The roster parser' -Tag 'Unit' {
 
-    It 'recovers T008 exactly, whose 24 names span three bullets' {
+    It 'recovers T008 exactly, whose 25 names span three bullets' {
         $expected = @(
             'Action', 'BugPatternMatched', 'CommentDeviations', 'DomainSkillUsed', 'DurationMs',
-            'Evidence', 'Finalize', 'FilesModified', 'FilesRead', 'Help', 'HumanInput',
+            'Evidence', 'Finalize', 'FilesModified', 'FilesRead', 'Force', 'Help', 'HumanInput',
             'HumanInteractions', 'Json', 'Outcome', 'Phase', 'Reasoning', 'Root', 'ScriptOutput',
             'SessionOutcome', 'Status', 'StoryId', 'TestsPassed', 'TestsRun', 'TokensUsed'
         ) | Sort-Object
         $actual = Get-RosterFromPlan -PlanText $script:PlanText -TaskId 'T008'
-        $actual.Count | Should -Be 24
+        $actual.Count | Should -Be 25
         ($actual -join ',') | Should -Be ($expected -join ',')
     }
 
