@@ -68,6 +68,6 @@ one file, so it runs before the five larger tasks queued ahead of it.
 | T054 | Resolve script paths from the installed plugin | DONE | caa9dca | 2026-09-16T13:58:00Z |
 | T055 | Prove the session lifecycle cannot be skipped | DONE | 6d888b0 | 2026-09-16T12:44:12Z |
 | T056 | Document the investigation order for maintainers | DONE | e8e1b1d | 2026-09-17T10:52:00Z |
-| T058 | Send the Azure DevOps token only to Azure DevOps | DONE | pending | 2026-09-17T11:13:27Z |
+| T058 | Send the Azure DevOps token only to Azure DevOps | DONE | 635aca7 | 2026-09-17T11:13:27Z |
 | T059 | Save an attachment under a name it cannot choose | TODO | — | — |
 | T060 | Say which scripts are safe to run twice | TODO | — | — |
