@@ -2283,40 +2283,6 @@ row-count drift, and pinning it to 35 keeps that signal alive after T031–T035 
 
 **Result:** DONE.
 
-## T056 — Document the investigation order for maintainers — 2026-09-17T09:59:53Z
-
-**Goal:** Put the full investigation order in the plugin readme and show it through the
-mounting-rail ordering regression, so maintainers can identify the step a failed session skipped.
-
-**Assumptions:** The order belongs in one numbered section after the skill overview and before the
-folder tree. The worked example follows every numbered step, but stays clearly labelled as one
-example rather than the only bug this workflow supports. The document tests will assert the
-ordered step names and the example's ordering-specific evidence. The existing plain-language
-suite remains the acceptance check for the changed readme.
-
-**Files touched:** `plugins/aveva-ei-graphics/README.md`, `tests/Documents.Tests.ps1`,
-`BUILD-PROGRESS.md` and `BUILD-LOG.md`.
-
-**Acceptance:** The focused document and plain-language suites passed 41 tests with no failures or
-skips. The progress check exited 0 with 60 rows and no errors or warnings. The full suite passed
-751 tests with no failures or skips.
-
-**Attempts:** Two focused runs. The first found a test assertion syntax error. The second passed.
-The first completion check then required the Current task header to advance to T058; the rerun
-passed with only the expected `pending` warning.
-
-**Decisions:** Kept the order as thirteen named steps, so each required transition has a place in
-the summary. The worked example follows all thirteen rather than pointing to the longer domain
-reference. It preserves the important warning: compare `OrderSequence()` and
-`ApplyPlateOrdering()` before changing either. The example says it is only one case, so readers do
-not mistake the mounting-rail regression for the workflow's full scope.
-
-The first test used an unparenthesized static method call as the value of `Should -Match`.
-PowerShell passed the method name as text instead of evaluating it. Parenthesizing the escaped
-pattern fixed the test; no document change was needed.
-
-**Result:** DONE.
-
 ## T032 — Canonical intake invocation in ei-azure-devops-cli-intake SKILL.md — 2026-09-09T06:02:22Z
 
 **Goal:** Close the intake-invocation rediscovery gap the story 3774939 review surfaced. The
