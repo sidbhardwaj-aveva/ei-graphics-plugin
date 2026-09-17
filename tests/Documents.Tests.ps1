@@ -66,6 +66,37 @@ Describe 'The documents' -Tag 'Unit' {
         }
     }
 
+    It 'the plugin README gives maintainers the investigation steps in order' {
+        $raw = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'plugins/aveva-ei-graphics/README.md') -Raw
+        $section = [regex]::Match($raw, '(?s)## Investigation order\s+(.*?)\s+### Worked example').Groups[1].Value
+        $steps = @('Intake', 'Write the understanding', 'Checkpoint', 'Select the domain',
+            'Read the domain', 'Triage bounded history', 'Inspect key files', 'State a hypothesis',
+            'Make the smallest edit', 'Run focused validation', 'Run the layer guard',
+            'Close the session', 'Check the summary')
+
+        $section | Should -Not -BeNullOrEmpty
+        $lastIndex = -1
+        foreach ($step in $steps) {
+            $index = $section.IndexOf($step, [StringComparison]::Ordinal)
+            $index | Should -BeGreaterThan $lastIndex -Because "'$step' must follow the prior step"
+            $lastIndex = $index
+        }
+    }
+
+    It 'the plugin README works the mounting-rail regression through that order' {
+        $raw = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'plugins/aveva-ei-graphics/README.md') -Raw
+        $example = [regex]::Match($raw, '(?s)### Worked example: a mounting-rail ordering regression\s+(.*?)\s+## Folder tree').Groups[1].Value
+
+        $example | Should -Match '(?i)one example'
+        $example | Should -Match '(?i)other bugs and other domain skills'
+        $example | Should -Match ([regex]::Escape('TS-1, B-1, --134, IOM-1'))
+        $example | Should -Match ([regex]::Escape('OrderSequence()'))
+        $example | Should -Match ([regex]::Escape('ApplyPlateOrdering()'))
+        $example | Should -Match '(?i)plated and unplated'
+        $example | Should -Match ([regex]::Escape('Complete-EiSession.ps1'))
+        @($example -split "`r?`n" | Where-Object { $_ -match '^\d+\.' }).Count | Should -Be 13
+    }
+
     It 'PLUGIN-INFO.md names the plugin as the folder does' {
         $folderName = Split-Path -Leaf (Join-Path $script:RepoRoot 'plugins' 'aveva-ei-graphics')
         (Get-Content -LiteralPath (Join-Path $script:RepoRoot 'PLUGIN-INFO.md') -Raw) |
