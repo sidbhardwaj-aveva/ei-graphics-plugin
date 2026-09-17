@@ -2350,7 +2350,7 @@ matter most is worse than no promise.
 script. Say plainly which ones may be run again with no effect, and for the two that cannot, say
 what a second run leaves behind and what to do instead. No script behaviour changes in this task.
 
-**Done when.** Tests prove the blanket sentence is gone, that every one of the nine scripts carries
+**Done when.** Tests prove the blanket sentence is gone, that every one of the ten scripts carries
 a repeat statement, and that the two writers name their consequence. The plain-language check
 still passes for that file. The progress check and full Pester suite exit 0 with no skipped tests.
 

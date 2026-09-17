@@ -3253,3 +3253,40 @@ the summary block and recomputes the totals from the entries present, so it is o
 repeated entry sits underneath it. And `Convert-EiAdoIntake.ps1` names each attachment from its
 index and the name on the work item, so a second run writes over the first set rather than adding
 to it.
+
+**Files touched:** `plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md`,
+`tests/aveva-ei-graphics/skills/ei-graphics-core/Skill.Tests.ps1`, `plan.md`.
+
+**Acceptance:** The blanket sentence is gone from the opening paragraph, which now points the
+reader at the statement under each script. Every one of the ten scripts carries a `**Run again:**`
+line that starts with `safe` or `not safe`. Seven are safe: three write nothing, three write over
+their own output, and the intake writes over the attachment set it named. Three are not, and each
+names what a second run leaves and what to do about it. Focused suite 62 passed across the skill,
+plain-language and document checks. Progress check exit 0. Full suite 771 passed, 0 failed, 0
+skipped.
+
+**Ceiling raised:** the skill document from 160 lines to 180 in `Skill.Tests.ps1`. Ten statements
+take it from 158 to 176. The reason is recorded beside the assertion.
+
+**Proof the new check bites:** with one `**Run again:**` line deleted from the document, the suite
+failed with "Export-EiSessionSummary.ps1 must say what a second run does". The file was restored
+from a copy and the suite went green again.
+
+**Attempts:** Two. The first run failed twice, and both failures were worth having. The
+plain-language check caught a 28-word sentence about attachment names, now two sentences. And the
+share export test looked for a phrase that wrapped across a line break, so the statement is now
+flattened to one line before matching.
+
+**Decisions:** The plan said nine scripts and the document has held ten since T054, so `plan.md`
+now says ten. Nothing else about the task changed, and the count was the only stale part.
+
+The plan named two scripts that cannot be repeated. `Complete-EiSession.ps1` is a third, because it
+calls the bundle export, and a reader who only read its section would have been told nothing. It
+carries the same statement and the same remedy. Its finalize and summary steps are called out as
+safe, so the warning cannot be read as covering the whole command.
+
+A repeated `-Finalize` is documented as safe. It replaces the summary block and works the totals out
+again from the entries present, so it only misreports when a repeated entry sits underneath it. That
+is the appending case, which the same statement already covers.
+
+**Result:** DONE.

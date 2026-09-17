@@ -1,6 +1,16 @@
 #Requires -Version 7.0
 Set-StrictMode -Version Latest
 
+# Discovery-time data. Pester needs -ForEach filled before any BeforeAll block runs.
+# The three scripts a second run does not leave alone, what it leaves, and what the reader is told
+# to do about it. Write-EiSessionEntry appends; the other two reach the share, one of them through
+# the first.
+$NotRepeatable = @(
+    @{ Script = 'Write-EiSessionEntry.ps1'; Leaves = '(?i)second entry'; Remedy = '(?i)remove a duplicate' }
+    @{ Script = 'Export-EiSessionBundleToShare.ps1'; Leaves = '(?i)second copy'; Remedy = '(?i)delete the extra folder' }
+    @{ Script = 'Complete-EiSession.ps1'; Leaves = '(?i)second copy'; Remedy = '(?i)delete the extra folder' }
+)
+
 BeforeAll {
     $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..' '..')).Path
     $script:SkillFolder = Join-Path $repoRoot 'plugins' 'aveva-ei-graphics' 'skills' 'ei-graphics-core'
@@ -39,8 +49,9 @@ Describe 'ei-graphics-core SKILL.md' -Tag 'Unit' {
         $declared | Should -Be (Split-Path -Leaf $script:SkillFolder)
     }
 
-    It 'is 160 lines or fewer' {
-        $script:Lines.Count | Should -BeLessOrEqual 160
+    # Raised from 160 in T060, which gave every script its own statement about a second run.
+    It 'is 180 lines or fewer' {
+        $script:Lines.Count | Should -BeLessOrEqual 180
     }
 
     It 'names <_>' -ForEach @(
@@ -71,5 +82,30 @@ Describe 'ei-graphics-core SKILL.md' -Tag 'Unit' {
     It 'carries no workflow narrative, because the agent owns the flow' {
         $script:Raw | Should -Not -Match '(?i)\blifecycle\b'
         $script:Raw | Should -Not -Match '(?i)\bstage\b'
+    }
+
+    It 'no longer promises that any command is safe to run twice' {
+        $script:Raw | Should -Not -Match '(?i)running the same command twice is safe'
+    }
+
+    It 'says what a second run of each script does' {
+        foreach ($name in $script:CoreScripts) {
+            $section = [regex]::Match($script:Raw, "(?ms)^## ``$([regex]::Escape($name))``\s*$.*?(?=^## |\z)")
+            $section.Success | Should -BeTrue -Because "$name needs its own section"
+            $statement = [regex]::Match($section.Value, '(?ms)^\*\*Run again:\*\*\s+(.*?)(?=\r?\n\r?\n|\z)')
+            $statement.Success | Should -BeTrue -Because "$name must say what a second run does"
+            $statement.Groups[1].Value | Should -Match '(?i)\b(safe|not safe)\b' -Because "$name must answer plainly"
+        }
+    }
+
+    It 'says what a second run of <Script> leaves behind, and what to do about it' -ForEach $NotRepeatable {
+        $section = [regex]::Match($script:Raw, "(?ms)^## ``$([regex]::Escape($Script))``\s*$.*?(?=^## |\z)")
+        $statement = [regex]::Match($section.Value, '(?ms)^\*\*Run again:\*\*\s+(.*?)(?=\r?\n\r?\n|\z)').Groups[1].Value
+        # The statement wraps across lines, so a phrase can straddle a line break.
+        $statement = ($statement -replace '\s+', ' ').Trim()
+
+        $statement | Should -Match '(?i)not safe'
+        $statement | Should -Match $Leaves
+        $statement | Should -Match $Remedy
     }
 }
