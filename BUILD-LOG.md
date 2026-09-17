@@ -3229,3 +3229,27 @@ neither depends on that set. The download harness written for T058 moved up to t
 `BeforeAll` so both sets of tests share it; no T058 assertion changed.
 
 **Result:** DONE.
+
+## T060 — Say which scripts are safe to run twice — 2026-09-17T11:25:23Z
+
+**Goal:** Replace the blanket promise in `ei-graphics-core/SKILL.md` that running any command twice
+is safe. Each script says for itself what a second run does, and the ones that leave something
+behind say what and what to do instead. No script behaviour changes.
+
+**Assumptions:** The plan says nine scripts. The skill has carried ten since T054, when
+`Complete-EiSession.ps1` joined the roster, and the document already says ten in three places. The
+count in the plan is stale, not a different instruction, so the plan is corrected to ten and the
+correction is recorded here rather than treated as an ambiguity.
+
+The plan names two writers that cannot be repeated safely. Reading the scripts finds a third case
+it did not anticipate: `Complete-EiSession.ps1` calls `Export-EiSessionBundleToShare.ps1`, so it
+inherits the duplicate copy on the share. It is stated as well. Checked against the code, the two
+the plan names hold: `Write-EiSessionEntry.ps1` appends at line 262 with no duplicate check, and
+`Export-EiSessionBundleToShare.ps1` builds its folder name at line 54 from the time to the second
+and a fresh identifier, so a repeat can never land on the earlier folder.
+
+Two further findings shape the wording. A second `-Finalize` is not itself a duplicate: it replaces
+the summary block and recomputes the totals from the entries present, so it is only wrong when a
+repeated entry sits underneath it. And `Convert-EiAdoIntake.ps1` names each attachment from its
+index and the name on the work item, so a second run writes over the first set rather than adding
+to it.
