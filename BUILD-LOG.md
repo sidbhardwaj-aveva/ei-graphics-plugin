@@ -3127,3 +3127,19 @@ again. Until the harness refuses a positional second path, run several files wit
 alone here, because it belongs to T003 and hardening it is not this task's work.
 
 **Result:** DONE.
+
+## T058 — Send the Azure DevOps token only to Azure DevOps — 2026-09-17T11:06:38Z
+
+**Goal:** Stop `Convert-EiAdoIntake.ps1` attaching a live Azure DevOps token to any address a work
+item happens to carry. Only an `https` address on `dev.azure.com`, or on a host ending
+`.visualstudio.com`, may see the header. Anything else is skipped with a warning naming it.
+
+**Assumptions:** The address list reaches this script from `Invoke-EiAdoCliIntake.ps1`, which is a
+copied script and is not edited here. Its filter, `$url -match '(?i)(dev\.azure\.com|visualstudio\.com)'`,
+is an unanchored substring test, so `https://attacker.example/x?u=dev.azure.com` passes it. That is
+why the check written here parses the address with `[System.Uri]` and compares `Host`, rather than
+matching text: a substring test in this script would inherit the same hole. The two accepted shapes
+are taken from the plan, and match the two the `aveva-rnd` plugin recognises in `Parse-AdoGitRemote`.
+The refusal path is the existing failed-download path: a warning on stderr, the attachment left out
+of the result, and the run carrying on.
+
