@@ -7,6 +7,12 @@
     Writes .ei-session-logs/<StoryId>/<ArtifactType>.json. For story-understanding and
     approved-files it stamps a hash over the canonical form of the payload. It never does that
     for ado, because ado.schema.json declares no hash property.
+
+    For story-understanding it also stamps adoHash, the same digest taken over the ado.json
+    already written beside it. That is what binds an understanding to the exact story text it
+    was read from, so the file on disk wins over any value the caller passed. A session with no
+    ado.json came from somewhere else and carries inputSource instead, so the payload is left
+    alone.
 #>
 [CmdletBinding()]
 param(
@@ -78,7 +84,21 @@ if ($InputJson) {
 }
 
 $canonical = ConvertTo-CanonicalNode -Node $payload
-if ($ArtifactType -ne 'ado') { $canonical['hash'] = Get-CanonicalHash -Payload $payload }
+
+if ($ArtifactType -eq 'story-understanding' -and (Test-Path -LiteralPath $Root)) {
+    $adoPath = Join-Path (Resolve-Path -LiteralPath $Root).Path '.ei-session-logs' $StoryId 'ado.json'
+    if (Test-Path -LiteralPath $adoPath -PathType Leaf) {
+        try { $ado = Get-Content -LiteralPath $adoPath -Raw | ConvertFrom-Json -AsHashtable }
+        catch {
+            Write-Problem "ado.json for story $StoryId is not valid JSON, so adoHash cannot be computed. $($_.Exception.Message)"
+            Write-Problem "Repair or re-run the intake for $adoPath, then write this artifact again. Nothing was written."
+            exit 1
+        }
+        $canonical['adoHash'] = Get-CanonicalHash -Payload $ado
+    }
+}
+
+if ($ArtifactType -ne 'ado') { $canonical['hash'] = Get-CanonicalHash -Payload $canonical }
 
 $schemaPath = Join-Path $PSScriptRoot '..' 'schemas' "$ArtifactType.schema.json"
 if (-not (Test-Path -LiteralPath $schemaPath)) {

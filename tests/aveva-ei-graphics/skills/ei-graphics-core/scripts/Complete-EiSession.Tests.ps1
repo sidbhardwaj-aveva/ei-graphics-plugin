@@ -46,7 +46,7 @@ param(
 Set-StrictMode -Version Latest
 if ($Help) { 'SYNOPSIS'; exit 0 }
 $callLog = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))))) 'call-log.json'
-@{ step = 'finalize'; StoryId = $StoryId; SessionOutcome = $SessionOutcome; Finalize = [bool]$Finalize; Force = [bool]$Force } | ConvertTo-Json -Compress | Add-Content -LiteralPath $callLog -Encoding utf8
+@{ step = 'finalize'; StoryId = $StoryId; SessionOutcome = $SessionOutcome; Finalize = [bool]$Finalize; Force = [bool]$Force; DomainSkillUsed = $DomainSkillUsed; BugPatternMatched = $BugPatternMatched; TestsRun = $TestsRun; TestsPassed = $TestsPassed; HumanInteractions = $HumanInteractions; CommentDeviationCount = @($CommentDeviations).Count; Bound = @($PSBoundParameters.Keys) } | ConvertTo-Json -Compress | Add-Content -LiteralPath $callLog -Encoding utf8
 Write-Output '{"path":"stub/session.json","storyId":"4965976"}'
 exit 0
 '@
@@ -197,6 +197,43 @@ exit 1
             $LASTEXITCODE | Should -Be 0
             $record = @(Get-Content -LiteralPath $box.CallLog | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq 'finalize' })[0]
             $record.Force | Should -BeFalse
+        }
+
+        It 'carries the domain skill and bug pattern through to the finalize step' {
+            # Closing any other way is unsupported, so a field the wrapper drops is a field no
+            # session can record. T022 matched a named pattern and the summary still said none.
+            $box = New-Sandbox -Shims @{ Finalize = $script:HappyFinalizeShim; Summary = $script:HappySummaryShim; Bundle = $script:HappyBundleShim }
+            $null = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' `
+                -DomainSkillUsed 'termination-drawing' -BugPatternMatched 'Pattern 8' 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $record = @(Get-Content -LiteralPath $box.CallLog | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq 'finalize' })[0]
+            $record.DomainSkillUsed | Should -Be 'termination-drawing'
+            $record.BugPatternMatched | Should -Be 'Pattern 8'
+        }
+
+        It 'carries the counts and the comment deviations through to the finalize step' {
+            $box = New-Sandbox -Shims @{ Finalize = $script:HappyFinalizeShim; Summary = $script:HappySummaryShim; Bundle = $script:HappyBundleShim }
+            $null = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' `
+                -TestsRun 12 -TestsPassed 11 -HumanInteractions 2 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $record = @(Get-Content -LiteralPath $box.CallLog | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq 'finalize' })[0]
+            $record.TestsRun | Should -Be 12
+            $record.TestsPassed | Should -Be 11
+            $record.HumanInteractions | Should -Be 2
+        }
+
+        It 'does not pass a field the caller left out' {
+            # An empty string is a value. A summary that records one is claiming a measurement
+            # nobody made, which is worse than saying nothing was recorded.
+            $box = New-Sandbox -Shims @{ Finalize = $script:HappyFinalizeShim; Summary = $script:HappySummaryShim; Bundle = $script:HappyBundleShim }
+            $null = pwsh -NoProfile -File $box.Wrapper -StoryId '4965976' -SessionOutcome 'success' `
+                -DomainSkillUsed 'termination-drawing' 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $record = @(Get-Content -LiteralPath $box.CallLog | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq 'finalize' })[0]
+            @($record.Bound) | Should -Contain 'DomainSkillUsed'
+            @($record.Bound) | Should -Not -Contain 'BugPatternMatched'
+            @($record.Bound) | Should -Not -Contain 'TestsRun'
+            @($record.Bound) | Should -Not -Contain 'HumanInteractions'
         }
 
         It 'exits 1 and names the failing step when summary fails' {

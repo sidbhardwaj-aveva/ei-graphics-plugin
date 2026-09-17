@@ -3475,3 +3475,44 @@ totals a defect in the close path. That is wrong. `-DurationMs` and `-TokensUsed
 parameters that `-Finalize` already sums, and it omits the totals deliberately when no entry
 carried a measurement, because a measured zero and no measurement are different things. The T022
 run simply passed neither. No script changes for this one.
+
+**Attempts:** One, with two rounds of correction after the first full-suite run.
+
+**What changed.** `Write-EiArtifact.ps1` now stamps `adoHash` for `story-understanding` from the
+`ado.json` beside it, before it stamps `hash`, so `hash` covers it. Invalid JSON in `ado.json`
+exits 1 and writes nothing rather than binding to something unreadable.
+`approved-files.schema.json` dropped `minItems` from 1 to 0. `Complete-EiSession.ps1` gained six
+forwarded parameters and now builds the finalize call by splatting only the parameters the caller
+actually bound.
+
+**A decision worth recording.** The forwarding is splatted from `$PSBoundParameters` rather than
+passed positionally. Passing every parameter unconditionally would send an empty string for the
+ones nobody set, and the finalize step writes any non-empty value it receives. The summary would
+then carry a measurement nobody made. A test holds this: it passes `-DomainSkillUsed` alone and
+asserts the other five names never reach the shim.
+
+**Three things the first full-suite run caught.** The T036 roster paragraph ended with prose that
+mentioned `-Finalize` in backticks, and the roster parser reads to the first blank line, so it
+counted thirteen names against a param block of twelve. The sentence was reworded.
+`Schemas.Tests.ps1` asserted that an empty file list is rejected, which is now the opposite of the
+rule, so it was replaced with a test that it is accepted plus one that a file entry with no path
+is still rejected. `EverythingGreen.Tests.ps1` hardcodes the row count, which went from 62 to 63.
+
+**The line ceiling was not raised.** `ei-graphics-core/SKILL.md` went to 187 against a ceiling of
+180 that had already been raised twice, from 120 to 160 in T060 and then to 180. Raising it a third
+time would make it decoration. Four paragraphs were tightened instead and the file came back to
+exactly 180. The two script ceilings in `ScriptContract.Tests.ps1` were raised, which is a
+different thing: `Write-EiArtifact` to 150 and `Complete-EiSession` to 170, because both scripts
+gained real behaviour rather than prose.
+
+**Result: DONE.** Full suite 793 passed, 0 failed, 0 skipped. Progress check exits 0.
+
+**Still open on T022.** The person who ran it has confirmed `session-summary.md` reads well, so
+that item is satisfied. The command budget is not, and T022 stays BLOCKED on that alone.
+
+**One piece of stale evidence.** `story-understanding.json` under story 5049211 holds the
+`adoHash` that run computed by hand, a raw digest of the file rather than the canonical digest this
+task settled on. It is wrong by the rule that now exists. Rewriting it would also mean rewriting
+`approved-files.json`, whose `understandingHash` points at it, so the pair is left alone for a
+person to decide: either re-run T022 and let the scripts stamp both, or leave the closed session as
+the record of what the run actually did.

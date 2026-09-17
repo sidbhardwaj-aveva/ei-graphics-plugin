@@ -7,6 +7,9 @@
     and when EI_GRAPHICS_SHARE_PATH is set in the environment,
     Export-EiSessionBundleToShare.ps1 -SharePath $env:EI_GRAPHICS_SHARE_PATH.
 
+    Every field -Finalize accepts can be passed here too, because closing any other way is not
+    supported and a field this wrapper drops is a field no session can ever record.
+
     Returns one JSON object naming the summary path and, when the share export ran, the
     exported bundle path. A failure in finalize or summary exits 1 with the failing step named
     on stderr. A share-export failure is a warning on stderr, not fatal, so the local bundle
@@ -25,6 +28,20 @@
 .PARAMETER Force
     Passed to Write-EiSessionEntry.ps1, allowing it to replace the summary of a session that is
     already closed. Without it a second close exits 1. A forced close does export a second bundle.
+.PARAMETER DomainSkillUsed
+    Passed to Write-EiSessionEntry.ps1. The domain skill this session worked through, named in the
+    maintainer section of the summary. Omit it and the summary says no skill was recorded.
+.PARAMETER BugPatternMatched
+    Passed to Write-EiSessionEntry.ps1. The bug pattern the diagnosis matched, if it matched one.
+.PARAMETER TestsRun
+    Passed to Write-EiSessionEntry.ps1. How many tests the session ran.
+.PARAMETER TestsPassed
+    Passed to Write-EiSessionEntry.ps1. How many of them passed.
+.PARAMETER HumanInteractions
+    Passed to Write-EiSessionEntry.ps1. How many times the session stopped and waited for a person.
+.PARAMETER CommentDeviations
+    Passed to Write-EiSessionEntry.ps1. Where a story comment sent the work somewhere the
+    description did not.
 .PARAMETER Json
     Emit stdout as a JSON string instead of a PSCustomObject.
 .PARAMETER Help
@@ -36,6 +53,12 @@ param(
     [string] $SessionOutcome,
     [string] $Root = '.',
     [switch] $Force,
+    [string] $DomainSkillUsed,
+    [string] $BugPatternMatched,
+    [Nullable[int]] $TestsRun,
+    [Nullable[int]] $TestsPassed,
+    [Nullable[int]] $HumanInteractions,
+    [object[]] $CommentDeviations,
     [switch] $Json,
     [switch] $Help
 )
@@ -70,7 +93,13 @@ foreach ($name in $steps.Keys) {
     }
 }
 
-$finalizeJson = & $steps['Write-EiSessionEntry.ps1'] -StoryId $StoryId -Root $Root -Finalize -SessionOutcome $SessionOutcome -Force:$Force -Json
+# An omitted field must stay omitted. Passing an empty string would record "nothing" as a value.
+$finalizeArgs = @{ StoryId = $StoryId; Root = $Root; Finalize = $true; SessionOutcome = $SessionOutcome; Force = $Force; Json = $true }
+foreach ($name in @('DomainSkillUsed', 'BugPatternMatched', 'TestsRun', 'TestsPassed', 'HumanInteractions', 'CommentDeviations')) {
+    if ($PSBoundParameters.ContainsKey($name)) { $finalizeArgs[$name] = $PSBoundParameters[$name] }
+}
+
+$finalizeJson = & $steps['Write-EiSessionEntry.ps1'] @finalizeArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Problem "Step 1 failed: Write-EiSessionEntry.ps1 exited $LASTEXITCODE. Nothing further was run."
     exit 1

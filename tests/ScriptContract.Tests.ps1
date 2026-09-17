@@ -12,7 +12,7 @@ $PluginsRoot = Join-Path $RepoRoot 'plugins'
 # where the Azure DevOps token is sent, and again in T059, which checks the name an attachment is
 # saved under.
 $LineCeilings = @{
-    'Write-EiArtifact'         = 120
+    'Write-EiArtifact'         = 150
     'Write-EiSessionEntry'     = 300
     'Export-EiSessionSummary'  = 250
     'Export-EiSessionBundleToShare' = 120
@@ -21,7 +21,7 @@ $LineCeilings = @{
     'Convert-EiAdoIntake'      = 200
     'Invoke-EiGraphicsDoctor'  = 800
     'Invoke-EiStoryIntake'     = 100
-    'Complete-EiSession'       = 120
+    'Complete-EiSession'       = 170
     'Resolve-EiScriptPath'     = 120
 }
 
@@ -60,7 +60,7 @@ BeforeAll {
     $script:HashFile = Join-Path $script:RepoRoot 'tests' 'data' 'ported-file-hashes.json'
 
     $script:LineCeilings = @{
-        'Write-EiArtifact'         = 120
+        'Write-EiArtifact'         = 150
         'Write-EiSessionEntry'     = 300
         'Export-EiSessionSummary'  = 250
         'Export-EiSessionBundleToShare' = 120
@@ -69,7 +69,7 @@ BeforeAll {
         'Convert-EiAdoIntake'      = 200
         'Invoke-EiGraphicsDoctor'  = 800
         'Invoke-EiStoryIntake'     = 100
-        'Complete-EiSession'       = 120
+        'Complete-EiSession'       = 170
         'Resolve-EiScriptPath'     = 120
     }
     $script:OwningTask = @{

@@ -238,9 +238,17 @@ Describe 'ei-graphics-core schemas' -Tag 'Unit' {
             Test-AgainstSchema -Payload $bad -SchemaName 'approved-files.schema.json' | Should -BeFalse
         }
 
-        It 'rejects an empty file list' {
+        It 'accepts an empty file list, which approves changing nothing' {
+            # T063. A session can reach the right answer and decide no code should change.
+            # Test-EiScopeDrift.ps1 then calls any change at all drift, which is the point.
+            $good = Copy-Payload $script:GoodApprovedFiles
+            $good.files = @()
+            Test-AgainstSchema -Payload $good -SchemaName 'approved-files.schema.json' | Should -BeTrue
+        }
+
+        It 'rejects a file entry that names no path' {
             $bad = Copy-Payload $script:GoodApprovedFiles
-            $bad.files = @()
+            $bad.files = @([ordered]@{ intent = 'modify'; reason = 'no path given' })
             Test-AgainstSchema -Payload $bad -SchemaName 'approved-files.schema.json' | Should -BeFalse
         }
 

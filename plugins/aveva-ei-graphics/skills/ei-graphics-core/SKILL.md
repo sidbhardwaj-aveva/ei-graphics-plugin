@@ -35,9 +35,10 @@ payload as an object through `-InputObject`, or as text through `-InputJson`.
 **Writes:** `.ei-session-logs/<storyId>/<artifact-type>.json`.
 **Output:** the path it wrote and the hash it stamped.
 
-For `story-understanding` and `approved-files` it stamps a `hash` field. It never does that for
-`ado`, because `ado.schema.json` allows no such field. ADO content is tied down instead by the
-`adoHash` field inside `story-understanding.json`.
+For `story-understanding` and `approved-files` it stamps `hash`, never for `ado`, whose schema
+allows no such field. `adoHash` inside `story-understanding.json` binds the ADO content instead,
+and this script stamps that too, from the `ado.json` beside it. Never work it out yourself. An
+`approved-files` list may be empty, which says a person approved changing nothing.
 
 **Exit codes:** 0 when the payload passed and the file was written. 1 when it failed, and the
 schema errors are listed on stderr.
@@ -165,14 +166,15 @@ stderr.
 Runs `Write-EiSessionEntry.ps1 -Finalize -SessionOutcome`, then `Export-EiSessionSummary.ps1`,
 and when `EI_GRAPHICS_SHARE_PATH` is set, `Export-EiSessionBundleToShare.ps1 -SharePath`.
 
-**Parameters:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Force`, `-Json`, `-Help`.
+**Parameters:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Force`, `-DomainSkillUsed`,
+`-BugPatternMatched`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`, `-CommentDeviations`,
+`-Json`, `-Help`. Everything after `-Force` goes to the finalize step. Pass `-DomainSkillUsed`
+whenever a domain skill was used, or the summary tells the maintainer none was.
 
 **Output:** the summary path and, when the share export ran, the exported bundle path.
 
-**Exit codes:** 0 on success. 1 when finalize or summary fails, with the failing step named
-on stderr. It rejects a renderer response unless the reported summary file exists. A share-export
-failure is a warning on stderr, not fatal.
-**Run again:** safe. The finalize step refuses a session that is already closed, so a second run
-stops there, exits 1, and never reaches the share. `-Force` is the exception. It goes through to the
-share and leaves a second copy of the story text there. Use it only to replace a summary recorded
-with the wrong outcome, and delete the extra folder afterwards.
+**Exit codes:** 0 on success. 1 when finalize or summary fails, with the failing step named on
+stderr, or when the reported summary file does not exist. A share-export failure only warns.
+**Run again:** safe. The finalize step refuses a session already closed, so a second run exits 1
+there and never reaches the share. `-Force` is the exception: it reaches the share and leaves a
+second copy of the story text. Use it only to replace a wrong outcome, then delete the extra copy.

@@ -179,6 +179,27 @@ Describe 'Write-EiArtifact' -Tag 'Unit' {
         $run.Result.hash | Should -Match '^sha256:[0-9a-f]{64}$'
     }
 
+    It 'writes an approved-files artifact that approves changing nothing' {
+        # A session can reach the right answer and decide no code should change. Before T063 the
+        # schema had no way to say that, so the run had to approve a file it then left alone.
+        $payload = [ordered]@{
+            schemaVersion     = '1.0.0'
+            storyId           = '4965976'
+            understandingHash = 'sha256:' + ('c' * 64)
+            approvedAt        = '2026-08-26T09:02:45Z'
+            approvedBy        = 'a.person'
+            approvalType      = 'direct'
+            files             = @()
+        }
+        $run = Invoke-Writer -Splat @{
+            StoryId = 'nothing-1'; ArtifactType = 'approved-files'
+            InputObject = $payload; Root = $script:Root
+        }
+        $run.ExitCode | Should -Be 0
+        $written = Get-Content -LiteralPath $run.Result.path -Raw | ConvertFrom-Json
+        @($written.files).Count | Should -Be 0
+    }
+
     Context 'the ado artifact is the exception' {
         It 'writes an ado.json that validates against the copied schema' {
             $run = Invoke-Writer -Splat @{
@@ -201,6 +222,104 @@ Describe 'Write-EiArtifact' -Tag 'Unit' {
             $written = Get-Content -LiteralPath $run.Result.path -Raw | ConvertFrom-Json
             $written.PSObject.Properties.Name | Should -Not -Contain 'hash'
             $run.Result.hash | Should -BeNullOrEmpty
+        }
+    }
+
+    Context 'adoHash binds an understanding to the ado.json beside it' {
+        It 'stamps adoHash from the ado.json on disk' {
+            $ado = Invoke-Writer -Splat @{
+                StoryId = '77'; ArtifactType = 'ado'
+                InputObject = (New-AdoPayload); Root = $script:Root
+            }
+            $ado.ExitCode | Should -Be 0
+
+            $run = Invoke-Writer -Splat @{
+                StoryId = '77'; ArtifactType = 'story-understanding'
+                InputObject = (New-Understanding); Root = $script:Root
+            }
+            $run.ExitCode | Should -Be 0
+            $written = Get-Content -LiteralPath $run.Result.path -Raw | ConvertFrom-Json
+            $written.adoHash | Should -Match '^sha256:[0-9a-f]{64}$'
+            $written.adoHash | Should -Not -Be ('sha256:' + ('b' * 64))
+        }
+
+        It 'replaces whatever the caller passed, because the file on disk is the source' {
+            $null = Invoke-Writer -Splat @{
+                StoryId = '78'; ArtifactType = 'ado'
+                InputObject = (New-AdoPayload); Root = $script:Root
+            }
+            $payload = New-Understanding
+            $payload['adoHash'] = 'sha256:' + ('c' * 64)
+            $run = Invoke-Writer -Splat @{
+                StoryId = '78'; ArtifactType = 'story-understanding'
+                InputObject = $payload; Root = $script:Root
+            }
+            $written = Get-Content -LiteralPath $run.Result.path -Raw | ConvertFrom-Json
+            $written.adoHash | Should -Not -Be ('sha256:' + ('c' * 64))
+        }
+
+        It 'gives the same adoHash for the same ado.json under two stories' {
+            foreach ($id in @('79', '80')) {
+                $null = Invoke-Writer -Splat @{
+                    StoryId = $id; ArtifactType = 'ado'
+                    InputObject = (New-AdoPayload); Root = $script:Root
+                }
+            }
+            $first = Invoke-Writer -Splat @{
+                StoryId = '79'; ArtifactType = 'story-understanding'
+                InputObject = (New-Understanding); Root = $script:Root
+            }
+            $second = Invoke-Writer -Splat @{
+                StoryId = '80'; ArtifactType = 'story-understanding'
+                InputObject = (New-Understanding); Root = $script:Root
+            }
+            $a = (Get-Content -LiteralPath $first.Result.path -Raw | ConvertFrom-Json).adoHash
+            $b = (Get-Content -LiteralPath $second.Result.path -Raw | ConvertFrom-Json).adoHash
+            $a | Should -Be $b
+        }
+
+        It 'leaves the payload alone when there is no ado.json, so a local-input session still writes' {
+            $local = New-Understanding
+            $local.Remove('adoHash')
+            $local['inputSource'] = [ordered]@{
+                kind = 'pasted-symptom'; reference = 'chat'
+                hash = 'sha256:' + ('d' * 64); adoNotUsedBecause = 'No work item exists'
+            }
+            $run = Invoke-Writer -Splat @{
+                StoryId = '81'; ArtifactType = 'story-understanding'
+                InputObject = $local; Root = $script:Root
+            }
+            $run.ExitCode | Should -Be 0
+            $written = Get-Content -LiteralPath $run.Result.path -Raw | ConvertFrom-Json
+            $written.PSObject.Properties.Name | Should -Not -Contain 'adoHash'
+        }
+
+        It 'covers adoHash with the payload hash, so the two cannot drift apart' {
+            $null = Invoke-Writer -Splat @{
+                StoryId = '82'; ArtifactType = 'ado'
+                InputObject = (New-AdoPayload); Root = $script:Root
+            }
+            $bound = Invoke-Writer -Splat @{
+                StoryId = '82'; ArtifactType = 'story-understanding'
+                InputObject = (New-Understanding); Root = $script:Root
+            }
+            $unbound = Invoke-Writer -Splat @{
+                StoryId = '83'; ArtifactType = 'story-understanding'
+                InputObject = (New-Understanding); Root = $script:Root
+            }
+            $bound.Result.hash | Should -Not -Be $unbound.Result.hash
+        }
+
+        It 'exits 1 and writes nothing when ado.json is not valid JSON' {
+            $folder = Join-Path $script:Root '.ei-session-logs' '84'
+            $null = New-Item -ItemType Directory -Path $folder -Force
+            [System.IO.File]::WriteAllText((Join-Path $folder 'ado.json'), 'not json')
+            $run = Invoke-Writer -Splat @{
+                StoryId = '84'; ArtifactType = 'story-understanding'
+                InputObject = (New-Understanding); Root = $script:Root
+            }
+            $run.ExitCode | Should -Be 1
+            Test-Path -LiteralPath (Join-Path $folder 'story-understanding.json') | Should -BeFalse
         }
     }
 

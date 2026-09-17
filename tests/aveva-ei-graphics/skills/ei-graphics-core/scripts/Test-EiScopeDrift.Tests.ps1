@@ -56,6 +56,21 @@ Describe 'Test-EiScopeDrift' -Tag 'Unit' {
         $run.ExitCode | Should -Be 1
     }
 
+    It 'passes when nothing was approved and nothing changed' {
+        $root = New-ApprovedFiles -Paths @()
+        $run = Invoke-Drift -Root $root -ChangedFiles @()
+        $run.Result.status | Should -Be 'pass'
+        $run.ExitCode | Should -Be 0
+    }
+
+    It 'calls any change drift when the approved list is empty' {
+        $root = New-ApprovedFiles -Paths @()
+        $run = Invoke-Drift -Root $root -ChangedFiles @('src/A.cs')
+        $run.Result.status | Should -Be 'drift'
+        @($run.Result.unapproved) | Should -Be @('src/A.cs')
+        $run.ExitCode | Should -Be 1
+    }
+
     It 'reports an approved file nobody touched as a warning, not a failure' {
         $root = New-ApprovedFiles -Paths @('src/A.cs', 'src/Untouched.cs')
         $run = Invoke-Drift -Root $root -ChangedFiles @('src/A.cs')

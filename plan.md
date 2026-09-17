@@ -1846,8 +1846,8 @@ from every sub-script is forwarded unaltered.
 **Parameters, exactly these 12:** `-StoryId`, `-SessionOutcome`, `-Root`, `-Force`,
 `-DomainSkillUsed`, `-BugPatternMatched`, `-TestsRun`, `-TestsPassed`, `-HumanInteractions`,
 `-CommentDeviations`, `-Json`, `-Help`. `-Force` arrived in T062. The six after it arrived in T063,
-which made the wrapper forward every field `-Finalize` accepts. All of them pass straight through
-to `Write-EiSessionEntry.ps1`.
+which made the wrapper forward every field the finalize set accepts. All of them pass straight
+through to `Write-EiSessionEntry.ps1`.
 
 Follow the standard header: `#Requires -Version 7.0`, `Set-StrictMode -Version Latest`,
 `$ErrorActionPreference = 'Stop'`. Paths resolve from `$PSScriptRoot`. JSON goes to stdout,
