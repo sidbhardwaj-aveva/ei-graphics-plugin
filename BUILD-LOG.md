@@ -3290,3 +3290,21 @@ again from the entries present, so it only misreports when a repeated entry sits
 is the appending case, which the same statement already covers.
 
 **Result:** DONE.
+
+## T061 — Correct the script count the READMEs still give — 2026-09-17T11:55:21Z
+
+**Goal:** Three files a reader meets first say `ei-graphics-core` has nine scripts. It has had ten
+since T054. Correct them, then make the count a thing a test reads off disk rather than a number a
+person has to remember.
+
+**Assumptions:** The drift lasted six tasks because the only test that pins the count lives inside
+the core skill's own suite and reads that skill's document. Nothing compared the number against the
+scripts folder, and nothing looked at the plugin README or the diagram at all. So correcting the
+three files is the smaller half of this task. The test that stops it recurring is the point.
+
+The rendered `04-components.html` is generated from the `.mmd` beside it, but there is no renderer
+checked in and no task that regenerates it, so both are edited by hand and both are asserted. If a
+renderer is added later, the HTML assertion is what will catch a stale render.
+
+`docs/` is not scanned by the plain-language checks, and the README is. Wording is kept plain in
+both regardless.
