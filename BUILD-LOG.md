@@ -3386,3 +3386,24 @@ not become silently repeatable: the second run exits 1. `-Force` is the one path
 the share twice, and the repeat statement says so.
 
 **Result:** DONE.
+
+---
+
+## T022 — Dry run against bug 5049211 — 2026-09-17T12:30:00Z
+
+**Started:** 2026-09-17T12:30:00Z
+
+**Assumptions:** The run uses the plugin in this repository, not the installed copy, because this
+repository is what the run is meant to judge. The target repository is `C:\Git\dabacon-products`
+and the session artifacts land under its `.ei-session-logs\5049211\`. `-Root` therefore points
+there, so an evidence quote resolves against the product source rather than against the plugin.
+
+Nothing is merged and no pull request is created. The run stops at the point where a real session
+would ask to commit.
+
+The command budget counts the terminal commands the run itself needs. The build-loop commands that
+open and close this task are bookkeeping and are counted separately.
+
+The two human checkpoints pause for the person driving this session, who answers in chat. The
+readability check is the one item no test and no agent can settle, and it stays open until a person
+who has never worked on the plugin reads `session-summary.md`.
