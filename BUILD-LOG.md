@@ -3176,3 +3176,19 @@ mocks and the script is still driven for real. Console error output is captured 
 process.
 
 **Result:** DONE.
+
+## T059 — Save an attachment under a name it cannot choose — 2026-09-17T11:18:00Z
+
+**Goal:** Stop a work item deciding where `Convert-EiAdoIntake.ps1` writes. The name comes from the
+`fileName` part of the address, so it is reduced to a leaf, stripped, and checked against the
+attachments folder before anything is written.
+
+**Assumptions:** T058 now limits the address to Azure DevOps, but not the `fileName` it carries, so
+anyone who can attach a file can still choose the name. The `$index-` prefix already stops two
+attachments colliding, and it also absorbs one leading `..`, which is why the obvious payloads look
+harmless today: `../../x` resolves back inside the folder, and an absolute path turns into an
+invalid one and is skipped. Three or more `..` segments do escape. The tests therefore assert that
+the written path sits inside the attachments folder, rather than asserting an exact name, because
+`GetInvalidFileNameChars` returns a different set on Windows and on Linux and the exact name is not
+the thing worth pinning. No script behaviour outside `Get-Attachment` changes.
+
