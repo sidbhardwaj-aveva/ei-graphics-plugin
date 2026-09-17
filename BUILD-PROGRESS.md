@@ -1,8 +1,8 @@
 # Build Progress — aveva-ei-graphics v3
 
 **Plan:** `plan.md`
-**Current task:** T061
-**Last verified green:** T060 (2026-09-17T11:31:51Z)
+**Current task:** T062
+**Last verified green:** T061 (2026-09-17T11:59:31Z)
 
 The rows below run top to bottom. T015 sits above T010 on purpose: T010 builds its catalogue from
 the real registry, whose only entry points at the skill document T015 copies. See the T010 blocks
@@ -71,5 +71,5 @@ one file, so it runs before the five larger tasks queued ahead of it.
 | T058 | Send the Azure DevOps token only to Azure DevOps | DONE | 635aca7 | 2026-09-17T11:13:27Z |
 | T059 | Save an attachment under a name it cannot choose | DONE | 596f953 | 2026-09-17T11:22:38Z |
 | T060 | Say which scripts are safe to run twice | DONE | f9a1f1c | 2026-09-17T11:31:51Z |
-| T061 | Correct the script count the READMEs still give | IN-PROGRESS | — | — |
+| T061 | Correct the script count the READMEs still give | DONE | pending | 2026-09-17T11:59:31Z |
 | T062 | Refuse to finalize a session that is already finalized | TODO | — | — |

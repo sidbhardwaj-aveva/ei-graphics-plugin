@@ -110,4 +110,38 @@ Describe 'The documents' -Tag 'Unit' {
         $raw | Should -Not -Match 'Siddanth'
         $raw | Should -Match 'story text, comments, interactions, and evidence'
     }
+
+    # The count drifted for six tasks because no test read it off disk. Every document that states
+    # it is checked against the folder, so the next script to join cannot leave one of them stale.
+    It 'every document that counts the core scripts agrees with the scripts folder' {
+        $scriptsFolder = Join-Path $script:RepoRoot 'plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts'
+        $onDisk = @(Get-ChildItem -LiteralPath $scriptsFolder -Filter '*.ps1' -File).Count
+        $onDisk | Should -BeGreaterThan 0
+
+        $numberWords = @{
+            one = 1; two = 2; three = 3; four = 4; five = 5; six = 6; seven = 7; eight = 8
+            nine = 9; ten = 10; eleven = 11; twelve = 12; thirteen = 13; fourteen = 14; fifteen = 15
+        }
+
+        foreach ($relative in @(
+                'plugins/aveva-ei-graphics/README.md'
+                'plugins/aveva-ei-graphics/skills/ei-graphics-core/SKILL.md'
+                'docs/presentation/04-components.mmd'
+                'docs/presentation/04-components.html'
+            )) {
+            $raw = Get-Content -LiteralPath (Join-Path $script:RepoRoot $relative) -Raw
+            $stated = 0
+            foreach ($match in [regex]::Matches($raw, '(?i)\b([a-z]+|\d+)\s+(?:core\s+)?scripts\b')) {
+                $token = $match.Groups[1].Value.ToLowerInvariant()
+                $count = if ($numberWords.ContainsKey($token)) { $numberWords[$token] }
+                         elseif ($token -match '^\d+$') { [int] $token }
+                         else { $null }   # prose such as "core scripts" states no count
+                if ($null -eq $count) { continue }
+
+                $stated++
+                $count | Should -Be $onDisk -Because "$relative says '$($match.Value.Trim())' and the folder holds $onDisk"
+            }
+            $stated | Should -BeGreaterThan 0 -Because "$relative should state how many core scripts there are"
+        }
+    }
 }

@@ -26,7 +26,7 @@ For automated checks, add the `-Json` flag.
 
 | Skill | What it is for | When it is read |
 |---|---|---|
-| `ei-graphics-core` | Nine scripts for session files and checks | When the agent uses a session file |
+| `ei-graphics-core` | Ten scripts for session files and checks | When the agent uses a session file |
 | `ei-azure-devops-cli-intake` | Gets a story, images, and comments | At the start |
 | `ei-graphics-doctor` | Checks that the plugin can run | Before the first story or when setup is unclear |
 | `ei-layer-guard` | Checks file-layer rules | Before committing |
@@ -84,7 +84,7 @@ aveva-ei-graphics/
     │   ├── SKILL.md
     │   ├── schemas/          five schemas
     │   ├── references/       the registry, plus two files the agent loads on demand
-    │   └── scripts/          nine scripts
+    │   └── scripts/          ten scripts
     ├── ei-azure-devops-cli-intake/
     │   ├── SKILL.md
     │   └── scripts/          the intake script and its two helpers

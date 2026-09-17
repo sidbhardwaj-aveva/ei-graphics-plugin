@@ -3308,3 +3308,36 @@ renderer is added later, the HTML assertion is what will catch a stale render.
 
 `docs/` is not scanned by the plain-language checks, and the README is. Wording is kept plain in
 both regardless.
+
+**Files touched:** `plugins/aveva-ei-graphics/README.md`, `docs/presentation/04-components.mmd`,
+`docs/presentation/04-components.html`, `tests/Documents.Tests.ps1`.
+
+**Acceptance:** Four counts corrected: the skill table and the folder tree in the plugin README, the
+node label in the diagram source, and both the accessible description and the drawn label in the
+rendered HTML. The new test reads the scripts folder, then checks every count in the plugin README,
+the core skill document, the diagram source and the rendered HTML against it. Focused suite 17
+passed. Progress check exit 0. Full suite 772 passed, 0 failed, 0 skipped.
+
+**Proof the new check bites:** with `ten scripts` put back to `nine scripts` in the diagram source,
+the suite failed with "docs/presentation/04-components.mmd says 'nine scripts' and the folder holds
+10". The file was restored from a copy and the suite went green again.
+
+**Attempts:** One.
+
+**Decisions:** The test does not hold a number. It counts `*.ps1` in the scripts folder and compares
+every count it finds against that, so adding a script cannot make the test wrong, only the documents
+it checks. It reads both word and digit forms, because the drawn label in the HTML says `10` while
+the prose around it says `ten`.
+
+The pattern ignores a phrase that has no number in front of it, so prose like "core scripts write
+JSON artifacts" is not treated as a count. It does allow one word between the number and `scripts`,
+but only `core`, which keeps "ten core scripts" readable without letting the pattern drift.
+
+Each of the four files must state the count at least once. Without that, deleting the sentence would
+pass the check as easily as correcting it.
+
+The description inside the rendered HTML said "core scripts with nine scripts", which the corrected
+version would have left as "core scripts with ten scripts". It now reads "ten core scripts". That
+sentence is what a screen reader announces, so it is worth the extra edit.
+
+**Result:** DONE.
