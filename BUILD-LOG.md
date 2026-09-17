@@ -3086,3 +3086,25 @@ History triage is proved through the evidence path, because a quote the writer c
 file on disk is exactly the thing a reader can check.
 
 **Result:** DONE.
+
+## T056 — Document the investigation order for maintainers — 2026-09-17T10:42:08Z
+
+**Goal:** Put the order the workflow expects in one place a maintainer reads, with the
+mounting-rail ordering regression worked through it, so a skipped step is visible.
+
+**Assumptions:** This block re-books work that is already on disk. An earlier run of this task
+landed the `Investigation order` section and its two checks in `eedc5fb`, and a later commit,
+`06e581e`, reverted only the bookkeeping: the row went back to `TODO` and that run's log block was
+deleted. The document and its checks were left untouched. The human chose to re-book rather than
+rewrite, so this task verifies what is on disk against the plan instead of writing it again.
+BUILD-LOG.md is append only, so the deleted block is not restored; this block records what
+happened instead.
+
+**Files touched:** none. `plugins/aveva-ei-graphics/README.md` and `tests/Documents.Tests.ps1`
+already carry the work, from `eedc5fb`.
+
+**Attempts:** In progress.
+
+**Decisions:** In progress.
+
+**Result:** In progress.
