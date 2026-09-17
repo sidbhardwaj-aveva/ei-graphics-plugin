@@ -29,6 +29,7 @@ param(
     [Parameter(ParameterSetName = 'Append')] [string] $Status,
 
     [Parameter(ParameterSetName = 'Finalize', Mandatory = $true)] [switch] $Finalize,
+    [Parameter(ParameterSetName = 'Finalize')] [switch] $Force,
     [Parameter(ParameterSetName = 'Finalize')] [Nullable[int]] $TestsRun,
     [Parameter(ParameterSetName = 'Finalize')] [Nullable[int]] $TestsPassed,
     [Parameter(ParameterSetName = 'Finalize')] [Nullable[int]] $HumanInteractions,
@@ -187,6 +188,16 @@ if (Test-Path -LiteralPath $target) {
 }
 
 if ($PSCmdlet.ParameterSetName -eq 'Finalize') {
+    # A second close is almost always an accident, and it is the step that sends the bundle to the
+    # share, so the copy it leaves there holds story text nobody meant to send twice.
+    $closedAt = if ($session.Contains('summary') -and $session['summary'] -is [System.Collections.IDictionary] -and $session['summary'].Contains('completedAt')) {
+        [string] $session['summary']['completedAt']
+    } else { '' }
+    if ($closedAt -and -not $Force) {
+        Write-Problem "The session for story $StoryId was already closed at $closedAt. Closing it again replaces the summary, and the close command would send a second copy of the story text to the review share. Pass -Force if the recorded outcome is wrong and you mean to replace it."
+        exit 1
+    }
+
     $entries = @($session['entries'])
     if ($entries.Count -eq 0 -and $SessionOutcome -notin @('aborted', 'setup-failed')) {
         Write-Problem "The session for story $StoryId has no entries. Append the work performed before finalizing, or use -SessionOutcome aborted or setup-failed."

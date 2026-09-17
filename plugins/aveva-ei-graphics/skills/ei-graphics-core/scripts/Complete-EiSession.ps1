@@ -22,6 +22,9 @@
     Passed to Write-EiSessionEntry.ps1 as -SessionOutcome, populating summary.outcome.
 .PARAMETER Root
     The folder that holds .ei-session-logs. Defaults to the current folder.
+.PARAMETER Force
+    Passed to Write-EiSessionEntry.ps1, allowing it to replace the summary of a session that is
+    already closed. Without it a second close exits 1. A forced close does export a second bundle.
 .PARAMETER Json
     Emit stdout as a JSON string instead of a PSCustomObject.
 .PARAMETER Help
@@ -32,6 +35,7 @@ param(
     [string] $StoryId,
     [string] $SessionOutcome,
     [string] $Root = '.',
+    [switch] $Force,
     [switch] $Json,
     [switch] $Help
 )
@@ -66,7 +70,7 @@ foreach ($name in $steps.Keys) {
     }
 }
 
-$finalizeJson = & $steps['Write-EiSessionEntry.ps1'] -StoryId $StoryId -Root $Root -Finalize -SessionOutcome $SessionOutcome -Json
+$finalizeJson = & $steps['Write-EiSessionEntry.ps1'] -StoryId $StoryId -Root $Root -Finalize -SessionOutcome $SessionOutcome -Force:$Force -Json
 if ($LASTEXITCODE -ne 0) {
     Write-Problem "Step 1 failed: Write-EiSessionEntry.ps1 exited $LASTEXITCODE. Nothing further was run."
     exit 1

@@ -3341,3 +3341,19 @@ version would have left as "core scripts with ten scripts". It now reads "ten co
 sentence is what a screen reader announces, so it is worth the extra edit.
 
 **Result:** DONE.
+
+---
+
+## T062 — Refuse to finalize a session that is already finalized — 2026-09-17T12:06:00Z
+
+**Started:** 2026-09-17T12:06:00Z
+
+**Assumptions:** A session is closed when `session.json` holds a `summary` with a `completedAt`.
+Only that counts as closed; a finalize that exited 1 wrote nothing and does not. `-Force` is the
+single way past the refusal, and it is meant for one case, a session closed with the wrong outcome.
+The wrapper passes `-Force` through and changes nothing else, so a forced close still exports a
+second bundle and the repeat statement must say so.
+
+**Honest note on order:** the guard and the wrapper pass-through were edited before this block was
+appended, which is the wrong order. Nothing was committed before this start commit, and no check
+was run against the edits, so the work below still proves itself from scratch.
