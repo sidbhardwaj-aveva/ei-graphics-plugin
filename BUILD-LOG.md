@@ -3192,3 +3192,40 @@ the written path sits inside the attachments folder, rather than asserting an ex
 `GetInvalidFileNameChars` returns a different set on Windows and on Linux and the exact name is not
 the thing worth pinning. No script behaviour outside `Get-Attachment` changes.
 
+**Files touched:** `plugins/aveva-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.ps1`,
+`tests/ScriptContract.Tests.ps1`,
+`tests/aveva-ei-graphics/skills/ei-graphics-core/scripts/Convert-EiAdoIntake.Tests.ps1`.
+
+**Acceptance:** `Get-SafeFileName` keeps only the leaf of the decoded name, drops the characters a
+file system rejects along with the colon and both separators, trims spaces and dots, and falls back
+to `image-<index>.png` when nothing is left. The index prefix is applied inside that function, so
+the name and its prefix can no longer be assembled apart. The full path is then compared against the
+attachments folder, and an attachment that would land elsewhere is skipped with a warning naming it.
+Tests prove an ordinary name is saved as `1-rail.png`, that four hostile names write nothing outside
+the folder, that a name of two spaces falls back to `1-image-1.png`, that a Windows absolute path
+keeps only `1-escaped.png`, and that two attachments sharing a name both arrive. Focused suite 38
+passed. Contract and plain-language suites 107 passed. Progress check exit 0. Full suite 766 passed,
+0 failed, 0 skipped.
+
+**Ceiling raised:** `Convert-EiAdoIntake` from 180 to 200 in both copies of `$LineCeilings`. The name
+helper and the containment check take the file to 191. T058 left a note in `ScriptContract.Tests.ps1`
+saying 180 left room for this task. It did not, and that note now records the second rise instead.
+
+**Evidence the payloads were live:** with the old naming, `Join-Path` of the attachments folder and
+`1-../../../../escaped.png` resolves to `C:\root\.ei-session-logs\escaped.png`, two levels above the
+folder. The backslash form resolves to the same place. Only the absolute path was already harmless,
+because the prefix turned it into a path no file system accepts.
+
+**Attempts:** Two. The first run failed the whole file at discovery: the `-ForEach` list for the new
+tests was never written to the top of the file, so Pester read an unset variable. The list is now
+beside the one T058 added. Nothing else needed changing.
+
+**Decisions:** The hostile names climb four levels, which from the attachments folder reaches the
+root of `TestDrive` and no further, so a future regression in this check cannot write into a real
+folder while the test runs. The tests assert that the written path sits inside the folder rather
+than asserting exact names, because `GetInvalidFileNameChars` returns a different set on Windows and
+on Linux. Two names are pinned exactly, the fallback and the leaf of an absolute path, because
+neither depends on that set. The download harness written for T058 moved up to the file-level
+`BeforeAll` so both sets of tests share it; no T058 assertion changed.
+
+**Result:** DONE.

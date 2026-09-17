@@ -54,6 +54,19 @@ function Test-AdoAddress {
     $hostName -eq 'dev.azure.com' -or $hostName.EndsWith('.visualstudio.com', [System.StringComparison]::OrdinalIgnoreCase)
 }
 
+function Get-SafeFileName {
+    # A work item chooses this name, so only a leaf with no awkward characters survives.
+    param([string] $Name, [int] $Index)
+    $fallback = "image-$Index.png"
+    $leaf = @($Name -split '[\\/]')[-1]
+    $invalid = [char[]] ([System.IO.Path]::GetInvalidFileNameChars() + [char[]] @(':', '\', '/'))
+    $kept = -join @($leaf.ToCharArray() | Where-Object { $invalid -notcontains $_ })
+    $kept = $kept.Trim([char[]] @(' ', '.'))
+    if (-not $kept) { $kept = $fallback }
+    # The index prefix stops two attachments with the same name colliding.
+    "$Index-$kept"
+}
+
 function Get-Attachment {
     # Downloads each attached image and reports only the ones that arrived.
     param($Entries, [string] $Folder)
@@ -69,6 +82,7 @@ function Get-Attachment {
     }
 
     if (-not (Test-Path -LiteralPath $Folder)) { $null = New-Item -ItemType Directory -Path $Folder -Force }
+    $inside = [System.IO.Path]::GetFullPath($Folder).TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
     $saved = [System.Collections.Generic.List[object]]::new()
     $index = 0
     foreach ($entry in @($Entries)) {
@@ -88,9 +102,12 @@ function Get-Attachment {
         $name = "image-$index.png"
         $query = [regex]::Match([string] $url, '[?&]fileName=([^&]+)')
         if ($query.Success) { $name = [System.Uri]::UnescapeDataString($query.Groups[1].Value) }
-        # The index prefix stops two attachments with the same name colliding.
-        $name = "$index-$name"
+        $name = Get-SafeFileName -Name $name -Index $index
         $localPath = Join-Path $Folder $name
+        if (-not [System.IO.Path]::GetFullPath($localPath).StartsWith($inside, [System.StringComparison]::OrdinalIgnoreCase)) {
+            Write-Problem "The attachment named $name would be written outside the attachments folder, so it was not downloaded."
+            continue
+        }
         try {
             Invoke-WebRequest -Uri $url -Headers @{ Authorization = "Bearer $token" } -OutFile $localPath -ErrorAction Stop
             $saved.Add([ordered]@{ url = [string] $url; localPath = $localPath; fileName = $name; source = $source })
